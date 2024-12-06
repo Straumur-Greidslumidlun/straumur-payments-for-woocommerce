@@ -1,0 +1,11 @@
+# Code owners for Straumur WooCommerce plugins
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# Straumur admins will be requested for 
+# review when someone opens a pull request.
+*       @thorirtho
+
+# changes to the CODEOWNERS file can only be approved by Straumur admins
+/.github/CODEOWNERS @kvika/straumur-admin
