@@ -1,3 +1,139 @@
 # Straumur WooCommerce Plugin
 
-Source control for Straumur's WooCommerce plugin
+Source control for Straumur's WooCommerce plugin.  
+
+More information about Wordpress plugin development can be found in the [Plugin Handbook](https://developer.wordpress.org/plugins/).  WooCommerce plugin guide can be found [here](https://woocommerce.com/document/create-a-plugin/).
+
+# Guide for New Developers Working on the WooCommerce Plugin
+
+Welcome to the WooCommerce development team! This guide will walk you through the essential steps to start working on the WooCommerce plugin, including cloning the GitHub repository, installing the plugin locally, and updating the WordPress.org SVN repository.
+
+---
+
+## 1. Cloning the GitHub Repository
+
+### Prerequisites:
+
+- Ensure you have Git installed on your system.
+- Obtain access to the GitHub repository.
+
+### Steps:
+
+1. Open your terminal or Git client.
+2. Navigate to the directory where you want to store the repository:
+   ```bash
+   cd /path/to/your/projects
+   ```
+3. Clone the repository using the provided URL:
+   ```bash
+   git clone https://github.com/your-organization/woocommerce-plugin.git
+   ```
+4. Navigate into the cloned repository:
+   ```bash
+   cd woocommerce-plugin
+   ```
+5. (Optional) Create a new branch for your feature or fix:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+---
+
+## 2. Installing the Plugin in WooCommerce
+
+### Prerequisites:
+
+- A local WordPress environment (e.g., using Local by Flywheel, XAMPP, or Docker).
+- WooCommerce installed and activated.
+
+### Steps:
+
+1. Locate the WooCommerce plugin directory in your local WordPress installation:
+   ```
+   /path/to/wordpress/wp-content/plugins/
+   ```
+2. Copy the cloned repository into the plugins directory:
+   ```bash
+   cp -R /path/to/woocommerce-plugin /path/to/wordpress/wp-content/plugins/
+   ```
+3. Navigate to your WordPress admin dashboard (`http://localhost/wp-admin`).
+4. Go to **Plugins > Installed Plugins**.
+5. Locate your plugin in the list and click **Activate**.
+6. (Optional) To enable debugging, add the following to your `wp-config.php` file:
+   ```php
+   define('WP_DEBUG', true);
+   define('WP_DEBUG_LOG', true);
+   define('WP_DEBUG_DISPLAY', false);
+   ```
+   Debug logs will appear in the `wp-content/debug.log` file.
+
+---
+
+## 3. Updating the SVN Repository on WordPress.org
+
+### Prerequisites:
+
+- An SVN client installed (e.g., TortoiseSVN for Windows, command-line SVN, or Git-SVN).
+- Access to the WordPress.org SVN repository.
+- Ensure your plugin is production-ready and tested.
+
+### Steps:
+
+1. **Check Out the SVN Repository:**
+   Clone the SVN repository locally:
+
+   ```bash
+   svn co https://plugins.svn.wordpress.org/your-plugin-slug /path/to/svn/checkout
+   ```
+
+2. **Organize Files in the SVN Directory:**
+   The SVN repository should have the following structure:
+
+   ```
+   /trunk    - Contains the latest version of the plugin.
+   /tags     - Contains specific versions (e.g., 1.0.0, 1.1.0).
+   /branches - For development branches (optional).
+   ```
+
+   - Copy your plugin files to the `trunk/` directory.
+   - (Optional) Create a new folder under `tags/` for the current version:
+     ```bash
+     mkdir /path/to/svn/checkout/tags/1.0.0
+     cp -R /path/to/svn/checkout/trunk/* /path/to/svn/checkout/tags/1.0.0
+     ```
+
+3. **Add and Commit Changes:**
+   Navigate to the SVN directory:
+
+   ```bash
+   cd /path/to/svn/checkout
+   ```
+
+   Add new or modified files:
+
+   ```bash
+   svn add --force trunk/*
+   ```
+
+   Commit changes with a descriptive message:
+
+   ```bash
+   svn commit -m "Updated to version 1.0.0 with new features and bug fixes."
+   ```
+
+4. **Verify the Update:**
+   Check the WordPress.org plugin page to ensure your changes are live.
+
+---
+
+## 4. Tips for Success
+
+- **Version Control:** Always increment the plugin version in the main file and `readme.txt`.
+- **Testing:** Test your plugin thoroughly in different environments.
+- **Documentation:** Keep the `readme.txt` file updated with accurate changelogs.
+- **Collaboration:** Use pull requests to review changes with the team before committing.
+
+---
+
+Feel free to reach out to the team if you have any questions or run into issues. Happy coding!
+
