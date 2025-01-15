@@ -1,0 +1,274 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-01-10T12:04:08+00:00\n"
+"PO-Revision-Date: 2025-01-10T12:04:08+00:00\n"
+"Language: \n"
+
+#. Plugin Name of the plugin
+#: C:\Users\jon\Local
+#: Sites\klikk\app\public\wp-content\plugins\straumur-payments\straumur-payments.php
+msgid "Straumur Payments for WooCommerce"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: C:\Users\jon\Local
+#: Sites\klikk\app\public\wp-content\plugins\straumur-payments\straumur-payments.php
+msgid "https://straumur.is/payments-plugin"
+msgstr ""
+
+#. Description of the plugin
+#: C:\Users\jon\Local
+#: Sites\klikk\app\public\wp-content\plugins\straumur-payments\straumur-payments.php
+msgid "Facilitates seamless payments using Straumur's Hosted Checkout in WooCommerce."
+msgstr ""
+
+#. Author of the plugin
+#: C:\Users\jon\Local
+#: Sites\klikk\app\public\wp-content\plugins\straumur-payments\straumur-payments.php
+msgid "Straumur"
+msgstr ""
+
+#. Author URI of the plugin
+#: C:\Users\jon\Local
+#: Sites\klikk\app\public\wp-content\plugins\straumur-payments\straumur-payments.php
+msgid "https://straumur.is"
+msgstr ""
+
+#: includes/class-wc-straumur-block-support.php:56
+#: includes/class-wc-straumur-settings.php:56
+#: includes/class-wc-straumur-settings.php:192
+msgid "Straumur Payment"
+msgstr ""
+
+#: includes/class-wc-straumur-block-support.php:61
+msgid "Pay securely via Straumur Hosted Checkout."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:77
+#: includes/class-wc-straumur-order-handler.php:121
+#: includes/class-wc-straumur-order-handler.php:168
+#: includes/class-wc-straumur-payment-gateway.php:211
+msgid "Invalid order."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:82
+#: includes/class-wc-straumur-order-handler.php:126
+#: includes/class-wc-straumur-order-handler.php:173
+msgid "Order not paid with Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:89
+msgid "Cannot cancel: missing payment references."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:102
+msgid "Straumur payment cancellation request sent"
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:108
+msgid "Failed to send cancellation request to Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:132
+msgid "Cannot capture: missing payment references."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:147
+msgid "Straumur payment capture request sent"
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:155
+msgid "Failed to send capture request to Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:180
+msgid "Cannot refund: missing payment references."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:191
+msgid "Straumur refund request has been sent to Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-order-handler.php:197
+msgid "Failed to send refund request to Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-payment-gateway.php:89
+msgid "Straumur Payments"
+msgstr ""
+
+#: includes/class-wc-straumur-payment-gateway.php:90
+msgid "Accept payments via Straumur Hosted Checkout."
+msgstr ""
+
+#: includes/class-wc-straumur-payment-gateway.php:238
+msgid "Payment error: "
+msgstr ""
+
+#: includes/class-wc-straumur-payment-gateway.php:247
+msgid "Payment error: Unable to initiate payment session."
+msgstr ""
+
+#: includes/class-wc-straumur-payment-gateway.php:324
+msgid "Payment pending, awaiting webhook confirmation. Payfac ref: %s"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:47
+msgid "Enable/Disable"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:49
+msgid "Enable Straumur Gateway"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:53
+msgid "Title"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:55
+msgid "This controls the title which the user sees during checkout."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:60
+msgid "Description"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:62
+msgid "This controls the description which the user sees during checkout."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:63
+#: includes/class-wc-straumur-settings.php:204
+msgid "Pay securely using Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:66
+msgid "API Key"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:68
+msgid "The API Key provided by Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:73
+msgid "Terminal Identifier"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:75
+msgid "The Terminal Identifier provided by Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:80
+msgid "Theme key"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:82
+msgid "Theme key, logo colors etc."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:87
+msgid "Authorize Only (Manual Capture)"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:89
+msgid "Enable authorize only mode. Payments will require manual capture."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:91
+msgid "If enabled, payments will be authorized but not captured automatically."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:95
+msgid "Test Mode"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:97
+msgid "Enable Test Mode"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:99
+msgid "If enabled, the gateway will use the sandbox URL."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:103
+msgid "Production URL"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:105
+msgid "The Production URL provided by Straumur."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:111
+msgid "HMAC Key"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:113
+msgid "Your HMAC secret key used to validate incoming webhooks."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:118
+msgid "Send cart items"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:120
+msgid "Send cart items to the checkout page. Disable if using incompatible plugins."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:125
+msgid "Webhook URL"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:127
+msgid "Use this URL in your Straumur dashboard to configure webhooks. Click the field to select all."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:153
+msgid "Production URL is required when Test Mode is disabled."
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:157
+msgid "Straumur Webhook: Received %1$s %2$s. Event Type: %3$s"
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:166
+msgid "Straumur Webhook: payfacReference: %s"
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:196
+msgid "Capture confirmed by Straumur via webhook."
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:198
+msgid "Payment fully captured."
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:216
+msgid "Payment cancelled."
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:227
+msgid "Unknown Straumur event type received."
+msgstr ""
+
+#: straumur-payments.php:49
+msgid "Straumur Payments requires WooCommerce to be installed and active."
+msgstr ""
+
+#: straumur-payments.php:137
+msgid "Settings"
+msgstr ""
+
+#: straumur-payments.php:155
+msgid "Documentation"
+msgstr ""
+
+#: straumur-payments.php:156
+msgid "Support"
+msgstr ""
