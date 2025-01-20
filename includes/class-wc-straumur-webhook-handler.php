@@ -236,7 +236,7 @@ class WC_Straumur_Webhook_Handler
     break;
 
             default:
-                $order->add_order_note(__('Unknown Straumur event type received.', 'straumur-payments'));
+                $order->add_order_note(__('Unknown Straumur event type received.', 'straumur-payments-for-woocommerce'));
                 break;
         }
 

@@ -26,7 +26,7 @@ Welcome to the WooCommerce development team! This guide will walk you through th
    ```
 3. Clone the repository using the provided URL:
    ```bash
-   git clone https://github.com/your-organization/woocommerce-plugin.git
+   git clone https://github.com/your-organization/straumur-woocommerce-plugin.git
    ```
 4. Navigate into the cloned repository:
    ```bash

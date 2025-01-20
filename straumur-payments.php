@@ -5,7 +5,7 @@
  * Description:     Facilitates seamless payments using Straumur's Hosted Checkout in WooCommerce.
  * Author:          Straumur
  * Author URI:      https://straumur.is
- * Text Domain:     straumur-payments
+ * Text Domain:     straumur-payments-for-woocommerce
  * Domain Path:     /languages
  * Version:         1.0.0
  * Requires Plugins:  woocommerce

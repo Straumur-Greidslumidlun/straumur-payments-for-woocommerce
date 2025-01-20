@@ -1,5 +1,5 @@
 === Straumur Payments For WooCommerce ===
-Contributors: Smartmedia
+Contributors: Smartmedia, Straumur
 Tags: woocommerce, payments, straumur, 
 Requires at least: 5.2
 Tested up to: 6.7
