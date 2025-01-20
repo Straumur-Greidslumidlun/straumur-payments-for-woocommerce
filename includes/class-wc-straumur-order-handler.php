@@ -78,7 +78,7 @@ class WC_Straumur_Order_Handler {
             return true;
         }
 
-        $this->logger->error("Cancellation request failed for order #{$order_id}", ['source' => 'straumur-payments-for-woocommerce']);
+        $this->logger->error("Cancellation request failed for order #{$order_id}", ['source' => 'straumur-payments']);
         return new WP_Error('cancellation_failed', __('Failed to send cancellation request to Straumur.', 'straumur-payments-for-woocommerce'));
     }
 
