@@ -1,10 +1,10 @@
 === Straumur Payments For WooCommerce ===
-Contributors: Smartmedia
+Contributors: Smartmedia, Straumur
 Tags: woocommerce, payments, straumur, 
 Requires at least: 5.2
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,7 +59,11 @@ Because Straumur’s webhooks do not provide historical data for partial capture
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-Initial release; no upgrade required.
+= 1.1.0 =
+* Icelandic Translations
+* Improved webhook handling
+* Bug fixes
+
+
 
 

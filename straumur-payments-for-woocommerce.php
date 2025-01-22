@@ -5,9 +5,9 @@
  * Description:     Facilitates seamless payments using Straumur's Hosted Checkout in WooCommerce.
  * Author:          Straumur
  * Author URI:      https://straumur.is
- * Text Domain:     straumur-payments
+ * Text Domain:     straumur-payments-for-woocommerce
  * Domain Path:     /languages
- * Version:         1.0.0
+ * Version:         1.1.0
  * Requires Plugins:  woocommerce
  * WC requires at least: 6.0
  * WC tested up to: 9.4
@@ -49,7 +49,7 @@ function straumur_payments_woocommerce_missing_notice(): void
     if (!current_user_can('activate_plugins')) {
         return;
     }
-    echo '<div class="error"><p><strong>' . esc_html__('Straumur Payments requires WooCommerce to be installed and active.', 'straumur-payments') . '</strong></p></div>';
+    echo '<div class="error"><p><strong>' . esc_html__('Straumur Payments for WooCommerce requires WooCommerce to be installed and active.', 'straumur-payments-for-woocommerce') . '</strong></p></div>';
 }
 
 /**
@@ -77,7 +77,7 @@ function straumur_payments_init(): void
     }
 
     // Load text domain for translations.
-    load_plugin_textdomain('straumur-payments', false, dirname(plugin_basename(STRAUMUR_PAYMENTS_MAIN_FILE)) . '/languages');
+    load_plugin_textdomain('straumur-payments-for-woocommerce', false, dirname(plugin_basename(STRAUMUR_PAYMENTS_MAIN_FILE)) . '/languages');
 
     if (class_exists(__NAMESPACE__ . '\\WC_Straumur_Block_Support')) {
         WC_Straumur_Block_Support::init();
@@ -141,7 +141,7 @@ function add_straumur_payment_gateway(array $gateways): array
 function straumur_payments_action_links(array $links): array
 {
     $settings_url = admin_url('admin.php?page=wc-settings&tab=checkout&section=straumur');
-    $settings_link = sprintf('<a href="%s">%s</a>', esc_url($settings_url), esc_html__('Settings', 'straumur-payments'));
+    $settings_link = sprintf('<a href="%s">%s</a>', esc_url($settings_url), esc_html__('Settings', 'straumur-payments-for-woocommerce'));
     array_unshift($links, $settings_link);
 
     return $links;
@@ -159,8 +159,8 @@ function straumur_payments_action_links(array $links): array
 function straumur_payments_plugin_row_meta(array $links, string $file): array
 {
     if (plugin_basename(STRAUMUR_PAYMENTS_MAIN_FILE) === $file) {
-        $docs_link = '<a href="https://docs.straumur.is" target="_blank" rel="noopener noreferrer">' . esc_html__('Documentation', 'straumur-payments') . '</a>';
-        $support_link = '<a href="https://straumur.is/hafa-samband" target="_blank" rel="noopener noreferrer">' . esc_html__('Support', 'straumur-payments') . '</a>';
+        $docs_link = '<a href="https://docs.straumur.is" target="_blank" rel="noopener noreferrer">' . esc_html__('Documentation', 'straumur-payments-for-woocommerce') . '</a>';
+        $support_link = '<a href="https://straumur.is/hafa-samband" target="_blank" rel="noopener noreferrer">' . esc_html__('Support', 'straumur-payments-for-woocommerce-for-woocommerce') . '</a>';
         $links[] = $docs_link;
         $links[] = $support_link;
     }
