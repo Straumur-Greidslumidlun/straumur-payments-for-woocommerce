@@ -103,8 +103,8 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
     public function __construct()
     {
         $this->id                 = 'straumur';
-        $this->method_title       = esc_html__('Straumur Payments', 'straumur-payments');
-        $this->method_description = esc_html__('Accept payments via Straumur Hosted Checkout.', 'straumur-payments');
+        $this->method_title       = esc_html__('Straumur Payments', 'straumur-payments-for-woocommerce');
+        $this->method_description = esc_html__('Accept payments via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce');
         $this->has_fields         = false;
 
         $this->supports           = [
@@ -226,7 +226,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
 
         $order = wc_get_order($order_id);
         if (!$order) {
-            wc_add_notice(esc_html__('Invalid order.', 'straumur-payments'), 'error');
+            wc_add_notice(esc_html__('Invalid order.', 'straumur-payments-for-woocommerce'), 'error');
             $this->logger->error('Invalid order: ' . $order_id, $this->context);
             return ['result' => 'failure'];
         }
@@ -255,7 +255,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
 
         if (is_wp_error($items)) {
             wc_add_notice(
-                esc_html__('Payment error: ', 'straumur-payments') . $items->get_error_message(),
+                esc_html__('Payment error: ', 'straumur-payments-for-woocommerce') . $items->get_error_message(),
                 'error'
             );
             $this->logger->error(
@@ -270,7 +270,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
 
         if (!$session || !isset($session['url'])) {
             wc_add_notice(
-                esc_html__('Payment error: Unable to initiate payment session.', 'straumur-payments'),
+                esc_html__('Payment error: Unable to initiate payment session.', 'straumur-payments-for-woocommerce'),
                 'error'
             );
             $this->logger->error('Payment error: Unable to initiate payment session for order ' . $order_id, $this->context);
@@ -303,7 +303,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
                 'straumur_process_return'
             )
         ) {
-            wp_die(esc_html(__('Nonce verification failed.', 'straumur-payments')));
+            wp_die(esc_html(__('Nonce verification failed.', 'straumur-payments-for-woocommerce')));
         }
 
         $order_id = 0;
@@ -346,7 +346,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
             // Mark order failed, show user a notice, redirect.
             $this->update_order_status($order, 'failed', 'Unable to fetch payment status via Straumur.');
             wc_add_notice(
-                __('There was an issue retrieving your payment status. Please try again.', 'straumur-payments'),
+                __('There was an issue retrieving your payment status. Please try again.', 'straumur-payments-for-woocommerce'),
                 'error'
             );
 
@@ -373,13 +373,13 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
 
             $note = sprintf(
                     /* translators: %s: The Payfac reference number for the transaction. */
-                __('Payment pending, awaiting payment confirmation. Straumur Reference: %s', 'straumur-payments'),
+                __('Payment pending, awaiting payment confirmation. Straumur Reference: %s', 'straumur-payments-for-woocommerce'),
                 $payfac_ref
             );
             $order->add_order_note($note);
 
             wc_add_notice(
-                __('Thank you for your order! Your payment is currently being processed.', 'straumur-payments'),
+                __('Thank you for your order! Your payment is currently being processed.', 'straumur-payments-for-woocommerce'),
                 'success'
             );
 
@@ -394,7 +394,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway
             exit;
         } else {
             wc_add_notice(
-                __('Your payment session has not completed. Please try again.', 'straumur-payments'),
+                __('Your payment session has not completed. Please try again.', 'straumur-payments-for-woocommerce'),
                 'error'
             );
 

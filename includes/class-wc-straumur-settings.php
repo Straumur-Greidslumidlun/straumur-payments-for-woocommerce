@@ -44,89 +44,89 @@ class WC_Straumur_Settings
 
         return [
             'enabled' => [
-                'title'       => esc_html__('Enable/Disable', 'straumur-payments'),
+                'title'       => esc_html__('Enable/Disable', 'straumur-payments-for-woocommerce'),
                 'type'        => 'checkbox',
-                'label'       => esc_html__('Enable Straumur Payments', 'straumur-payments'),
+                'label'       => esc_html__('Enable Straumur Payments', 'straumur-payments-for-woocommerce'),
                 'default'     => 'yes',
             ],
             'title' => [
-                'title'       => esc_html__('Title', 'straumur-payments'),
+                'title'       => esc_html__('Title', 'straumur-payments-for-woocommerce'),
                 'type'        => 'text',
-                'description' => esc_html__('This controls the title which the user sees during checkout.', 'straumur-payments'),
-                'default'     => esc_html__('Straumur Payments', 'straumur-payments'),
+                'description' => esc_html__('This controls the title which the user sees during checkout.', 'straumur-payments-for-woocommerce'),
+                'default'     => esc_html__('Straumur Payments', 'straumur-payments-for-woocommerce'),
                 'desc_tip'    => true,
             ],
             'description' => [
-                'title'       => esc_html__('Description', 'straumur-payments'),
+                'title'       => esc_html__('Description', 'straumur-payments-for-woocommerce'),
                 'type'        => 'text',
-                'description' => esc_html__('This controls the description which the user sees during checkout.', 'straumur-payments'),
-                'default'     => esc_html__('Pay via Straumur Hosted Checkout.', 'straumur-payments'),
+                'description' => esc_html__('This controls the description which the user sees during checkout.', 'straumur-payments-for-woocommerce'),
+                'default'     => esc_html__('Pay via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce'),
                                 'desc_tip'    => true,
 
             ],
             'theme_key' => [
-                'title'       => esc_html__('Theme key', 'straumur-payments'),
+                'title'       => esc_html__('Theme key', 'straumur-payments-for-woocommerce'),
                 'type'        => 'text',
-                'description' => esc_html__('Theme key, logo colors etc.', 'straumur-payments'),
+                'description' => esc_html__('Theme key, logo colors etc.', 'straumur-payments-for-woocommerce'),
                 'default'     => '',
                 'desc_tip'    => true,
             ],
 
             'authorize_only' => [
-                'title'       => esc_html__('Authorize Only (Manual Capture)', 'straumur-payments'),
+                'title'       => esc_html__('Authorize Only (Manual Capture)', 'straumur-payments-for-woocommerce'),
                 'type'        => 'checkbox',
-                'label'       => esc_html__('Enable authorize only mode. Payments will require manual capture.', 'straumur-payments'),
+                'label'       => esc_html__('Enable authorize only mode. Payments will require manual capture.', 'straumur-payments-for-woocommerce'),
                 'default'     => 'no',
-                'description' => esc_html__('If enabled, payments will be authorized but not captured automatically.', 'straumur-payments'),
+                'description' => esc_html__('If enabled, payments will be authorized but not captured automatically.', 'straumur-payments-for-woocommerce'),
                 'desc_tip'    => false,
             ],
 
 
             'items' => [
-                'title'       => esc_html__('Send cart items', 'straumur-payments'),
+                'title'       => esc_html__('Send cart items', 'straumur-payments-for-woocommerce'),
                 'type'        => 'checkbox',
-                'description' => esc_html__('Send cart items to the checkout page. Disable if using incompatible plugins.', 'straumur-payments'),
+                'description' => esc_html__('Send cart items to the checkout page. Disable if using incompatible plugins.', 'straumur-payments-for-woocommerce'),
                 'default'     => 'yes',
                 'desc_tip'    => false,
             ],
 
 
             'terminal_identifier' => [
-                'title'       => esc_html__('Terminal Identifier', 'straumur-payments'),
+                'title'       => esc_html__('Terminal Identifier', 'straumur-payments-for-woocommerce'),
                 'type'        => 'text',
-                'description' => esc_html__('The Terminal Identifier provided by Straumur.', 'straumur-payments'),
+                'description' => esc_html__('The Terminal Identifier provided by Straumur.', 'straumur-payments-for-woocommerce'),
                 'default'     => '117980943d55',
                 'desc_tip'    => true,
             ],
             'test_mode' => [
-                'title'       => esc_html__('Test Mode', 'straumur-payments'),
+                'title'       => esc_html__('Test Mode', 'straumur-payments-for-woocommerce'),
                 'type'        => 'checkbox',
-                'label'       => esc_html__('Enable Test Mode', 'straumur-payments'),
+                'label'       => esc_html__('Enable Test Mode', 'straumur-payments-for-woocommerce'),
                 'default'     => 'yes',
-                'description' => esc_html__('If enabled, the gateway will use the sandbox URL.', 'straumur-payments'),
+                'description' => esc_html__('If enabled, the gateway will use the sandbox URL.', 'straumur-payments-for-woocommerce'),
                 'desc_tip'    => false,
             ],
             'production_url' => [
-                'title'       => esc_html__('Production URL', 'straumur-payments'),
+                'title'       => esc_html__('Production URL', 'straumur-payments-for-woocommerce'),
                 'type'        => 'text',
-                'description' => esc_html__('The Production URL provided by Straumur.', 'straumur-payments'),
+                'description' => esc_html__('The Production URL provided by Straumur.', 'straumur-payments-for-woocommerce'),
                 'default'     => 'https://greidslugatt.straumur.is/api/v1/',
                 'desc_tip'    => true,
                 'placeholder' => 'https://greidslugatt.straumur.is/api/v1/',
             ],
             'api_key' => [
-                'title'       => esc_html__('API Key', 'straumur-payments'),
+                'title'       => esc_html__('API Key', 'straumur-payments-for-woocommerce'),
                 'type'        => 'text',
-                'description' => esc_html__('The API Key provided by Straumur.', 'straumur-payments'),
+                'description' => esc_html__('The API Key provided by Straumur.', 'straumur-payments-for-woocommerce'),
                 'default'     => '4cb5b98a627312a883fa6d4cac30ed7c422d4b5a7a45e65d15',
                 'desc_tip'    => true,
             ],
 
 
             'webhook_url' => [
-                'title'             => esc_html__('Webhook URL', 'straumur-payments'),
+                'title'             => esc_html__('Webhook URL', 'straumur-payments-for-woocommerce'),
                 'type'              => 'text',
-                'description'       => esc_html__('Use this URL in your Straumur dashboard to configure webhooks. Click the field to select all.', 'straumur-payments'),
+                'description'       => esc_html__('Use this URL in your Straumur dashboard to configure webhooks. Click the field to select all.', 'straumur-payments-for-woocommerce'),
                 'default'           => $webhook_url,
                 'desc_tip'          => false,
                 'custom_attributes' => [
@@ -135,9 +135,9 @@ class WC_Straumur_Settings
                 ],
             ],         
             'hmac_key' => [
-                'title'       => esc_html__('HMAC Key', 'straumur-payments'),
+                'title'       => esc_html__('HMAC Key', 'straumur-payments-for-woocommerce'),
                 'type'        => 'text',
-                'description' => esc_html__('Your HMAC secret key used to validate incoming webhooks.', 'straumur-payments'),
+                'description' => esc_html__('Your HMAC secret key used to validate incoming webhooks.', 'straumur-payments-for-woocommerce'),
                 'default'     => '',
                 'desc_tip'    => true,
             ],
@@ -159,7 +159,7 @@ class WC_Straumur_Settings
     public static function validate_production_url_field(bool $test_mode, string $value): string
     {
         if (!$test_mode && empty($value)) {
-            WC_Admin_Settings::add_error(esc_html__('Production URL is required when Test Mode is disabled.', 'straumur-payments'));
+            WC_Admin_Settings::add_error(esc_html__('Production URL is required when Test Mode is disabled.', 'straumur-payments-for-woocommerce'));
             return '';
         }
 
@@ -198,7 +198,7 @@ class WC_Straumur_Settings
     public static function get_title(): string
     {
         $settings = self::get_settings();
-        return $settings['title'] ?? esc_html__('Straumur Payments', 'straumur-payments');
+        return $settings['title'] ?? esc_html__('Straumur Payments', 'straumur-payments-for-woocommerce');
     }
 
     /**
@@ -210,7 +210,7 @@ class WC_Straumur_Settings
     public static function get_description(): string
     {
         $settings = self::get_settings();
-        return $settings['description'] ?? esc_html__('Pay securely using Straumur hosted checkout.', 'straumur-payments');
+        return $settings['description'] ?? esc_html__('Pay securely using Straumur hosted checkout.', 'straumur-payments-for-woocommerce');
     }
 
     /**

@@ -1,10 +1,10 @@
 === Straumur Payments For WooCommerce ===
-Contributors: Smartmedia
+Contributors: smartmediais, straumur
 Tags: woocommerce, payments, straumur, 
 Requires at least: 5.2
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,7 +16,6 @@ Straumur Payments Payments allows you to accept payments via Straumur’s Hosted
 **Key Features:**
 - **Manual or Automatic Capture:** Authorize payments first and capture later, or capture automatically as soon as payment is confirmed.
 - **Webhooks for Status Updates:** Receive webhook events for authorized and captured payments, updating orders accordingly.
-- **Partial refunds Tracking:** Store historical data of partial refunds in order meta, ensuring accurate transaction records.
 - **Customizable Checkout Look:** Optionally provide a Theme Key for a branded payment experience.  A Theme Key can be optained in Straumur merchant portal.
 **How It Works:**
 1. Customer chooses Straumur Payments Payments at checkout.
@@ -42,8 +41,7 @@ No, the Theme Key is optional. If provided by Straumur, it customizes your hoste
 = How do I handle manual captures? =  
 If you enable “Authorize Only,” orders are authorized but not captured automatically. Once a webhook notifies you of authorization, the order moves to “on-hold.” You can then capture funds from the order screen in WooCommerce by changing status to processing. 
 
-= How are partial refunds tracked? =  
-Because Straumur’s webhooks do not provide historical data for partial captures/refunds, all partial refund details are stored in order meta and detailed order notes. This ensures accurate record-keeping.
+
 
 == Screenshots ==
 
@@ -59,7 +57,11 @@ Because Straumur’s webhooks do not provide historical data for partial capture
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-Initial release; no upgrade required.
+= 1.1.0 =
+* Icelandic Translations
+* Improved webhook handling
+* Bug fixes
+
+
 
 
