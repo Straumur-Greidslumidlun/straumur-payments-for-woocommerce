@@ -160,7 +160,7 @@ function straumur_payments_plugin_row_meta(array $links, string $file): array
 {
     if (plugin_basename(STRAUMUR_PAYMENTS_MAIN_FILE) === $file) {
         $docs_link = '<a href="https://docs.straumur.is" target="_blank" rel="noopener noreferrer">' . esc_html__('Documentation', 'straumur-payments-for-woocommerce') . '</a>';
-        $support_link = '<a href="https://straumur.is/hafa-samband" target="_blank" rel="noopener noreferrer">' . esc_html__('Support', 'straumur-payments-for-woocommerce-for-woocommerce') . '</a>';
+        $support_link = '<a href="https://straumur.is/hafa-samband" target="_blank" rel="noopener noreferrer">' . esc_html__('Support', 'straumur-payments-for-woocommerce') . '</a>';
         $links[] = $docs_link;
         $links[] = $support_link;
     }
