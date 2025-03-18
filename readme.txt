@@ -4,7 +4,7 @@ Tags: woocommerce, payments, straumur,
 Requires at least: 5.2
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.2
+Stable tag: 1.1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -62,7 +62,7 @@ If you enable “Authorize Only,” orders are authorized but not captured autom
 * Improved webhook handling
 * Bug fixes
 
-= 1.1.2 =
+= 1.1.3 =
 * Bug fixes
 
 
