@@ -26,7 +26,6 @@ jobs:
           SLUG: straumur-payments-for-woocommerce # optional, remove if GitHub repo name matches SVN slug, including capitalization
 
   deploytest:
-    if: github.ref == 'refs/heads/main'  # only deploy from main branch
     name: Deploy to WordPress.org
     runs-on: ubuntu-latest
 
