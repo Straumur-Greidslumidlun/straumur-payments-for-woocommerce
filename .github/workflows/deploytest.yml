@@ -1,7 +1,8 @@
-name: Deployment Test
-
+name: Deploy to WordPress.org
 on:
-  workflow_dispatch:  # manual trigger
+  push:
+    tags:
+    - "*"
 
 jobs:
   deploy:
