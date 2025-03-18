@@ -1,12 +1,11 @@
-name: Deploy to WordPress.org
+name: Deployment Test
 
 on:
   workflow_dispatch:  # manual trigger
 
 jobs:
   deploy:
-    if: github.ref == 'refs/heads/main'  # only deploy from main branch
-    name: Deploy to WordPress.org
+    name: Deployment Test (dry-run)
     runs-on: ubuntu-latest
 
     steps:
@@ -18,6 +17,7 @@ jobs:
       - name: WordPress Plugin Deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
         with:
+          dry-run: true
           generate-zip: true
         env:
           SVN_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
