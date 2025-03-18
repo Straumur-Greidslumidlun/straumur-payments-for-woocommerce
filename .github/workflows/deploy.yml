@@ -10,40 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build the plugin
-        run: npm run build
-
-      - name: Checkout SVN repository
-        uses: svn-actions/checkout@v1
-        with:
-          svn-url: https://plugins.svn.wordpress.org/straumur-payments-for-woocommerce
-          svn-username: ${{ secrets.WP_ORG_USERNAME }}
-          svn-password: ${{ secrets.WP_ORG_PASSWORD }}
-
-      - name: Sync files to SVN trunk
+      - uses: actions/checkout@master
+      - name: Build # Remove or modify this step as needed
         run: |
-          rsync -av --delete --exclude='.git' --exclude='.github' --exclude='node_modules' --exclude='*.yml' --exclude='*.json' --exclude='*.lock' --exclude='*.md' --exclude='*.txt' ./ /github/svn/trunk/
-        working-directory: ${{ github.workspace }}
-
-      - name: Commit files to SVN trunk
-        run: |
-          svn add --force trunk/*
-          svn commit -m "Deploy version ${{ github.ref_name }} from GitHub" --username ${{ secrets.WP_ORG_USERNAME }} --password ${{ secrets.WP_ORG_PASSWORD }}
-        working-directory: /github/svn
-
-      - name: Tag the release in SVN
-        run: |
-          svn copy trunk tags/${{ github.ref_name }}
-          svn commit -m "Tag version ${{ github.ref_name }} from GitHub" --username ${{ secrets.WP_ORG_USERNAME }} --password ${{ secrets.WP_ORG_PASSWORD }}
-        working-directory: /github/svn
+          npm install
+          npm run build
+      - name: WordPress Plugin Deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
+          SVN_USERNAME: ${{ secrets.WP_ORG_USERNAME}}
+          SLUG: straumur-payments-for-woocommerce # optional, remove if GitHub repo name matches SVN slug, including capitalization
