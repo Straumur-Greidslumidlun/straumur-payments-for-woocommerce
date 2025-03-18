@@ -62,6 +62,7 @@ If you enable “Authorize Only,” orders are authorized but not captured autom
 * Improved webhook handling
 * Bug fixes
 
-
+= 1.1.1 =
+* Bug fixes
 
 

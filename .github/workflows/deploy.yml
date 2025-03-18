@@ -1,7 +1,9 @@
 name: Deploy to WordPress.org
 
 on:
-  workflow_dispatch:  # manual trigger
+  push:
+    tags:
+    - "*"
 
 jobs:
   deploy:
@@ -17,9 +19,8 @@ jobs:
           npm run build
       - name: WordPress Plugin Deploy
         uses: 10up/action-wordpress-plugin-deploy@stable
-        with:
-          generate-zip: true
         env:
+          ASSETS_DIR: assets
           SVN_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
           SVN_USERNAME: ${{ secrets.WP_ORG_USERNAME}}
           SLUG: straumur-payments-for-woocommerce # optional, remove if GitHub repo name matches SVN slug, including capitalization
