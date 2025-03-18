@@ -73,53 +73,18 @@ Welcome to the WooCommerce development team! This guide will walk you through th
 
 ### Prerequisites:
 
-- An SVN client installed (e.g., TortoiseSVN for Windows, command-line SVN, or Git-SVN).
-- Access to the WordPress.org SVN repository.
+- Access to the Straumur Woocommerce plugin repository
 - Ensure your plugin is production-ready and tested.
 
 ### Steps:
 
-1. **Check Out the SVN Repository:**
-   Clone the SVN repository locally:
+1. **Create a Pull Request into main**
+   When all the changes that should go into next version are merged into dev branch, create a pull request to main.
 
-   ```bash
-   svn co https://plugins.svn.wordpress.org/your-plugin-slug /path/to/svn/checkout
-   ```
-
-2. **Organize Files in the SVN Directory:**
-   The SVN repository should have the following structure:
-
-   ```
-   /trunk    - Contains the latest version of the plugin.
-   /tags     - Contains specific versions (e.g., 1.0.0, 1.1.0).
-   /branches - For development branches (optional).
-   ```
-
-   - Copy your plugin files to the `trunk/` directory.
-   - (Optional) Create a new folder under `tags/` for the current version:
-     ```bash
-     mkdir /path/to/svn/checkout/tags/1.0.0
-     cp -R /path/to/svn/checkout/trunk/* /path/to/svn/checkout/tags/1.0.0
-     ```
-
-3. **Add and Commit Changes:**
-   Navigate to the SVN directory:
-
-   ```bash
-   cd /path/to/svn/checkout
-   ```
-
-   Add new or modified files:
-
-   ```bash
-   svn add --force trunk/*
-   ```
-
-   Commit changes with a descriptive message:
-
-   ```bash
-   svn commit -m "Updated to version 1.0.0 with new features and bug fixes."
-   ```
+2. **Create a new Release**
+   Once pull request has been approved and merged into main you should create a new Release with a tag that is the version of the release.  The version should be the same as the Stable Tag in release.txt file.
+   
+   This will trigger a Github action deployment trigger that deploys to Wordpress.org SVN repository.
 
 4. **Verify the Update:**
    Check the WordPress.org plugin page to ensure your changes are live.
