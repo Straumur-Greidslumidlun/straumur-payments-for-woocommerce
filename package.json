@@ -1,6 +1,6 @@
 {
   "name": "straumur-payments",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "scripts": {
     "build": "wp-scripts build src/index.js --output-path=assets/js/frontend --output-filename=straumur-block-payment-method.js --externals=@woocommerce/blocks-registry=wc-blocks-registry --externals=@woocommerce/settings=wc-settings",
     "start": "wp-scripts start src/index.js --output-path=assets/js/frontend --output-filename=straumur-block-payment-method.js --externals=@woocommerce/blocks-registry=wc-blocks-registry --externals=@woocommerce/settings=wc-settings"
