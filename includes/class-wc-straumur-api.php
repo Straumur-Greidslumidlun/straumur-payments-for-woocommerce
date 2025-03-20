@@ -234,8 +234,7 @@ class WC_Straumur_API {
 	public function get_session_status( string $checkout_reference ) {
 		$endpoint = "hostedcheckout/status/{$checkout_reference}";
 
-		// Straumur may expect POST instead of GET for status—adjust if needed.
-		return $this->send_request( $endpoint, [], 'POST' );
+		return $this->send_request( $endpoint, [], 'GET' );
 	}
 
 	/**
