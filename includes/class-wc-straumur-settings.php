@@ -161,21 +161,21 @@ class WC_Straumur_Settings {
 				'title'       => esc_html__( 'Payment Page Terminal Identifier', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'The Terminal Identifier provided by Straumur.', 'straumur-payments-for-woocommerce' ),
-				'default'     => 'd67efaf00c8c',
+				'default'     => '',
 				'desc_tip'    => true,
 			],
 			'gateway_terminal_identifier' => [
 				'title'       => esc_html__( 'Payment Gateway Terminal Identifier', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'The Terminal Identifier provided by Straumur.', 'straumur-payments-for-woocommerce' ),
-				'default'     => '0531e49886d1',
+				'default'     => '',
 				'desc_tip'    => true,
 			],
 			'api_key' => [
 				'title'       => esc_html__( 'API Key', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'The API Key provided by Straumur.', 'straumur-payments-for-woocommerce' ),
-				'default'     => '8ee1da747aafad5a281807dd837489172370ad5b710b8d9625',
+				'default'     => '',
 				'desc_tip'    => true,
 			],
 			'hmac_key' => [
@@ -418,8 +418,8 @@ class WC_Straumur_Settings {
 	public static function get_webhook_url(): string {
 		$settings = self::get_settings();
 		return ! empty( $settings['webhook_url'] )
-			? $settings['webhook_url']
-			: home_url( '/wp-json/straumur/v1/payment-callback' );
+		? $settings['webhook_url']
+		: home_url( '/wp-json/straumur/v1/payment-callback' );
 	}
 
 	/**
@@ -431,7 +431,7 @@ class WC_Straumur_Settings {
 	public static function get_checkout_expiry(): float {
 		$settings = self::get_settings();
 		return isset( $settings['checkout_expiry'] )
-			? (float) $settings['checkout_expiry']
-			: 1.0;
+		? (float) $settings['checkout_expiry']
+		: 1.0;
 	}
 }

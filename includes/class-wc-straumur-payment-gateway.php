@@ -544,8 +544,8 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// Retrieve checkout reference from query string or order meta.
 		$checkout_reference = isset( $_GET['checkoutReference'] )
-			? sanitize_text_field( wp_unslash( $_GET['checkoutReference'] ) )
-			: $order->get_meta( '_straumur_checkout_reference' );
+		? sanitize_text_field( wp_unslash( $_GET['checkoutReference'] ) )
+		: $order->get_meta( '_straumur_checkout_reference' );
 
 		if ( empty( $checkout_reference ) ) {
 			$payment_url = $order->get_checkout_payment_url() ?: wc_get_cart_url();
@@ -577,17 +577,14 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			exit;
 		}
 
-		// If Straumur returned a 'payfacReference', the payment is pending or authorized.
 		if ( isset( $status_response['payfacReference'] ) ) {
 			$payfac_ref = sanitize_text_field( $status_response['payfacReference'] );
 			$order->update_meta_data( '_straumur_payfac_reference', $payfac_ref );
 			$order->save();
 
-			$order->update_status(
-				'pending',
+			$order->add_order_note(
 				sprintf(
-					/* translators: %s: Straumur payment reference. */
-					esc_html__( 'Payment pending, awaiting payment confirmation. Straumur Reference: %s', 'straumur-payments-for-woocommerce' ),
+					esc_html__( 'Payment pending, awaiting confirmation. Straumur Reference: %s', 'straumur-payments-for-woocommerce' ),
 					$payfac_ref
 				)
 			);
@@ -597,23 +594,23 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 				'success'
 			);
 
-			// If merchant specified a custom success URL, use it; otherwise default to the standard thank-you page.
 			$redirect_url = ! empty( $this->custom_success_url )
-				? $this->custom_success_url
-				: $this->get_return_url( $order );
+			? $this->custom_success_url
+			: $this->get_return_url( $order );
 
 			wp_safe_redirect( $redirect_url );
 			exit;
-		} else {
-			// Payment not completed or user canceled on Straumur's side.
-			wc_add_notice(
-				esc_html__( 'Your payment session was not completed. Please try again.', 'straumur-payments-for-woocommerce' ),
-				'error'
-			);
-			wp_safe_redirect( $order->get_checkout_payment_url() ?: wc_get_cart_url() );
-			exit;
 		}
+	} else {
+			// Payment not completed or user canceled on Straumur's side
+		wc_add_notice(
+			esc_html__( 'Your payment session was not completed. Please try again.', 'straumur-payments-for-woocommerce' ),
+			'error'
+		);
+		wp_safe_redirect( $order->get_checkout_payment_url() ?: wc_get_cart_url() );
+		exit;
 	}
+}
 
 	/**
 	 * Process and save admin options (from the WC settings page).
