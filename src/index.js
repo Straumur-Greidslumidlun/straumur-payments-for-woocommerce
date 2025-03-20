@@ -1,17 +1,22 @@
-const { registerPaymentMethod } = window.wc.wcBlocksRegistry
+const { __, sprintf } = window.wp.i18n;
 const { decodeEntities } = window.wp.htmlEntities;
-const { getSetting } = window.wc.wcSettings
+const { registerPaymentMethod } = window.wc.wcBlocksRegistry;
+const { getSetting } = window.wc.wcSettings;
+
 
 const settings = getSetting( 'straumur_data', {} );
 
+const defaultLabel = __(
+    'Straumur Payments',
+    'woo-gutenberg-products-block'
+);
 
-const label = decodeEntities( settings.title || 'Straumur' );
-
+const label = decodeEntities( settings.title ) || defaultLabel;
 /**
  * Content component
  */
 const Content = () => {
-    return decodeEntities( settings.description || 'Greiða á öruggri greiðslusíðu hjá Straumi' );
+    return decodeEntities( settings.description || 'Secure payment via Straumur Hosted checkout' );
 
 };
 /**
