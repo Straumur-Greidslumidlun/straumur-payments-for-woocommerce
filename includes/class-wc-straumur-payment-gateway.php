@@ -579,31 +579,29 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// If Straumur returned a 'payfacReference', the payment is pending or authorized.
 		if ( isset( $status_response['payfacReference'] ) ) {
-			$payfac_ref = sanitize_text_field( $status_response['payfacReference'] );
-			$order->update_meta_data( '_straumur_payfac_reference', $payfac_ref );
-			$order->save();
+    $payfac_ref = sanitize_text_field( $status_response['payfacReference'] );
+    $order->update_meta_data( '_straumur_payfac_reference', $payfac_ref );
+    $order->save();
 
-			$order->update_status(
-				'pending',
-				sprintf(
-					/* translators: %s: Straumur payment reference. */
-					esc_html__( 'Payment pending, awaiting payment confirmation. Straumur Reference: %s', 'straumur-payments-for-woocommerce' ),
-					$payfac_ref
-				)
-			);
+    // Instead of updating the status, just add an order note.
+    $order->add_order_note(
+        sprintf(
+            esc_html__( 'Payment pending, awaiting confirmation. Straumur Reference: %s', 'straumur-payments-for-woocommerce' ),
+            $payfac_ref
+        )
+    );
 
-			wc_add_notice(
-				esc_html__( 'Thank you for your order! Your payment is currently being processed.', 'straumur-payments-for-woocommerce' ),
-				'success'
-			);
+    wc_add_notice(
+        esc_html__( 'Thank you for your order! Your payment is currently being processed.', 'straumur-payments-for-woocommerce' ),
+        'success'
+    );
 
-			// If merchant specified a custom success URL, use it; otherwise default to the standard thank-you page.
-			$redirect_url = ! empty( $this->custom_success_url )
-				? $this->custom_success_url
-				: $this->get_return_url( $order );
+    $redirect_url = ! empty( $this->custom_success_url )
+        ? $this->custom_success_url
+        : $this->get_return_url( $order );
 
-			wp_safe_redirect( $redirect_url );
-			exit;
+    wp_safe_redirect( $redirect_url );
+    exit;
 		} else {
 			// Payment not completed or user canceled on Straumur's side.
 			wc_add_notice(
