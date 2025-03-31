@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Straumur Payment Gateway Class.
  *
@@ -11,119 +12,44 @@
  * @package Straumur\Payments
  * @since   1.0.0
  */
-
 declare(strict_types=1);
 
 namespace Straumur\Payments;
 
 use WC_Payment_Gateway;
 use WC_Order;
-use WC_Logger;
+use WC_Logger_Interface;
 use WP_Error;
-use WC_Payment_Token;
-use function esc_html__;
-use function wc_add_notice;
-use function wc_get_logger;
-use function wc_get_order;
-use function wc_price;
-use function wp_safe_redirect;
-use function get_woocommerce_currency;
 
-if ( ! class_exists( 'WC_Payment_Tokens' ) ) {
-	require_once WC_ABSPATH . 'includes/abstracts/abstract-wc-payment-tokens.php';
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-/**
- * Class WC_Straumur_Payment_Gateway
- *
- * @since 1.0.0
- */
+if ( ! defined( 'WC_ABSPATH' ) ) {
+	define( 'WC_ABSPATH', WP_PLUGIN_DIR . '/woocommerce/' );
+}
+
+if ( ! defined( 'STRAUMUR_PAYMENTS_PLUGIN_URL' ) ) {
+	define( 'STRAUMUR_PAYMENTS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+}
+
 class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
-	/**
-	 * WooCommerce logger instance.
-	 *
-	 * @var WC_Logger
-	 */
-	private WC_Logger $logger;
+	private WC_Logger_Interface $logger;
 
-	/**
-	 * Log context array.
-	 *
-	 * @var array<string, string>
-	 */
-	private array $context = [
-		'source' => 'straumur-payments',
-	];
+	private string $terminal_identifier;
+	private string $gateway_terminal_identifier;
+	private string $api_key;
+	private string $theme_key;
+	private bool $authorize_only;
+	private string $hmac_key;
+	private bool $send_items;
+	private string $abandon_url;
+	private string $custom_success_url;
 
-	/**
-	 * Terminal identifier.
-	 *
-	 * @var string
-	 */
-	private string $terminal_identifier = '';
 
-	/**
-	 * Gateway Terminal identifier.
-	 *
-	 * @var string
-	 */
-	private string $gateway_terminal_identifier = '';
+	private array $context = array( 'source' => 'straumur' );
 
-	/**
-	 * API key for Straumur.
-	 *
-	 * @var string
-	 */
-	private string $api_key = '';
-
-	/**
-	 * Template/Theme key for customizing the checkout.
-	 *
-	 * @var string
-	 */
-	private string $theme_key = '';
-
-	/**
-	 * Whether to only authorize payment (and manually capture later).
-	 *
-	 * @var bool
-	 */
-	private bool $authorize_only = false;
-
-	/**
-	 * HMAC secret key for webhook validation.
-	 *
-	 * @var string
-	 */
-	private string $hmac_key = '';
-
-	/**
-	 * Whether items should be sent to the hosted checkout.
-	 *
-	 * @var bool
-	 */
-	private bool $send_items = false;
-
-	/**
-	 * Abandon URL for the payment session.
-	 *
-	 * @var string
-	 */
-	private string $abandon_url = '';
-
-	/**
-	 * Custom success URL for the payment process.
-	 *
-	 * @var string
-	 */
-	private string $custom_success_url = '';
-
-	/**
-	 * Constructor for the gateway.
-	 *
-	 * @since 1.0.0
-	 */
 	public function __construct() {
 		$this->logger = wc_get_logger();
 
@@ -131,52 +57,24 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->method_title       = esc_html__( 'Straumur Payments', 'straumur-payments-for-woocommerce' );
 		$this->method_description = esc_html__( 'Accept payments via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce' );
 		$this->has_fields         = false;
-		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-28x28.png';
+		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-128x128.png';
 
-		/*
-		 * Mark the supports array.
-		 * Includes 'wc-blocks' for block-based checkout and 'wc-orders' for HPOS compatibility.
-		 * If you need subscriptions, ensure 'subscriptions' is included and your plugin
-		 * properly implements the necessary subscription hooks.
-		 */
-		$this->supports = [
-			'products',
-			'subscriptions',
-			'wc-blocks',
-			'wc-orders', // Enable High-Performance Order Storage / HPOS support.
-		];
+		$this->supports = array( 'products', 'subscriptions', 'wc-blocks', 'wc-orders', 'subscription_cancellation', 'subscription_suspension', 'subscription_reactivation', 'subscription_amount_changes', 'subscription_payment_method_change_customer', 'subscription_payment_method_change_admin', 'subscription_date_changes', 'multiple_subscriptions' );
 
-		// Load settings fields from the custom settings class.
 		$this->init_form_fields();
-
-		// Apply settings to local properties.
 		$this->init_settings_values();
 
-		// Hook return URL action (for ?wc-api=straumur).
-		add_action( 'woocommerce_api_' . $this->id, [ $this, 'process_return' ] );
-		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, [ $this, 'process_admin_options' ] );
+		add_action( 'woocommerce_api_' . $this->id, array( $this, 'process_return' ) );
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
-		// Subscription payment hooks.
-		add_action( 'woocommerce_scheduled_subscription_payment_straumur', [ $this, 'process_subscription_payment' ], 10, 2 );
-		add_action( 'woocommerce_subscription_payment_method_updated_to_straumur', [ $this, 'process_subscription_payment_method_change' ], 10, 1 );
+		add_action( 'woocommerce_scheduled_subscription_payment_straumur', array( $this, 'process_subscription_payment' ), 10, 2 );
+		add_action( 'woocommerce_subscription_payment_method_updated_to_straumur', array( $this, 'process_subscription_payment_method_change' ) );
 	}
 
-	/**
-	 * Initialize form fields for the settings page.
-	 *
-	 * @since 1.0.0
-	 * @return void
-	 */
 	public function init_form_fields(): void {
 		$this->form_fields = WC_Straumur_Settings::get_form_fields();
 	}
 
-	/**
-	 * Load settings into local gateway properties.
-	 *
-	 * @since 1.0.0
-	 * @return void
-	 */
 	private function init_settings_values(): void {
 		$this->title                       = WC_Straumur_Settings::get_title();
 		$this->description                 = WC_Straumur_Settings::get_description();
@@ -192,89 +90,55 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->custom_success_url          = WC_Straumur_Settings::get_custom_success_url();
 	}
 
-	/**
-	 * Validate the production URL field.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $key   Option key.
-	 * @param string $value Option value.
-	 *
-	 * @return string
-	 */
-	public function validate_production_url_field( string $key, string $value ): string {
-		$test_mode = WC_Straumur_Settings::is_test_mode();
+	private function is_subscription_renewal_checkout( int $order_id ): bool {
+		if ( ! class_exists( 'WC_Subscriptions' ) ) {
+			return false;
+		}
 
-		return WC_Straumur_Settings::validate_production_url_field( $test_mode, $value );
+		return wcs_order_contains_renewal( $order_id ) || wcs_cart_contains_renewal();
 	}
 
-	/**
-	 * Get a pre-configured instance of WC_Straumur_API.
-	 *
-	 * @since 1.0.0
-	 * @return WC_Straumur_API
-	 */
-	private function get_api(): WC_Straumur_API {
-		return new WC_Straumur_API( $this->authorize_only );
-	}
-
-	/**
-	 * Retrieve line items for the order to send to Straumur.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param WC_Order $order          Order object.
-	 * @param int      $expected_amount Minor units total.
-	 *
-	 * @return array[] {
-	 *     @type array {
-	 *         @type string 'Name'   Item name.
-	 *         @type int    'Amount' Line item total in minor units.
-	 *     }
-	 * }
-	 */
 	private function get_order_items( WC_Order $order, int $expected_amount ): array {
-		$items            = [];
+		$items            = array();
 		$calculated_total = 0;
 
 		foreach ( $order->get_items() as $item ) {
-			$line_total   = (int) round( ( $item->get_total() + $item->get_total_tax() ) * 100 );
-			$product_name = $item->get_name();
-
-			$items[] = [
-				'Name'   => $product_name,
+			/** @var \WC_Order_Item_Product $item */
+			$line_total        = (int) round( ( $item->get_total() + $item->get_total_tax() ) * 100 );
+			$items[]           = array(
+				'Name'   => $item->get_name(),
 				'Amount' => $line_total,
-			];
+			);
 			$calculated_total += $line_total;
 		}
 
 		if ( $order->get_shipping_total() > 0 ) {
-			$shipping_cost = (int) round( ( $order->get_shipping_total() + $order->get_shipping_tax() ) * 100 );
-			$items[]       = [
+			$shipping_cost     = (int) round( ( $order->get_shipping_total() + $order->get_shipping_tax() ) * 100 );
+			$items[]           = array(
 				'Name'   => esc_html__( 'Delivery', 'straumur-payments-for-woocommerce' ),
 				'Amount' => $shipping_cost,
-			];
+			);
 			$calculated_total += $shipping_cost;
 		}
 
-		// Adjust last line item if there's any minor difference due to rounding.
 		$difference = $expected_amount - $calculated_total;
-		if ( 0 !== $difference && ! empty( $items ) ) {
+		if ( $difference !== 0 && ! empty( $items ) ) {
 			$items[ count( $items ) - 1 ]['Amount'] += $difference;
 		}
 
 		return $items;
 	}
 
+
 	/**
-	 * Handle the payment process and return a redirect URL to Straumur's hosted checkout.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int $order_id The WooCommerce order ID.
-	 *
-	 * @return array|WP_Error
-	 */
+		 * Handle the payment process and return a redirect URL to Straumur's hosted checkout.
+		 *
+		 * @since 1.0.0
+		 *
+		 * @param int $order_id The WooCommerce order ID.
+		 *
+		 * @return array|WP_Error
+		 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
@@ -284,12 +148,11 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			);
 			$this->logger->error( 'Invalid order: ' . $order_id, $this->context );
 
-			return [ 'result' => 'failure' ];
+			return array( 'result' => 'failure' );
 		}
 
 		$api = $this->get_api();
 
-		// Save whether it's manual capture.
 		$order->update_meta_data( '_straumur_is_manual_capture', $this->authorize_only ? 'yes' : 'no' );
 		$order->save();
 
@@ -303,11 +166,11 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// Build return URL.
 		$return_url = add_query_arg(
-			[
+			array(
 				'wc-api'         => $this->id,
 				'order_id'       => $order->get_id(),
 				'straumur_nonce' => wp_create_nonce( 'straumur_process_return' ),
-			],
+			),
 			home_url( '/' )
 		);
 
@@ -341,27 +204,30 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 				$this->context
 			);
 
-			return [ 'result' => 'failure' ];
+			return array( 'result' => 'failure' );
 		}
 
 		// Straumur returns the Hosted Checkout URL.
 		$redirect_url = $session['url'];
 
-		return [
+		return array(
 			'result'   => 'success',
 			'redirect' => $redirect_url,
-		];
+		);
 	}
 
 	/**
 	 * Process a subscription payment (renewal) using the saved token.
+	 *
+	 * Uses the stored token to process automatic renewal payments for subscriptions.
+	 * Handles different response scenarios including authorization, redirects, and failures.
 	 *
 	 * @since 1.0.0
 	 *
 	 * @param float    $amount The amount to be charged.
 	 * @param WC_Order $order  The order object (renewal order).
 	 *
-	 * @return array
+	 * @return array Response with result status and redirect URL if needed.
 	 */
 	public function process_subscription_payment( $amount, WC_Order $order ): array {
 		$this->logger->info(
@@ -392,7 +258,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 				$this->context
 			);
 
-			return [ 'result' => 'failure' ];
+			return array( 'result' => 'failure' );
 		}
 		$token_value = $default_token->get_token();
 
@@ -407,11 +273,11 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// Build return URL in case additional action is required.
 		$return_url = add_query_arg(
-			[
+			array(
 				'wc-api'         => $this->id,
 				'order_id'       => $order->get_id(),
 				'straumur_nonce' => wp_create_nonce( 'straumur_process_return' ),
-			],
+			),
 			home_url( '/' )
 		);
 
@@ -429,6 +295,30 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		);
 
 		if ( isset( $response['resultCode'] ) && 'Authorised' === $response['resultCode'] ) {
+			// Save the payfacReference for future refund/capture operations
+			if ( ! empty( $response['payfacReference'] ) ) {
+				$payfac_reference = sanitize_text_field( $response['payfacReference'] );
+				$order->update_meta_data( '_straumur_payfac_reference', $payfac_reference );
+				$order->save();
+
+				$this->logger->info(
+					sprintf(
+						'Saved payfacReference %s for subscription payment on order %d',
+						$payfac_reference,
+						$order->get_id()
+					),
+					$this->context
+				);
+			} else {
+				$this->logger->warning(
+					sprintf(
+						'No payfacReference received for authorized subscription payment on order %d',
+						$order->get_id()
+					),
+					$this->context
+				);
+			}
+
 			// Determine if the order should be marked completed or just payment complete.
 			$mark_as_complete = WC_Straumur_Settings::is_complete_order_on_payment();
 			if ( ! $order->needs_processing() ) {
@@ -452,7 +342,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 				$this->context
 			);
 
-			return [ 'result' => 'success' ];
+			return array( 'result' => 'success' );
 		} elseif ( isset( $response['resultCode'] ) && 'RedirectShopper' === $response['resultCode'] ) {
 			$redirect_url = $response['redirect']['url'] ?? '';
 			$order->add_order_note(
@@ -467,10 +357,10 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 				$this->context
 			);
 
-			return [
+			return array(
 				'result'   => 'success',
 				'redirect' => $redirect_url,
-			];
+			);
 		} else {
 			$order->update_status(
 				'failed',
@@ -482,12 +372,16 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 				$this->context
 			);
 
-			return [ 'result' => 'failure' ];
+			return array( 'result' => 'failure' );
 		}
 	}
 
+
 	/**
 	 * Save the payment method (tokenization) for auto-renewals, if needed.
+	 *
+	 * Creates and stores a payment token for future subscription renewal payments.
+	 * Always marks tokens as subscription_only since they're only used for recurring payments.
 	 *
 	 * @since 1.0.0
 	 *
@@ -514,11 +408,15 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$token->set_token( 'SAVED_TOKEN_FROM_STRAUMUR' );
 		$token->set_user_id( $order->get_user_id() );
 		$token->set_default( true );
+
+		// Always mark as subscription_only since tokens are only for subscriptions
+		$token->update_meta_data( 'subscription_only', 'yes' );
+
 		$token->save();
 	}
 
 	/**
-	 * Handle the return from Straumur's payment gateway (callback).
+	 * Handle the return from Straumur's payment gateway (callback)
 	 *
 	 * @since 1.0.0
 	 * @return void
@@ -542,85 +440,73 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			exit;
 		}
 
-		// Retrieve checkout reference from query string or order meta.
 		$checkout_reference = isset( $_GET['checkoutReference'] )
 			? sanitize_text_field( wp_unslash( $_GET['checkoutReference'] ) )
 			: $order->get_meta( '_straumur_checkout_reference' );
 
 		if ( empty( $checkout_reference ) ) {
-			$payment_url = $order->get_checkout_payment_url() ?: wc_get_cart_url();
-			wp_safe_redirect( $payment_url );
+			$checkout_url = $order->get_checkout_payment_url();
+			wp_safe_redirect( $checkout_url ? $checkout_url : wc_get_cart_url() );
 			exit;
 		}
 
-		// If we haven't saved it yet, do so now.
 		if ( ! $order->get_meta( '_straumur_checkout_reference' ) ) {
 			$order->update_meta_data( '_straumur_checkout_reference', $checkout_reference );
 			$order->save();
 		}
 
-		// Query Straumur for current payment session status.
 		$api             = $this->get_api();
 		$status_response = $api->get_session_status( $checkout_reference );
 
 		if ( ! $status_response ) {
-			// Could not retrieve status; mark order failed and notify shopper.
-			$order->update_status(
-				'failed',
-				esc_html__( 'Unable to fetch payment status via Straumur.', 'straumur-payments-for-woocommerce' )
-			);
 			wc_add_notice(
-				esc_html__( 'There was an issue retrieving your payment status. Please try again.', 'straumur-payments-for-woocommerce' ),
+				esc_html__( 'Unable to verify payment status. Please try again.', 'straumur-payments-for-woocommerce' ),
 				'error'
 			);
-			wp_safe_redirect( $order->get_checkout_payment_url() ?: wc_get_cart_url() );
+			$checkout_url = $order->get_checkout_payment_url();
+			wp_safe_redirect( $checkout_url ? $checkout_url : wc_get_cart_url() );
 			exit;
 		}
 
-		// If Straumur returned a 'payfacReference', the payment is pending or authorized.
 		if ( isset( $status_response['payfacReference'] ) ) {
-    $payfac_ref = sanitize_text_field( $status_response['payfacReference'] );
-    $order->update_meta_data( '_straumur_payfac_reference', $payfac_ref );
-    $order->save();
+			$payfac_ref = sanitize_text_field( $status_response['payfacReference'] );
+			$order->update_meta_data( '_straumur_payfac_reference', $payfac_ref );
+			$order->save();
 
-    // Instead of updating the status, just add an order note.
-    $order->add_order_note(
-        sprintf(
-            esc_html__( 'Payment pending, awaiting confirmation. Straumur Reference: %s', 'straumur-payments-for-woocommerce' ),
-            $payfac_ref
-        )
-    );
+			wc_add_notice(
+				esc_html__( 'Thank you for your order! Your payment is being processed.', 'straumur-payments-for-woocommerce' ),
+				'success'
+			);
 
-    wc_add_notice(
-        esc_html__( 'Thank you for your order! Your payment is currently being processed.', 'straumur-payments-for-woocommerce' ),
-        'success'
-    );
+			$redirect_url = ! empty( $this->custom_success_url )
+				? $this->custom_success_url
+				: $this->get_return_url( $order );
 
-    $redirect_url = ! empty( $this->custom_success_url )
-        ? $this->custom_success_url
-        : $this->get_return_url( $order );
-
-    wp_safe_redirect( $redirect_url );
-    exit;
+			wp_safe_redirect( $redirect_url );
+			exit;
 		} else {
-			// Payment not completed or user canceled on Straumur's side.
 			wc_add_notice(
 				esc_html__( 'Your payment session was not completed. Please try again.', 'straumur-payments-for-woocommerce' ),
 				'error'
 			);
-			wp_safe_redirect( $order->get_checkout_payment_url() ?: wc_get_cart_url() );
+			$checkout_url = $order->get_checkout_payment_url();
+			wp_safe_redirect( $checkout_url ? $checkout_url : wc_get_cart_url() );
 			exit;
 		}
 	}
 
-	/**
-	 * Process and save admin options (from the WC settings page).
-	 *
-	 * @since 1.0.0
-	 * @return bool
-	 */
-	public function process_admin_options(): bool {
-		return parent::process_admin_options();
-	}
 
+	/**
+	 * Process refund directly through the payment gateway.
+	 *
+	 * @since 2.0.1
+	 * @param int    $order_id Order ID.
+	 * @param float  $amount   Refund amount.
+	 * @param string $reason   Refund reason.
+	 * @return bool|WP_Error True on success, false or WP_Error on failure.
+	 */
+	public function process_refund( $order_id, $amount = null, $reason = '' ) {
+		$order_handler = new WC_Straumur_Order_Handler();
+		return $order_handler->handle_refund( $order_id );
+	}
 }
