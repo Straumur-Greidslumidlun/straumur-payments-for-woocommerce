@@ -2,7 +2,7 @@
 /**
  * Straumur Settings Class
  *
- * Provides and validates the settings fields used by the Straumur payment gateway.
+ * Provides and validates the settings fields used by the Straumur payment gateway.dsd
  *
  * @package Straumur\Payments
  * @since   1.0.0
@@ -43,7 +43,7 @@ class WC_Straumur_Settings {
 	 * @since 1.1.0
 	 * @var array
 	 */
-	private static array $cached_settings = [];
+	private static array $cached_settings = array();
 
 	/**
 	 * Retrieve the gateway form fields for the settings page (all fields).
@@ -55,22 +55,22 @@ class WC_Straumur_Settings {
 	public static function get_form_fields(): array {
 		$webhook_url = home_url( '/wp-json/straumur/v1/payment-callback' );
 
-		return [
-			'enabled' => [
+		return array(
+			'enabled'                     => array(
 				'title'   => esc_html__( 'Enable/Disable', 'straumur-payments-for-woocommerce' ),
 				'type'    => 'checkbox',
 				'label'   => esc_html__( 'Enable Straumur Payments', 'straumur-payments-for-woocommerce' ),
 				'default' => 'yes',
-			],
-			'test_mode' => [
+			),
+			'test_mode'                   => array(
 				'title'       => esc_html__( 'Test Mode', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => esc_html__( 'Enable Test Mode', 'straumur-payments-for-woocommerce' ),
 				'default'     => 'yes',
 				'description' => esc_html__( 'If enabled, the gateway will use the sandbox URL.', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => false,
-			],
-			'title' => [
+			),
+			'title'                       => array(
 				'title'       => esc_html__( 'Title', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__(
@@ -79,8 +79,8 @@ class WC_Straumur_Settings {
 				),
 				'default'     => esc_html__( 'Straumur Payments', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => true,
-			],
-			'description' => [
+			),
+			'description'                 => array(
 				'title'       => esc_html__( 'Description', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__(
@@ -89,23 +89,23 @@ class WC_Straumur_Settings {
 				),
 				'default'     => esc_html__( 'Pay via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => true,
-			],
-			'theme_key' => [
+			),
+			'theme_key'                   => array(
 				'title'       => esc_html__( 'Theme key', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'Theme key, logo colors, etc.', 'straumur-payments-for-woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true,
-			],
-			'authorize_only' => [
+			),
+			'authorize_only'              => array(
 				'title'       => esc_html__( 'Authorize Only (Manual Capture)', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'label'       => esc_html__( 'Enable authorize only mode. Payments will require manual capture.', 'straumur-payments-for-woocommerce' ),
 				'default'     => 'no',
 				'description' => esc_html__( 'If enabled, payments will be authorized but not captured automatically.', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => false,
-			],
-			'complete_order_on_payment' => [
+			),
+			'complete_order_on_payment'   => array(
 				'title'       => esc_html__( 'Mark Order as Completed', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => esc_html__(
@@ -113,8 +113,8 @@ class WC_Straumur_Settings {
 					'straumur-payments-for-woocommerce'
 				),
 				'default'     => 'no',
-			],
-			'items' => [
+			),
+			'items'                       => array(
 				'title'       => esc_html__( 'Send cart items', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'checkbox',
 				'description' => esc_html__(
@@ -123,12 +123,12 @@ class WC_Straumur_Settings {
 				),
 				'default'     => 'yes',
 				'desc_tip'    => false,
-			],
-			'checkout_expiry' => [
-				'title'   => esc_html__( 'Checkout Expiry (hours)', 'straumur-payments-for-woocommerce' ),
-				'type'    => 'select',
-				'default' => '1',
-				'options' => [
+			),
+			'checkout_expiry'             => array(
+				'title'       => esc_html__( 'Checkout Expiry (hours)', 'straumur-payments-for-woocommerce' ),
+				'type'        => 'select',
+				'default'     => '1',
+				'options'     => array(
 					'0.0833' => esc_html__( '5 minutes', 'straumur-payments-for-woocommerce' ),
 					'0.1667' => esc_html__( '10 minutes', 'straumur-payments-for-woocommerce' ),
 					'0.25'   => esc_html__( '15 minutes', 'straumur-payments-for-woocommerce' ),
@@ -139,53 +139,53 @@ class WC_Straumur_Settings {
 					'6'      => esc_html__( '6 hours', 'straumur-payments-for-woocommerce' ),
 					'12'     => esc_html__( '12 hours', 'straumur-payments-for-woocommerce' ),
 					'24'     => esc_html__( '24 hours', 'straumur-payments-for-woocommerce' ),
-				],
+				),
 				'description' => esc_html__( 'How long before checkout sessions expire (approx).', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => true,
-			],
-			'abandon_url' => [
+			),
+			'abandon_url'                 => array(
 				'title'       => esc_html__( 'Abandon URL', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'Optional URL to redirect shoppers if they cancel or abandon the payment page.', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => true,
 				'default'     => '',
-			],
-			'custom_success_url' => [
+			),
+			'custom_success_url'          => array(
 				'title'       => esc_html__( 'Custom Success URL', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'Optional URL to redirect shoppers after a successful payment. If left empty, the default WooCommerce thank-you page is used.', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => true,
 				'default'     => '',
-			],
-			'terminal_identifier' => [
+			),
+			'terminal_identifier'         => array(
 				'title'       => esc_html__( 'Payment Page Terminal Identifier', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'The Terminal Identifier provided by Straumur.', 'straumur-payments-for-woocommerce' ),
 				'default'     => 'd67efaf00c8c',
 				'desc_tip'    => true,
-			],
-			'gateway_terminal_identifier' => [
+			),
+			'gateway_terminal_identifier' => array(
 				'title'       => esc_html__( 'Payment Gateway Terminal Identifier', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'The Terminal Identifier provided by Straumur.', 'straumur-payments-for-woocommerce' ),
 				'default'     => '0531e49886d1',
 				'desc_tip'    => true,
-			],
-			'api_key' => [
+			),
+			'api_key'                     => array(
 				'title'       => esc_html__( 'API Key', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'The API Key provided by Straumur.', 'straumur-payments-for-woocommerce' ),
 				'default'     => '8ee1da747aafad5a281807dd837489172370ad5b710b8d9625',
 				'desc_tip'    => true,
-			],
-			'hmac_key' => [
+			),
+			'hmac_key'                    => array(
 				'title'       => esc_html__( 'HMAC Key', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'text',
 				'description' => esc_html__( 'Your HMAC secret key used to validate incoming webhooks.', 'straumur-payments-for-woocommerce' ),
 				'default'     => '',
 				'desc_tip'    => true,
-			],
-			'webhook_url' => [
+			),
+			'webhook_url'                 => array(
 				'title'             => esc_html__( 'Webhook URL', 'straumur-payments-for-woocommerce' ),
 				'type'              => 'text',
 				'description'       => esc_html__(
@@ -194,12 +194,12 @@ class WC_Straumur_Settings {
 				),
 				'default'           => $webhook_url,
 				'desc_tip'          => false,
-				'custom_attributes' => [
+				'custom_attributes' => array(
 					'readonly' => 'readonly',
 					'onclick'  => 'this.select()',
-				],
-			],
-		];
+				),
+			),
+		);
 	}
 
 	/**
@@ -235,7 +235,7 @@ class WC_Straumur_Settings {
 	 */
 	private static function get_settings(): array {
 		if ( empty( self::$cached_settings ) ) {
-			self::$cached_settings = get_option( self::$option_key, [] );
+			self::$cached_settings = get_option( self::$option_key, array() );
 		}
 		return self::$cached_settings;
 	}

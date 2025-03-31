@@ -1,0 +1,8 @@
+node_modules
+vendor
+.DS_Store
+Composer.json
+Composer.lock
+.php-cs-fixer.php
+phpcs.xml
+phpstan.neon
