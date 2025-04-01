@@ -46,7 +46,7 @@ Debug logs will appear in the wp-content/debug.log file. 3. Updating the SVN Rep
 
 Prerequisites:
 
-Access to the Straumur Woocommerce plugin repository
+Access to the Straumur WooCommerce plugin repository
 Ensure your plugin is production-ready and tested.
 Steps:
 
