@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name:     Straumur Payments For WooCommerce
  * Plugin URI:      https://straumur.is/veflausnir
@@ -80,6 +81,68 @@ function straumur_enqueue_block_payment_scripts(): void {
 }
 
 /**
+ * Filter tokens for block-based checkout.
+ *
+ * @since 2.0.0
+ * @param array  $tokens     Array of token data.
+ * @param int    $user_id    User ID.
+ * @param string $gateway_id Gateway ID.
+ * @return array Filtered tokens.
+ */
+function straumur_filter_block_checkout_tokens( $tokens, $user_id, $gateway_id ) {
+	if ( $gateway_id !== 'straumur' ) {
+		return $tokens;
+	}
+
+	$is_renewal = function_exists( 'wcs_cart_contains_renewal' ) && wcs_cart_contains_renewal();
+
+	if ( $is_renewal ) {
+		return $tokens;
+	}
+
+	foreach ( $tokens as $token_id => $token ) {
+		if ( $token instanceof \WC_Payment_Token && $token->get_meta( 'subscription_only' ) === 'yes' ) {
+			unset( $tokens[ $token_id ] );
+		}
+	}
+
+	return array_values( $tokens );
+}
+
+/**
+ * Filter payment tokens at the core data source level.
+ *
+ * @since 2.0.0
+ * @param array $tokens      Array of token objects.
+ * @param int   $customer_id Customer ID.
+ * @return array Filtered tokens.
+ */
+function straumur_filter_customer_payment_tokens( $tokens, $customer_id ) {
+	unset( $customer_id ); // Intentionally unused parameter.
+
+	if ( is_admin() || ! is_checkout() || is_wc_endpoint_url() ) {
+		return $tokens;
+	}
+
+	$is_renewal = function_exists( 'wcs_cart_contains_renewal' ) && wcs_cart_contains_renewal();
+
+	if ( $is_renewal ) {
+		return $tokens;
+	}
+
+	foreach ( $tokens as $key => $token ) {
+		if ( $token instanceof \WC_Payment_Token
+			&& $token->get_gateway_id() === 'straumur'
+			&& $token->get_meta( 'subscription_only' ) === 'yes'
+		) {
+			unset( $tokens[ $key ] );
+		}
+	}
+
+	return array_values( $tokens );
+}
+
+/**
  * Initialize the Straumur Payments plugin.
  *
  * Checks if WooCommerce is active and loads the payment gateway and other classes.
@@ -114,16 +177,33 @@ function straumur_payments_init(): void {
 		WC_Straumur_Block_Support::init();
 	}
 
+	// Token filtering hooks
+	add_filter(
+		'woocommerce_store_api_get_customer_payment_tokens',
+		__NAMESPACE__ . '\\straumur_filter_block_checkout_tokens',
+		10,
+		3
+	);
+	add_filter(
+		'woocommerce_get_customer_payment_tokens',
+		__NAMESPACE__ . '\\straumur_filter_customer_payment_tokens',
+		10,
+		2
+	);
+
 	// Declare compatibility for WooCommerce Blocks (Cart and Checkout).
-	add_action( 'before_woocommerce_init', function() {
-		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
-				'cart_checkout_blocks',
-				__FILE__,
-				true
-			);
+	add_action(
+		'before_woocommerce_init',
+		function () {
+			if ( class_exists( '\\Automattic\\WooCommerce\\Utilities\\FeaturesUtil' ) ) {
+				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+					'cart_checkout_blocks',
+					__FILE__,
+					true
+				);
+			}
 		}
-	} );
+	);
 
 	// Enqueue block scripts at the right time.
 	add_action( 'enqueue_block_assets', __NAMESPACE__ . '\\straumur_enqueue_block_payment_scripts' );
@@ -132,15 +212,18 @@ function straumur_payments_init(): void {
 	add_filter( 'woocommerce_payment_gateways', __NAMESPACE__ . '\\add_straumur_payment_gateway' );
 
 	// Declare HPOS (High Performance Order Storage) compatibility.
-	add_action( 'before_woocommerce_init', static function() {
-		if ( class_exists( '\\Automattic\\WooCommerce\\Utilities\\FeaturesUtil' ) ) {
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
-				'custom_order_tables',
-				STRAUMUR_PAYMENTS_MAIN_FILE,
-				true
-			);
+	add_action(
+		'before_woocommerce_init',
+		static function () {
+			if ( class_exists( '\\Automattic\\WooCommerce\\Utilities\\FeaturesUtil' ) ) {
+				\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
+					'custom_order_tables',
+					STRAUMUR_PAYMENTS_MAIN_FILE,
+					true
+				);
+			}
 		}
-	} );
+	);
 
 	// Add plugin action links.
 	add_filter(
@@ -154,36 +237,60 @@ function straumur_payments_init(): void {
 	// Instantiate the order handler (manages captures, refunds, cancellations).
 	$straumur_order_handler = new WC_Straumur_Order_Handler();
 
-	// Hook into order status transitions for capturing, refunding, etc.
+	// Hook into order status transitions without returning values explicitly.
 	add_action(
 		'woocommerce_order_status_on-hold_to_cancelled',
-		array( $straumur_order_handler, 'handle_cancellation' ),
-		10,
-		1
+		static function ( $order_id ) use ( $straumur_order_handler ): void {
+			try {
+				$straumur_order_handler->handle_cancellation( $order_id );
+			} catch ( \Exception $e ) {
+				wc_get_logger()->error( 'Cancellation error: ' . $e->getMessage(), array( 'source' => 'straumur' ) );
+			}
+		}
 	);
+
 	add_action(
 		'woocommerce_order_status_on-hold_to_processing',
-		array( $straumur_order_handler, 'handle_capture' ),
-		10,
-		1
+		static function ( $order_id ) use ( $straumur_order_handler ): void {
+			try {
+				$straumur_order_handler->handle_capture( $order_id );
+			} catch ( \Exception $e ) {
+				wc_get_logger()->error( 'Capture error: ' . $e->getMessage(), array( 'source' => 'straumur' ) );
+			}
+		}
 	);
+
 	add_action(
 		'woocommerce_order_status_on-hold_to_completed',
-		array( $straumur_order_handler, 'handle_capture' ),
-		10,
-		1
+		static function ( $order_id ) use ( $straumur_order_handler ): void {
+			try {
+				$straumur_order_handler->handle_capture( $order_id );
+			} catch ( \Exception $e ) {
+				wc_get_logger()->error( 'Capture error: ' . $e->getMessage(), array( 'source' => 'straumur' ) );
+			}
+		}
 	);
+
 	add_action(
 		'woocommerce_order_status_processing_to_refunded',
-		array( $straumur_order_handler, 'handle_refund' ),
-		10,
-		1
+		static function ( $order_id ) use ( $straumur_order_handler ): void {
+			try {
+				$straumur_order_handler->handle_refund( $order_id );
+			} catch ( \Exception $e ) {
+				wc_get_logger()->error( 'Refund error: ' . $e->getMessage(), array( 'source' => 'straumur' ) );
+			}
+		}
 	);
+
 	add_action(
 		'woocommerce_order_status_completed_to_refunded',
-		array( $straumur_order_handler, 'handle_refund' ),
-		10,
-		1
+		static function ( $order_id ) use ( $straumur_order_handler ): void {
+			try {
+				$straumur_order_handler->handle_refund( $order_id );
+			} catch ( \Exception $e ) {
+				wc_get_logger()->error( 'Refund error: ' . $e->getMessage(), array( 'source' => 'straumur' ) );
+			}
+		}
 	);
 }
 
@@ -232,9 +339,9 @@ function straumur_payments_action_links( array $links ): array {
 function straumur_payments_plugin_row_meta( array $links, string $file ): array {
 	if ( plugin_basename( STRAUMUR_PAYMENTS_MAIN_FILE ) === $file ) {
 		$docs_link    = '<a href="https://docs.straumur.is" target="_blank" rel="noopener noreferrer">' .
-						esc_html__( 'Documentation', 'straumur-payments-for-woocommerce' ) . '</a>';
+			esc_html__( 'Documentation', 'straumur-payments-for-woocommerce' ) . '</a>';
 		$support_link = '<a href="https://straumur.is/hafa-samband" target="_blank" rel="noopener noreferrer">' .
-						esc_html__( 'Support', 'straumur-payments-for-woocommerce' ) . '</a>';
+			esc_html__( 'Support', 'straumur-payments-for-woocommerce' ) . '</a>';
 
 		$links[] = $docs_link;
 		$links[] = $support_link;
@@ -242,6 +349,7 @@ function straumur_payments_plugin_row_meta( array $links, string $file ): array 
 
 	return $links;
 }
+
 
 // Initialize the plugin after all plugins are loaded, ensuring WooCommerce is ready.
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\straumur_payments_init' );

@@ -16,6 +16,7 @@ namespace Straumur\Payments;
 use Straumur\Payments\WC_Straumur_Settings;
 use WC_Logger_Interface;
 use WP_Error;
+
 use function wc_get_logger;
 use function trailingslashit;
 use function wp_remote_request;
@@ -27,17 +28,19 @@ use function json_last_error_msg;
 use function is_wp_error;
 use function wp_json_encode;
 
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Class WC_Straumur_API
  *
  * @since 1.0.0
  */
 class WC_Straumur_API {
+
+	/**
+	 * Holds the singleton instance.
+	 *
+	 * @var WC_Straumur_API|null
+	 */
+	private static $instance = null;
 
 	/**
 	 * API key for authentication.
@@ -107,9 +110,9 @@ class WC_Straumur_API {
 	 *
 	 * @var array
 	 */
-	private $context = [
+	private $context = array(
 		'source' => 'straumur-api',
-	];
+	);
 
 	/**
 	 * Whether line items should be included in the hosted checkout request.
@@ -124,6 +127,18 @@ class WC_Straumur_API {
 	 * @var float
 	 */
 	private $checkout_expiry;
+
+	/**
+	 * Get the singleton instance.
+	 *
+	 * @return WC_Straumur_API
+	 */
+	public static function instance(): WC_Straumur_API {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 
 	/**
 	 * Constructor.
@@ -186,14 +201,14 @@ class WC_Straumur_API {
 		$endpoint   = 'hostedcheckout/';
 		$expires_at = gmdate( 'Y-m-d\\TH:i:s.v\\Z', time() + (int) ( $this->checkout_expiry * HOUR_IN_SECONDS ) );
 
-		$body = [
+		$body = array(
 			'amount'             => $amount,
 			'currency'           => $currency,
 			'returnUrl'          => $return_url,
 			'reference'          => $reference,
 			'terminalIdentifier' => $this->terminal_identifier,
 			'expiresAt'          => $expires_at,
-		];
+		);
 
 		// Include line items if requested.
 		if ( $this->send_items ) {
@@ -234,8 +249,7 @@ class WC_Straumur_API {
 	public function get_session_status( string $checkout_reference ) {
 		$endpoint = "hostedcheckout/status/{$checkout_reference}";
 
-		// Straumur may expect POST instead of GET for status—adjust if needed.
-		return $this->send_request( $endpoint, [], 'POST' );
+		return $this->send_request( $endpoint, array(), 'GET' );
 	}
 
 	/**
@@ -250,12 +264,12 @@ class WC_Straumur_API {
 	 * @return array|false Array on success, or false on failure.
 	 */
 	public function capture( string $payfac_reference, string $reference, int $amount, string $currency ) {
-		$body = [
+		$body = array(
 			'reference'       => $reference,
 			'payfacReference' => $payfac_reference,
 			'amount'          => $amount,
 			'currency'        => $currency,
-		];
+		);
 
 		return $this->send_request( 'modification/capture', $body );
 	}
@@ -270,10 +284,10 @@ class WC_Straumur_API {
 	 * @return bool True if the request was successful, false otherwise.
 	 */
 	public function reverse( string $reference, string $payfac_reference ): bool {
-		$body = [
+		$body = array(
 			'reference'       => $reference,
 			'payfacReference' => $payfac_reference,
-		];
+		);
 
 		$response = $this->send_request( 'modification/reverse', $body );
 		return (bool) $response;
@@ -304,7 +318,7 @@ class WC_Straumur_API {
 		string $channel,
 		string $return_url
 	): array {
-		$body = [
+		$body = array(
 			'terminalIdentifier' => $this->gateway_terminal_identifier,
 			'amount'             => $amount,
 			'currency'           => $currency,
@@ -313,11 +327,11 @@ class WC_Straumur_API {
 			'origin'             => $origin,
 			'channel'            => $channel,
 			'returnUrl'          => $return_url,
-			'tokenDetails'       => [
+			'tokenDetails'       => array(
 				'tokenValue'               => $token_value,
 				'recurringProcessingModel' => 'Subscription',
-			],
-		];
+			),
+		);
 
 		$this->log(
 			"Processing token payment for reference {$reference} and amount {$amount}",
@@ -328,6 +342,8 @@ class WC_Straumur_API {
 		$result   = $this->send_request( $endpoint, $body );
 
 		if ( isset( $result['resultCode'] ) && 'Authorised' === $result['resultCode'] ) {
+			// Process and normalize payment references for future operations like refunds
+			$result = $this->normalize_payment_references( $result, $reference );
 			$this->log( "Token payment authorised for reference {$reference}", 'info' );
 		} elseif ( isset( $result['resultCode'] ) && 'RedirectShopper' === $result['resultCode'] ) {
 			$this->log( "Token payment requires redirect for reference {$reference}", 'info' );
@@ -338,43 +354,51 @@ class WC_Straumur_API {
 			);
 		}
 
-		return is_array( $result ) ? $result : [];
+		return is_array( $result ) ? $result : array();
 	}
 
 	/**
-	 * Send an API request to Straumur.
+	 * Common function to send an API request to Straumur.
 	 *
-	 * @since 1.0.0
-	 *
-	 * @param string $endpoint API endpoint relative to base URL.
-	 * @param array  $body     Request payload.
-	 * @param string $method   HTTP method to use (default: POST).
-	 * @return array|false Decoded response on success, false on failure.
+	 * @param string $endpoint
+	 * @param array  $body
+	 * @param string $method
+	 * @return array|false
 	 */
-	private function send_request( string $endpoint, array $body = [], string $method = 'POST' ) {
-		$url  = $this->base_url . $endpoint;
-		$args = [
+	private function send_request( string $endpoint, array $body = array(), string $method = 'POST' ) {
+		$url = $this->base_url . $endpoint;
+
+		$args = array(
 			'headers' => $this->get_request_headers(),
-			'body'    => wp_json_encode( $body ),
 			'method'  => $method,
 			'timeout' => $this->timeout,
-		];
+		);
 
-		// Log the outgoing request details (headers, body).
+		if ( 'GET' === $method && ! empty( $body ) ) {
+			// Construct query string for GET requests
+			$url                             = add_query_arg( $body, $url );
+			$args['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
+		} elseif ( 'POST' === $method && ! empty( $body ) ) {
+			// Encode body as JSON for POST requests
+			$args['body'] = wp_json_encode( $body );
+		}
+
+		// Log outgoing request
 		$this->log(
 			wp_json_encode(
-				[
-					'straumur_request' => [
+				array(
+					'straumur_request' => array(
 						'method'  => $method,
 						'url'     => $url,
 						'headers' => $args['headers'],
 						'body'    => $body,
-					],
-				]
+					),
+				)
 			),
 			'info'
 		);
 
+		// Execute request
 		$response = wp_remote_request( $url, $args );
 
 		return $this->handle_response( $response, $url );
@@ -393,12 +417,12 @@ class WC_Straumur_API {
 		if ( is_wp_error( $response ) ) {
 			$this->log(
 				wp_json_encode(
-					[
-						'straumur_response' => [
+					array(
+						'straumur_response' => array(
 							'url'   => $url,
 							'error' => $response->get_error_message(),
-						],
-					]
+						),
+					)
 				),
 				'error'
 			);
@@ -410,13 +434,13 @@ class WC_Straumur_API {
 
 		$this->log(
 			wp_json_encode(
-				[
-					'straumur_response' => [
+				array(
+					'straumur_response' => array(
 						'url'  => $url,
 						'code' => $response_code,
 						'body' => $response_body,
-					],
-				]
+					),
+				)
 			),
 			'info'
 		);
@@ -446,10 +470,55 @@ class WC_Straumur_API {
 	 * @return array Associative array of headers.
 	 */
 	private function get_request_headers(): array {
-		return [
+		return array(
 			'Content-Type' => 'application/json',
 			'X-API-key'    => $this->api_key,
-		];
+		);
+	}
+
+	/**
+	 * Normalize payment references in the API response.
+	 *
+	 * This function ensures that payfacReference is available in the response,
+	 * which is required for refunding subscription payments.
+	 *
+	 * @since 1.1.0
+	 *
+	 * @param array  $response  The API response.
+	 * @param string $reference The merchant reference.
+	 * @return array The normalized response.
+	 */
+	private function normalize_payment_references( array $response, string $reference ): array {
+		// Some API responses use pspReference instead of payfacReference
+		if ( ! isset( $response['payfacReference'] ) && isset( $response['pspReference'] ) ) {
+			$response['payfacReference'] = $response['pspReference'];
+			$this->log(
+				"Normalized pspReference to payfacReference ({$response['payfacReference']}) for reference {$reference}",
+				'info'
+			);
+		}
+
+		if ( ! isset( $response['payfacReference'] ) && isset( $response['additionalData']['payfacReference'] ) ) {
+			$response['payfacReference'] = $response['additionalData']['payfacReference'];
+			$this->log(
+				"Extracted payfacReference ({$response['payfacReference']}) from additionalData for reference {$reference}",
+				'info'
+			);
+		}
+
+		if ( isset( $response['payfacReference'] ) ) {
+			$this->log(
+				"Payment has payfacReference: {$response['payfacReference']} for merchant reference {$reference}",
+				'info'
+			);
+		} else {
+			$this->log(
+				"No payfacReference found in response for reference {$reference}. Refunds may not be possible.",
+				'warning'
+			);
+		}
+
+		return $response;
 	}
 
 	/**
@@ -466,7 +535,6 @@ class WC_Straumur_API {
 			if ( method_exists( $this->logger, $level ) ) {
 				$this->logger->{$level}( $message, $this->context );
 			} else {
-				// Fallback if the logger lacks the specified method.
 				$this->logger->info( $message, $this->context );
 			}
 		}
