@@ -57,7 +57,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->method_title       = esc_html__( 'Straumur Payments', 'straumur-payments-for-woocommerce' );
 		$this->method_description = esc_html__( 'Accept payments via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce' );
 		$this->has_fields         = false;
-		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-128x128.png';
+		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-28x28.png';
 
 		$this->supports = array(
 			'products',
