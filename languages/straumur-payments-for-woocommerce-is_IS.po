@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/straumur-payments-for-woocommerce\n"
-"POT-Creation-Date: 2025-03-20T13:07:29+00:00\n"
-"PO-Revision-Date: 2025-03-24 09:30+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
-"Language: is_IS\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-03-20T13:07:29+00:00\n"
+"PO-Revision-Date: 2025-03-24 09:30+0000\n"
+"Language: is_IS\n"
 "X-Generator: Poedit 3.5\n"
 
 #. Plugin Name of the plugin
@@ -37,256 +37,251 @@ msgstr "Straumur"
 msgid "https://straumur.is"
 msgstr "https://straumur.is"
 
-#: includes/class-wc-straumur-order-handler.php:54 includes/class-wc-straumur-order-handler.php:94 includes/class-wc-straumur-order-handler.php:133
-#: includes/class-wc-straumur-payment-gateway.php:259
+#: includes/class-wc-straumur-order-handler.php:57
+#: includes/class-wc-straumur-order-handler.php:97
+#: includes/class-wc-straumur-order-handler.php:136
+#: includes/class-wc-straumur-payment-gateway.php:169
 msgid "Invalid order."
 msgstr "Ógild pöntun."
 
-#: includes/class-wc-straumur-order-handler.php:58 includes/class-wc-straumur-order-handler.php:98 includes/class-wc-straumur-order-handler.php:138
+#: includes/class-wc-straumur-order-handler.php:61
+#: includes/class-wc-straumur-order-handler.php:101
+#: includes/class-wc-straumur-order-handler.php:141
 msgid "Order not paid with Straumur."
 msgstr "Pöntun ekki greidd í gegnum Straum."
 
-#: includes/class-wc-straumur-order-handler.php:65
+#: includes/class-wc-straumur-order-handler.php:68
 msgid "Cannot cancel: missing payment references."
 msgstr "Get ekki hætt við:  vantar tilvísunarnúmer greiðslu."
 
-#: includes/class-wc-straumur-order-handler.php:77
+#: includes/class-wc-straumur-order-handler.php:80
 msgid "Straumur payment cancellation request sent"
 msgstr "Beiðni um að hætta við greiðslu send til Straums"
 
-#: includes/class-wc-straumur-order-handler.php:82
+#: includes/class-wc-straumur-order-handler.php:85
 msgid "Failed to send cancellation request to Straumur."
 msgstr "Tókst ekki að senda beiðni um að hætta við greiðslu til Straums."
 
-#: includes/class-wc-straumur-order-handler.php:104
+#: includes/class-wc-straumur-order-handler.php:107
 msgid "Cannot capture: missing payment references."
 msgstr "Get ekki staðfest greiðslu:  Vantar tilvísunarnúmer greiðslu."
 
-#: includes/class-wc-straumur-order-handler.php:116
+#: includes/class-wc-straumur-order-handler.php:119
 msgid "Straumur payment capture request sent"
 msgstr "Beiðni um staðfestingu á greiðslu send til Straums"
 
-#: includes/class-wc-straumur-order-handler.php:121
+#: includes/class-wc-straumur-order-handler.php:124
 msgid "Failed to send capture request to Straumur."
 msgstr "Tókst ekki að senda beiðni um staðfestingu á greiðslu til Straums."
 
-#: includes/class-wc-straumur-order-handler.php:145
+#: includes/class-wc-straumur-order-handler.php:148
 msgid "Cannot refund: missing payment references."
 msgstr "Get ekki endurgreitt:  vantar tilvísunarnúmer greiðslu."
 
-#: includes/class-wc-straumur-order-handler.php:158
+#: includes/class-wc-straumur-order-handler.php:161
 msgid "Straumur refund request has been sent to Straumur."
 msgstr "Endurgreiðslubeiðni send til Straums."
 
-#: includes/class-wc-straumur-order-handler.php:164
+#: includes/class-wc-straumur-order-handler.php:183
 msgid "Failed to send refund request to Straumur."
 msgstr "Tókst ekki að senda endurgreiðslubeiðni til Straums."
 
-#: includes/class-wc-straumur-payment-gateway.php:125 includes/class-wc-straumur-settings.php:77 includes/class-wc-straumur-settings.php:254
+#: includes/class-wc-straumur-payment-gateway.php:57
+#: includes/class-wc-straumur-settings.php:80
+#: includes/class-wc-straumur-settings.php:262
 msgid "Straumur Payments"
 msgstr "Straumur Payments"
 
-#: includes/class-wc-straumur-payment-gateway.php:126
+#: includes/class-wc-straumur-payment-gateway.php:58
 msgid "Accept payments via Straumur Hosted Checkout."
 msgstr "Takið á móti greiðslum með Greiðslusíðu Straums."
 
-#: includes/class-wc-straumur-payment-gateway.php:310
+#: includes/class-wc-straumur-payment-gateway.php:223
 msgid "Payment error: Unable to initiate payment session."
 msgstr "Greiðsluvilla:  Tókst ekki að setja upp greiðslulotu."
 
-#: includes/class-wc-straumur-payment-gateway.php:463
+#: includes/class-wc-straumur-payment-gateway.php:453
 msgid "Nonce verification failed."
 msgstr "Nonce staðfesting tókst ekki."
 
-#: includes/class-wc-straumur-payment-gateway.php:500
-msgid "There was an issue retrieving your payment status. Please try again."
-msgstr "Vandamál kom upp við að sækja stöðu greiðslu. Vinsamlegast reyndu aftur."
-
-#: includes/class-wc-straumur-payment-gateway.php:517
-msgid "Payment pending, awaiting payment confirmation. Straumur Reference: %s"
-msgstr "Greiðsla á bið, bíð eftir staðfestingu frá webhook. Payfac ref: %s"
-
-#: includes/class-wc-straumur-payment-gateway.php:523
-msgid "Thank you for your order! Your payment is currently being processed."
-msgstr "Takk fyrir pöntunina! Greiðslan þín er í vinnslu."
-
-#: includes/class-wc-straumur-payment-gateway.php:538
+#: includes/class-wc-straumur-payment-gateway.php:510
 msgid "Your payment session was not completed. Please try again."
 msgstr "Greiðslulotan var ekki kláruð. Vinsamlegast reyndu aftur."
 
-#: includes/class-wc-straumur-settings.php:57
+#: includes/class-wc-straumur-settings.php:60
 msgid "Enable/Disable"
 msgstr "Virkja/Afvirkja"
 
-#: includes/class-wc-straumur-settings.php:59
+#: includes/class-wc-straumur-settings.php:62
 msgid "Enable Straumur Payments"
 msgstr "Virkja Straums greiðslur"
 
-#: includes/class-wc-straumur-settings.php:63
+#: includes/class-wc-straumur-settings.php:66
 msgid "Test Mode"
 msgstr "Prófunarhamur"
 
-#: includes/class-wc-straumur-settings.php:65
+#: includes/class-wc-straumur-settings.php:68
 msgid "Enable Test Mode"
 msgstr "Virkja prófunarham"
 
-#: includes/class-wc-straumur-settings.php:67
+#: includes/class-wc-straumur-settings.php:70
 msgid "If enabled, the gateway will use the sandbox URL."
 msgstr "Ef virkjað, þá mun viðbótin einungis nota prófunarslóð Straums."
 
-#: includes/class-wc-straumur-settings.php:71
+#: includes/class-wc-straumur-settings.php:74
 msgid "Title"
 msgstr "Titill"
 
-#: includes/class-wc-straumur-settings.php:73
+#: includes/class-wc-straumur-settings.php:76
 msgid "This controls the title which the user sees during checkout."
 msgstr "Þetta gildi stýrir hvaða titil notendur sjá í greiðsluferlinu."
 
-#: includes/class-wc-straumur-settings.php:81
+#: includes/class-wc-straumur-settings.php:84
 msgid "Description"
 msgstr "Lýsing"
 
-#: includes/class-wc-straumur-settings.php:83
+#: includes/class-wc-straumur-settings.php:86
 msgid "This controls the description which the user sees during checkout."
 msgstr "Þetta gildi stýrir hvaða lýsingu notendur sjá í greiðsluferlinu."
 
-#: includes/class-wc-straumur-settings.php:87
+#: includes/class-wc-straumur-settings.php:90
 msgid "Pay via Straumur Hosted Checkout."
 msgstr "Greiðslur í gegnum Greiðslusíðu Straums."
 
-#: includes/class-wc-straumur-settings.php:91
+#: includes/class-wc-straumur-settings.php:94
 msgid "Theme key"
 msgstr "Þemalykill"
 
-#: includes/class-wc-straumur-settings.php:93
+#: includes/class-wc-straumur-settings.php:96
 msgid "Theme key, logo colors, etc."
 msgstr "Þemalykill, lógó litir o.fl."
 
-#: includes/class-wc-straumur-settings.php:98
+#: includes/class-wc-straumur-settings.php:101
 msgid "Authorize Only (Manual Capture)"
 msgstr "Einungis heimild (Handvirk staðfesting)"
 
-#: includes/class-wc-straumur-settings.php:100
+#: includes/class-wc-straumur-settings.php:103
 msgid "Enable authorize only mode. Payments will require manual capture."
 msgstr "Virkja heimildarham.  Handvirkt þarf að staðfesta greiðslur."
 
-#: includes/class-wc-straumur-settings.php:102
+#: includes/class-wc-straumur-settings.php:105
 msgid "If enabled, payments will be authorized but not captured automatically."
 msgstr "Ef það er virkt verða greiðslur heimilaðar en ekki teknar sjálfkrafa."
 
-#: includes/class-wc-straumur-settings.php:106
+#: includes/class-wc-straumur-settings.php:109
 msgid "Mark Order as Completed"
 msgstr "Merkja pöntun sem lokið"
 
-#: includes/class-wc-straumur-settings.php:108
+#: includes/class-wc-straumur-settings.php:111
 msgid "If enabled, orders will be marked as Completed after a successful payment instead of Processing."
 msgstr "Ef virkjað, verða pantanir merktar sem lokið eftir að greiðsla hefur gengið í gegn í stað þess að vera merktar sem í vinnslu."
 
-#: includes/class-wc-straumur-settings.php:115
+#: includes/class-wc-straumur-settings.php:118
 msgid "Send cart items"
 msgstr "Senda inn hluti í körfu"
 
-#: includes/class-wc-straumur-settings.php:117
+#: includes/class-wc-straumur-settings.php:120
 msgid "Send cart items to the checkout page. Disable if using incompatible plugins."
 msgstr "Senda inn hluti í körfu inn á greiðslusíðu Straums.  Afvirkið ef verið er að nota ósamhæfar viðbótir."
 
-#: includes/class-wc-straumur-settings.php:126
+#: includes/class-wc-straumur-settings.php:128
 msgid "Checkout Expiry (hours)"
 msgstr "Tímamörk greiðsluferlis (klst)"
 
-#: includes/class-wc-straumur-settings.php:130
+#: includes/class-wc-straumur-settings.php:132
 msgid "5 minutes"
 msgstr "5 mínútur"
 
-#: includes/class-wc-straumur-settings.php:131
+#: includes/class-wc-straumur-settings.php:133
 msgid "10 minutes"
 msgstr "10 mínútur"
 
-#: includes/class-wc-straumur-settings.php:132
+#: includes/class-wc-straumur-settings.php:134
 msgid "15 minutes"
 msgstr "15 mínútur"
 
-#: includes/class-wc-straumur-settings.php:133
+#: includes/class-wc-straumur-settings.php:135
 msgid "30 minutes"
 msgstr "30 mínútur"
 
-#: includes/class-wc-straumur-settings.php:134
+#: includes/class-wc-straumur-settings.php:136
 msgid "1 hour"
 msgstr "1 klukkustund"
 
-#: includes/class-wc-straumur-settings.php:135
+#: includes/class-wc-straumur-settings.php:137
 msgid "2 hours"
 msgstr "2 klukkustundir"
 
-#: includes/class-wc-straumur-settings.php:136
+#: includes/class-wc-straumur-settings.php:138
 msgid "4 hours"
 msgstr "4 klukkustundir"
 
-#: includes/class-wc-straumur-settings.php:137
+#: includes/class-wc-straumur-settings.php:139
 msgid "6 hours"
 msgstr "6 klukkustundir"
 
-#: includes/class-wc-straumur-settings.php:138
+#: includes/class-wc-straumur-settings.php:140
 msgid "12 hours"
 msgstr "12 klukkustundir"
 
-#: includes/class-wc-straumur-settings.php:139
+#: includes/class-wc-straumur-settings.php:141
 msgid "24 hours"
 msgstr "24 klukkustundir"
 
-#: includes/class-wc-straumur-settings.php:141
+#: includes/class-wc-straumur-settings.php:143
 msgid "How long before checkout sessions expire (approx)."
 msgstr "Hversu lengi greiðsluferli gildir áður en það rennur út (um það bil)."
 
-#: includes/class-wc-straumur-settings.php:145
+#: includes/class-wc-straumur-settings.php:147
 msgid "Abandon URL"
 msgstr "Slóð fyrir yfirgefna greiðslu"
 
-#: includes/class-wc-straumur-settings.php:147
+#: includes/class-wc-straumur-settings.php:149
 msgid "Optional URL to redirect shoppers if they cancel or abandon the payment page."
 msgstr "Valfrjáls slóð sem notandinn er sendur á ef hann hættir við eða yfirgefur greiðslusíðuna."
 
-#: includes/class-wc-straumur-settings.php:152
+#: includes/class-wc-straumur-settings.php:154
 msgid "Custom Success URL"
 msgstr "Sérsniðin slóð á Greiðsla tókst síðu"
 
-#: includes/class-wc-straumur-settings.php:154
+#: includes/class-wc-straumur-settings.php:156
 msgid "Optional URL to redirect shoppers after a successful payment. If left empty, the default WooCommerce thank-you page is used."
 msgstr "Valfrjáls slóð sem notandinn er sendur á eftir að greiðsla hefur gengið í gegn. Ef skilið eftir tómt, þá er sjálfgefna þakkarsíða WooCommerce notuð."
 
-#: includes/class-wc-straumur-settings.php:159
+#: includes/class-wc-straumur-settings.php:161
 msgid "Payment Page Terminal Identifier"
 msgstr "Auðkenni útstöðvar fyrir greiðslusíðu"
 
-#: includes/class-wc-straumur-settings.php:161 includes/class-wc-straumur-settings.php:168
+#: includes/class-wc-straumur-settings.php:163
+#: includes/class-wc-straumur-settings.php:170
 msgid "The Terminal Identifier provided by Straumur."
 msgstr "Auðkenni útstöðvar er fengið frá Straum."
 
-#: includes/class-wc-straumur-settings.php:166
+#: includes/class-wc-straumur-settings.php:168
 msgid "Payment Gateway Terminal Identifier"
 msgstr "Auðkenni útstöðvar fyrir greiðslugátt"
 
-#: includes/class-wc-straumur-settings.php:173
+#: includes/class-wc-straumur-settings.php:175
 msgid "API Key"
 msgstr "API Lykill"
 
-#: includes/class-wc-straumur-settings.php:175
+#: includes/class-wc-straumur-settings.php:177
 msgid "The API Key provided by Straumur."
 msgstr "API lykilinn er fenginn frá Straum."
 
-#: includes/class-wc-straumur-settings.php:180
+#: includes/class-wc-straumur-settings.php:182
 msgid "HMAC Key"
 msgstr "HMAC lykill"
 
-#: includes/class-wc-straumur-settings.php:182
+#: includes/class-wc-straumur-settings.php:184
 msgid "Your HMAC secret key used to validate incoming webhooks."
 msgstr "HMAC lykilinn þinn er notaður til að sannreyna móttekna vefkróka."
 
-#: includes/class-wc-straumur-settings.php:187
+#: includes/class-wc-straumur-settings.php:189
 msgid "Webhook URL"
 msgstr "Webhook URL"
 
-#: includes/class-wc-straumur-settings.php:189
+#: includes/class-wc-straumur-settings.php:191
 msgid "Use this URL in your Straumur dashboard to configure webhooks. Click the field to select all."
 msgstr "Notið þessa slóð á þjónustuvef Straums þar sem við á.  Smellið á slóðina til að velja hana."
 
@@ -294,145 +289,206 @@ msgstr "Notið þessa slóð á þjónustuvef Straums þar sem við á.  Smelli�
 msgid "Production URL is required when Test Mode is disabled."
 msgstr "Slóð á raunumhverfi er nauðsynleg þegar prófunarhamur er afvirkjaður."
 
-#: includes/class-wc-straumur-settings.php:260
+#: includes/class-wc-straumur-settings.php:273
 msgid "Pay securely using Straumur hosted checkout."
 msgstr "Öruggar greiðslur í gegnum Greiðslusíðu Straums."
 
-#: includes/class-wc-straumur-webhook-handler.php:51
-msgid "Invalid JSON."
-msgstr "Ógilt JSON."
-
-#: includes/class-wc-straumur-webhook-handler.php:56
-msgid "No hmacSignature provided."
-msgstr "Engin hmacSignature veitt."
-
-#: includes/class-wc-straumur-webhook-handler.php:85
+#: includes/class-wc-straumur-webhook-handler.php:291
 msgid "Transaction failed"
 msgstr "Greiðsla mistókst"
 
-#: includes/class-wc-straumur-webhook-handler.php:89
+#: includes/class-wc-straumur-webhook-handler.php:297
 msgid "Payment declined: The card was refused (declined)."
 msgstr "Greiðslu hafnað: Kortið var hafnað."
 
-#: includes/class-wc-straumur-webhook-handler.php:91
+#: includes/class-wc-straumur-webhook-handler.php:299
 msgid "Payment failed: The card has expired."
 msgstr "Greiðsla mistókst: Kortið er útrunnið."
 
-#: includes/class-wc-straumur-webhook-handler.php:93
+#: includes/class-wc-straumur-webhook-handler.php:301
 msgid "Payment failed: 3D Secure verification failed."
 msgstr "Greiðsla mistókst: 3D Secure auðkenning tókst ekki."
 
-#: includes/class-wc-straumur-webhook-handler.php:97
+#. translators: 1: event type, 2: reason text, 3: payfac reference
+#: includes/class-wc-straumur-webhook-handler.php:306
 msgid "Straumur %1$s failed: %2$s. Reference: %3$s"
 msgstr "Straumur Webhook: payfacReference: %s"
 
-#: includes/class-wc-straumur-webhook-handler.php:112
+#: includes/class-wc-straumur-webhook-handler.php:347
 msgid "No merchantReference or invalid."
 msgstr "Vantar eða ógildur kaupanda tilvísunarkóði (merchantReference)."
 
-#: includes/class-wc-straumur-webhook-handler.php:117
+#. translators: %d: order ID
+#: includes/class-wc-straumur-webhook-handler.php:361
 msgid "No order found for merchantReference: %d"
 msgstr "Engin pöntun fannst með kaupanda tilvísunarkóða: %d"
 
-#: includes/class-wc-straumur-webhook-handler.php:190 includes/class-wc-straumur-webhook-handler.php:231
+#: includes/class-wc-straumur-webhook-handler.php:474
+#: includes/class-wc-straumur-webhook-handler.php:713
 msgid "verified by 3D Secure"
 msgstr "staðfest af 3D Secure"
 
-#: includes/class-wc-straumur-webhook-handler.php:191 includes/class-wc-straumur-webhook-handler.php:232
+#: includes/class-wc-straumur-webhook-handler.php:475
+#: includes/class-wc-straumur-webhook-handler.php:714
 msgid "not verified by 3D Secure"
 msgstr "ekki staðfest af 3D Secure"
 
-#: includes/class-wc-straumur-webhook-handler.php:196
-msgid "Straumur authorization ignored: order already in paid status."
-msgstr ""
-
-#: includes/class-wc-straumur-webhook-handler.php:213
+#. translators: %s: formatted refund or cancellation amount
+#: includes/class-wc-straumur-webhook-handler.php:586
 msgid "Straumur refund/cancellation %s (unknown type)"
 msgstr "Beiðni um að hætta við greiðslu send til Straums"
 
-#: includes/class-wc-straumur-webhook-handler.php:221
-msgid "Straumur capture ignored: order already in paid status."
-msgstr ""
-
-#: includes/class-wc-straumur-webhook-handler.php:234
+#. translators: 1: last four digits of the card, 2: 3D Secure status text, 3: authorization code
+#: includes/class-wc-straumur-webhook-handler.php:718
 msgid "Card ending in %1$s has been saved for automatic subscription payments, %2$s (Auth code: %3$s)."
 msgstr "Kort með endinguna %1$s hefur verið vistað fyrir áskriftargreiðslu, %2$s (Auth code: %3$s)."
 
-#: includes/class-wc-straumur-webhook-handler.php:243
-msgid "Unknown Straumur event type received."
-msgstr "Óþekkt event type móttekin frá Straum."
-
-#: includes/class-wc-straumur-webhook-handler.php:275
+#: includes/class-wc-straumur-webhook-handler.php:967
 msgid "N/A"
 msgstr "Ekki tiltækt"
 
-#: includes/class-wc-straumur-webhook-handler.php:300
+#. translators: 1: authorized amount, 2: masked card number, 3: 3D Secure text, 4: auth code
+#: includes/class-wc-straumur-webhook-handler.php:520
 msgid "%1$s was authorized to card %2$s, %3$s. Auth code: %4$s. Payment captured automatically."
 msgstr ""
 
-#: includes/class-wc-straumur-webhook-handler.php:317
+#. translators: 1: authorized amount, 2: masked card number, 3: 3D Secure text, 4: auth code
+#: includes/class-wc-straumur-webhook-handler.php:552
 msgid "%1$s was authorized to card %2$s, %3$s. Auth code: %4$s. Awaiting manual capture."
 msgstr ""
 
-#: includes/class-wc-straumur-webhook-handler.php:328
+#. translators: 1: captured amount, 2: payfac reference ID
+#: includes/class-wc-straumur-webhook-handler.php:672
 msgid "Manual capture completed for %1$s via Straumur (reference: %2$s)."
 msgstr "Handvirk staðfesting greðslu fyrir %1$s gegnum Straumur (reference: %2$s)."
 
-#: includes/class-wc-straumur-webhook-handler.php:337
+#. translators: %s: payfac reference
+#: includes/class-wc-straumur-webhook-handler.php:641
 msgid "Cancellation confirmed by Straumur. Reference: %s."
 msgstr "Greiðsla staðfest af Straum með webhook."
 
-#: includes/class-wc-straumur-webhook-handler.php:346
+#. translators: 1: refunded amount, 2: payfac reference ID
+#: includes/class-wc-straumur-webhook-handler.php:609
 msgid "A refund amount of %1$s has been processed by Straumur. Reference: %2$s."
 msgstr "Endurgreiðsla að upphæð %1$s hefur verið afgreidd af Straum. Reference: %2$s."
 
-#: includes/class-wc-straumur-webhook-handler.php:357
+#: includes/class-wc-straumur-webhook-handler.php:992
 msgid "No HMAC secret configured in settings."
 msgstr "Enginn HMAC leynilykill skilgreindur í stillingum."
 
-#: includes/class-wc-straumur-webhook-handler.php:372
+#: includes/class-wc-straumur-webhook-handler.php:1022
 msgid "Invalid HMAC key configured in settings."
 msgstr "Ógildur HMAC lykill skilgreindur í stillingum."
 
-#: straumur-payments-for-woocommerce.php:54
+#: straumur-payments-for-woocommerce.php:53
 msgid "Straumur Payments for WooCommerce requires WooCommerce to be installed and active."
 msgstr "Til að nota Straumur payments for WooCommerce  viðbótina þarf WooCommerce að vera uppsett á virkt."
 
-#: straumur-payments-for-woocommerce.php:179
+#: straumur-payments-for-woocommerce.php:323
 msgid "Settings"
 msgstr "Stillingar"
 
-#: straumur-payments-for-woocommerce.php:197
+#: straumur-payments-for-woocommerce.php:342
 msgid "Documentation"
 msgstr "Skjölun"
 
-#: straumur-payments-for-woocommerce.php:198
+#: straumur-payments-for-woocommerce.php:344
 msgid "Support"
 msgstr "Aðstoð"
 
-#~ msgid "https://straumur.is/payments-plugin"
-#~ msgstr "https://straumur.is/payments-plugin"
+#: includes/class-wc-straumur-order-handler.php:172
+msgid "Subscription cancelled due to refunded payment."
+msgstr "Áskrift óvirkjuð eftir endurgreiðslu"
 
-#~ msgid "Straumur Payment"
-#~ msgstr "Straumur Payment"
+#: includes/class-wc-straumur-payment-gateway.php:142
+msgid "Delivery"
+msgstr "Afhending"
 
-#~ msgid "Payment error: "
-#~ msgstr "Greiðsluvilla: "
+#: includes/class-wc-straumur-payment-gateway.php:355
+#: includes/class-wc-straumur-payment-gateway.php:360
+msgid "Subscription renewal authorized via token payment."
+msgstr "Áskrift endurnýjuð með skuldfærslu á greiðslukort"
 
-#~ msgid "Enable Straumur Gateway"
-#~ msgstr "Virkja Straumur Gateway"
+#. translators: %s: redirect URL for additional payment steps.
+#: includes/class-wc-straumur-payment-gateway.php:375
+msgid "Subscription renewal requires redirect: %s"
+msgstr "Skuldfærsla gekk ekki"
 
-#~ msgid "Pay securely using Straumur."
-#~ msgstr "Öruggar greiðslur með Straum."
+#: includes/class-wc-straumur-payment-gateway.php:391
+msgid "Token payment failed."
+msgstr "Skuldfærsla gekk ekki"
 
-#~ msgid "Production URL"
-#~ msgstr "Slóð á raunumhverfi"
+#: includes/class-wc-straumur-payment-gateway.php:484
+msgid "Unable to verify payment status. Please try again."
+msgstr ""
 
-#~ msgid "The Production URL provided by Straumur."
-#~ msgstr "Slóð á raunumhverfi gefið upp af Straum."
+#: includes/class-wc-straumur-payment-gateway.php:498
+msgid "Thank you for your order! Your payment is being processed."
+msgstr "Takk fyrir pöntunina, greiðslustaðfesting er í vinnslu"
 
-#~ msgid "Straumur Webhook: Received %1$s %2$s. Event Type: %3$s"
-#~ msgstr "Straumur Webhook móttekinn %1$s %2$s. Event Type: %3$s"
+#: includes/class-wc-straumur-webhook-handler.php:112
+#: includes/class-wc-straumur-webhook-handler.php:115
+msgid "Invalid JSON payload."
+msgstr ""
 
-#~ msgid "Payment cancelled."
-#~ msgstr "Hætt við greiðslu."
+#. translators: %s: field name
+#: includes/class-wc-straumur-webhook-handler.php:127
+#: includes/class-wc-straumur-webhook-handler.php:135
+msgid "Required field missing: %s."
+msgstr "Nauðsynlegar upplýsingar vantar: %s."
+
+#: includes/class-wc-straumur-webhook-handler.php:151
+msgid "Invalid HMAC signature."
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:204
+msgid "Failed payment processed successfully."
+msgstr "Greiðsla tókst ekki"
+
+#: includes/class-wc-straumur-webhook-handler.php:224
+msgid "Webhook processed successfully."
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:237
+msgid "Error processing webhook."
+msgstr "Ekki gekk að vinna webhook"
+
+#: includes/class-wc-straumur-webhook-handler.php:264
+msgid "Invalid or missing order ID in failed webhook."
+msgstr ""
+
+#: includes/class-wc-straumur-webhook-handler.php:267
+#: includes/class-wc-straumur-webhook-handler.php:350
+msgid "Invalid or missing order ID."
+msgstr ""
+
+#. translators: %d: order ID
+#: includes/class-wc-straumur-webhook-handler.php:278
+msgid "Order %d not found for failed webhook."
+msgstr "Pöntun fannst ekki við greiðslustaðfestingu"
+
+#: includes/class-wc-straumur-webhook-handler.php:284
+#: includes/class-wc-straumur-webhook-handler.php:367
+msgid "Order not found."
+msgstr "Pöntun fannst ekki"
+
+#. translators: %s: event type
+#: includes/class-wc-straumur-webhook-handler.php:432
+msgid "Unknown Straumur event type received: %s."
+msgstr "Villa frá Straumi "
+
+#: includes/class-wc-straumur-webhook-handler.php:746
+msgid "Token value is missing in tokenization event."
+msgstr "Sýndarkort vantar"
+
+#: includes/class-wc-straumur-webhook-handler.php:832
+msgid "Error saving payment token."
+msgstr "Ekki gekk að vist greiðslukort"
+
+#: includes/class-wc-straumur-webhook-handler.php:998
+msgid "Invalid HMAC key format. Must be a hexadecimal string."
+msgstr "HMAC kenni ekki á réttu formi"
+
+#: includes/class-wc-straumur-webhook-handler.php:1035
+msgid "HMAC signature validation failed."
+msgstr "HMAC auðkenning gekk ekki"

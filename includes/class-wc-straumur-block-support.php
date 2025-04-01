@@ -42,7 +42,6 @@ class WC_Straumur_Block_Support extends AbstractPaymentMethodType {
 	 * Implement required method from IntegrationInterface.
 	 */
 	public function initialize() {
-		// No-op if not needed.
 	}
 
 	public function get_name(): string {
