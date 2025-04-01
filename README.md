@@ -2,8 +2,7 @@ Straumur WooCommerce Plugin
 
 Source control for Straumur's WooCommerce plugin.
 
-More information about Wordpress plugin development can be found in the Plugin Handbook. WooCommerce plugin guide can be found here.
-
+More information about WordPress plugin development can be found in the Plugin Handbook. WooCommerce plugin guide can be found here.
 Guide for New Developers Working on the WooCommerce Plugin
 
 Welcome to the WooCommerce development team! This guide will walk you through the essential steps to start working on the WooCommerce plugin, including cloning the GitHub repository, installing the plugin locally, and updating the WordPress.org SVN repository.
