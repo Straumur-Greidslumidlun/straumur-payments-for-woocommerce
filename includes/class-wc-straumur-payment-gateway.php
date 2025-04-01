@@ -12,6 +12,7 @@
  * @package Straumur\Payments
  * @since   1.0.0
  */
+
 declare(strict_types=1);
 
 namespace Straumur\Payments;
@@ -47,7 +48,6 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 	private string $abandon_url;
 	private string $custom_success_url;
 
-
 	private array $context = array( 'source' => 'straumur' );
 
 	public function __construct() {
@@ -59,7 +59,20 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->has_fields         = false;
 		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-128x128.png';
 
-		$this->supports = array( 'products', 'subscriptions', 'wc-blocks', 'wc-orders', 'subscription_cancellation', 'subscription_suspension', 'subscription_reactivation', 'subscription_amount_changes', 'subscription_payment_method_change_customer', 'subscription_payment_method_change_admin', 'subscription_date_changes', 'multiple_subscriptions' );
+		$this->supports = array(
+			'products',
+			'subscriptions',
+			'wc-blocks',
+			'wc-orders',
+			'subscription_cancellation',
+			'subscription_suspension',
+			'subscription_reactivation',
+			'subscription_amount_changes',
+			'subscription_payment_method_change_customer',
+			'subscription_payment_method_change_admin',
+			'subscription_date_changes',
+			'multiple_subscriptions',
+		);
 
 		$this->init_form_fields();
 		$this->init_settings_values();
@@ -88,6 +101,17 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->send_items                  = WC_Straumur_Settings::send_items();
 		$this->abandon_url                 = WC_Straumur_Settings::get_abandon_url();
 		$this->custom_success_url          = WC_Straumur_Settings::get_custom_success_url();
+	}
+
+	/**
+	 * Returns an instance of the Straumur API class.
+	 *
+	 * @return WC_Straumur_API
+	 */
+	private function get_api(): WC_Straumur_API {
+		// ADDED
+		// Pass $this->authorize_only if you need manual-capture logic at the API level:
+		return new WC_Straumur_API( $this->authorize_only );
 	}
 
 	private function is_subscription_renewal_checkout( int $order_id ): bool {
@@ -129,16 +153,15 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		return $items;
 	}
 
-
 	/**
-		 * Handle the payment process and return a redirect URL to Straumur's hosted checkout.
-		 *
-		 * @since 1.0.0
-		 *
-		 * @param int $order_id The WooCommerce order ID.
-		 *
-		 * @return array|WP_Error
-		 */
+	 * Handle the payment process and return a redirect URL to Straumur's hosted checkout.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param int $order_id The WooCommerce order ID.
+	 *
+	 * @return array|WP_Error
+	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
@@ -151,6 +174,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			return array( 'result' => 'failure' );
 		}
 
+		// Use get_api() to obtain the API instance
 		$api = $this->get_api();
 
 		$order->update_meta_data( '_straumur_is_manual_capture', $this->authorize_only ? 'yes' : 'no' );
@@ -281,7 +305,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			home_url( '/' )
 		);
 
-		// Process token payment via API.
+		// Process token payment via API (uses get_api()).
 		$api      = $this->get_api();
 		$response = $api->process_token_payment(
 			$token_value,
@@ -376,7 +400,6 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		}
 	}
 
-
 	/**
 	 * Save the payment method (tokenization) for auto-renewals, if needed.
 	 *
@@ -408,15 +431,13 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$token->set_token( 'SAVED_TOKEN_FROM_STRAUMUR' );
 		$token->set_user_id( $order->get_user_id() );
 		$token->set_default( true );
-
-		// Always mark as subscription_only since tokens are only for subscriptions
 		$token->update_meta_data( 'subscription_only', 'yes' );
 
 		$token->save();
 	}
 
 	/**
-	 * Handle the return from Straumur's payment gateway (callback)
+	 * Handle the return from Straumur's payment gateway
 	 *
 	 * @since 1.0.0
 	 * @return void
@@ -493,20 +514,5 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			wp_safe_redirect( $checkout_url ? $checkout_url : wc_get_cart_url() );
 			exit;
 		}
-	}
-
-
-	/**
-	 * Process refund directly through the payment gateway.
-	 *
-	 * @since 2.0.1
-	 * @param int    $order_id Order ID.
-	 * @param float  $amount   Refund amount.
-	 * @param string $reason   Refund reason.
-	 * @return bool|WP_Error True on success, false or WP_Error on failure.
-	 */
-	public function process_refund( $order_id, $amount = null, $reason = '' ) {
-		$order_handler = new WC_Straumur_Order_Handler();
-		return $order_handler->handle_refund( $order_id );
 	}
 }

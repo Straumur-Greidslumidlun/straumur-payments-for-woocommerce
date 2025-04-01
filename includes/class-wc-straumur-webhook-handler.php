@@ -457,32 +457,22 @@ class WC_Straumur_Webhook_Handler {
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
 	private static function handle_authorization_event( $order, array $data, string $display_amount ) {
-		if ( self::is_order_already_paid( $order ) ) {
-			self::log_message(
-				sprintf(
-					'Straumur authorization ignored for order %d: order already paid.',
-					$order->get_id()
-				)
-			);
-			return true;
-		}
-
 		// Get payment details
 		$additional_data = isset( $data['additionalData'] ) && is_array( $data['additionalData'] )
-			? $data['additionalData'] : array();
+		? $data['additionalData'] : array();
 
 		$card_number = isset( $additional_data['cardNumber'] )
-			? sanitize_text_field( $additional_data['cardNumber'] ) : '';
+		? sanitize_text_field( $additional_data['cardNumber'] ) : '';
 
 		$auth_code = isset( $additional_data['authCode'] )
-			? sanitize_text_field( $additional_data['authCode'] ) : '';
+		? sanitize_text_field( $additional_data['authCode'] ) : '';
 
 		$three_d_auth = isset( $additional_data['threeDAuthenticated'] )
-			? sanitize_text_field( $additional_data['threeDAuthenticated'] ) : 'false';
+		? sanitize_text_field( $additional_data['threeDAuthenticated'] ) : 'false';
 
 		$three_d_text = ( 'true' === $three_d_auth )
-			? esc_html__( 'verified by 3D Secure', 'straumur-payments-for-woocommerce' )
-			: esc_html__( 'not verified by 3D Secure', 'straumur-payments-for-woocommerce' );
+		? esc_html__( 'verified by 3D Secure', 'straumur-payments-for-woocommerce' )
+		: esc_html__( 'not verified by 3D Secure', 'straumur-payments-for-woocommerce' );
 
 		// Check if manual capture is enabled
 		$manual_capture = ( 'yes' === $order->get_meta( '_straumur_is_manual_capture' ) );
@@ -677,18 +667,8 @@ class WC_Straumur_Webhook_Handler {
 	 * @return true True on success.
 	 */
 	private static function handle_capture_event( $order, string $display_amount, string $payfac_reference ): bool {
-		if ( self::is_order_already_paid( $order ) ) {
-			self::log_message(
-				sprintf(
-					'Straumur capture ignored for order %d: order already paid.',
-					$order->get_id()
-				)
-			);
-			return true;
-		}
-
 		$note = sprintf(
-			/* translators: 1: captured amount, 2: payfac reference ID */
+		/* translators: 1: captured amount, 2: payfac reference ID */
 			esc_html__( 'Manual capture completed for %1$s via Straumur (reference: %2$s).', 'straumur-payments-for-woocommerce' ),
 			esc_html( $display_amount ),
 			esc_html( $payfac_reference )
@@ -952,17 +932,7 @@ class WC_Straumur_Webhook_Handler {
 		return $sanitized;
 	}
 
-	/**
-	 * Determine if the order has already been marked paid (processing or completed).
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param \WC_Order $order The order object.
-	 * @return bool True if paid, false otherwise.
-	 */
-	private static function is_order_already_paid( $order ): bool {
-		return $order->has_status( array( 'processing', 'completed' ) );
-	}
+
 
 	/**
 	 * Conditionally mark an order as paid (processing or completed).

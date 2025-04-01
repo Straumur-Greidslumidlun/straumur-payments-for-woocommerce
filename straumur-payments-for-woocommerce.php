@@ -350,21 +350,6 @@ function straumur_payments_plugin_row_meta( array $links, string $file ): array 
 	return $links;
 }
 
-/**
- * Remove the "manual refund" note when status changes to refunded.
- *
- * This removes the note: "Order status set to refunded. To return funds to the customer
- * you will need to issue a refund through your payment gateway."
- *
- * @since 2.0.1
- * @return void
- */
-function disable_automatic_refund_note(): void {
-	remove_action( 'woocommerce_order_status_refunded', 'wc_maybe_add_manual_refund_note', 20 );
-}
-
-// Hook our disable function AFTER WooCommerce has loaded fully, with the correct namespace
-add_action( 'woocommerce_loaded', __NAMESPACE__ . '\\disable_automatic_refund_note', 99 );
 
 // Initialize the plugin after all plugins are loaded, ensuring WooCommerce is ready.
 add_action( 'plugins_loaded', __NAMESPACE__ . '\\straumur_payments_init' );

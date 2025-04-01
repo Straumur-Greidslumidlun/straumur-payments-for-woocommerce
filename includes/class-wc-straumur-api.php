@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Straumur API Class
  *
@@ -29,17 +28,19 @@ use function json_last_error_msg;
 use function is_wp_error;
 use function wp_json_encode;
 
-// Exit if accessed directly.
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
 /**
  * Class WC_Straumur_API
  *
  * @since 1.0.0
  */
 class WC_Straumur_API {
+
+	/**
+	 * Holds the singleton instance.
+	 *
+	 * @var WC_Straumur_API|null
+	 */
+	private static $instance = null;
 
 	/**
 	 * API key for authentication.
@@ -126,6 +127,18 @@ class WC_Straumur_API {
 	 * @var float
 	 */
 	private $checkout_expiry;
+
+	/**
+	 * Get the singleton instance.
+	 *
+	 * @return WC_Straumur_API
+	 */
+	public static function instance(): WC_Straumur_API {
+		if ( is_null( self::$instance ) ) {
+			self::$instance = new self();
+		}
+		return self::$instance;
+	}
 
 	/**
 	 * Constructor.
@@ -344,7 +357,6 @@ class WC_Straumur_API {
 		return is_array( $result ) ? $result : array();
 	}
 
-
 	/**
 	 * Common function to send an API request to Straumur.
 	 *
@@ -364,8 +376,7 @@ class WC_Straumur_API {
 
 		if ( 'GET' === $method && ! empty( $body ) ) {
 			// Construct query string for GET requests
-			$url = add_query_arg( $body, $url );
-			// change content type to url encoded.
+			$url                             = add_query_arg( $body, $url );
 			$args['headers']['Content-Type'] = 'application/x-www-form-urlencoded';
 		} elseif ( 'POST' === $method && ! empty( $body ) ) {
 			// Encode body as JSON for POST requests
@@ -487,7 +498,6 @@ class WC_Straumur_API {
 			);
 		}
 
-		// Some API responses might include the reference in a different location
 		if ( ! isset( $response['payfacReference'] ) && isset( $response['additionalData']['payfacReference'] ) ) {
 			$response['payfacReference'] = $response['additionalData']['payfacReference'];
 			$this->log(
@@ -525,7 +535,6 @@ class WC_Straumur_API {
 			if ( method_exists( $this->logger, $level ) ) {
 				$this->logger->{$level}( $message, $this->context );
 			} else {
-				// Fallback if the logger lacks the specified method.
 				$this->logger->info( $message, $this->context );
 			}
 		}
