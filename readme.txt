@@ -4,7 +4,7 @@ Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,15 +84,18 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.0.1 =
+* Fix for order status hooks
+* Tested with latest WooCommerce version
 
-= 2.0 =
+= 2.0.0 =
 * Subscription support added.
 * Configurable payment page session lifetime.
 * Option to set orders as "completed" post-capture.
 * Customizable redirect URLs for completed or cancelled payments.
 * Improved order notes for declined and failed payments.
 * Straumur logo included for merchant use.
-* Enhanced support for B2B use cases and discount plugins (e.g., Vaskur.is).
+* Enhanced support for B2B use cases and discount plugins
 * Improved translation handling.
 * Tested compatibility with WordPress 6.7.0, WooCommerce 9.7.0, and PHP 8.3.
 
