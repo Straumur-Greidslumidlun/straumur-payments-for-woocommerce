@@ -2,9 +2,9 @@
 Contributors: smartmediais, straumur
 Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,10 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.0.2 =
+* Support multiple currency
+* Changes so that custom order number doesnt affect payment confirmation
+
 = 2.0.1 =
 * Fix for order status hooks
 * Tested with latest WooCommerce version
