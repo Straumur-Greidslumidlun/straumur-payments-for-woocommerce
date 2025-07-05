@@ -182,7 +182,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// Convert order total to minor units.
 		$amount    = (int) round( $order->get_total() * 100 );
-		$currency  = get_woocommerce_currency();
+		$currency  = $order->get_currency();
 		$reference = (string) $order->get_id();
 
 		// Build line items if needed.
