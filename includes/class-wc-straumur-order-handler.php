@@ -62,7 +62,7 @@ class WC_Straumur_Order_Handler {
 		}
 
 		$payfac_reference = $order->get_meta( '_straumur_payfac_reference' );
-		$reference        = $order->get_order_number();
+		$reference        = (string) $order->get_id();
 
 		if ( empty( $payfac_reference ) || empty( $reference ) ) {
 			return new WP_Error( 'no_reference', __( 'Cannot cancel: missing payment references.', 'straumur-payments-for-woocommerce' ) );
@@ -102,14 +102,14 @@ class WC_Straumur_Order_Handler {
 		}
 
 		$payfac_reference = $order->get_meta( '_straumur_payfac_reference' );
-		$reference        = $order->get_order_number();
+		$reference        = (string) $order->get_id();
 		if ( empty( $payfac_reference ) || empty( $reference ) ) {
 			return new WP_Error( 'no_reference', __( 'Cannot capture: missing payment references.', 'straumur-payments-for-woocommerce' ) );
 		}
 
 		$amount       = (float) $order->get_total();
 		$amount_minor = (int) round( $amount * 100 );
-		$currency     = get_woocommerce_currency();
+		$currency     =  $order->get_currency();
 
 		$api = new WC_Straumur_API();
 
@@ -142,7 +142,7 @@ class WC_Straumur_Order_Handler {
 		}
 
 		$payfac_reference = $order->get_meta( '_straumur_payfac_reference' );
-		$reference        = $order->get_order_number();
+		$reference        = (string) $order->get_id();
 
 		if ( empty( $payfac_reference ) || empty( $reference ) ) {
 			return new WP_Error( 'no_reference', __( 'Cannot refund: missing payment references.', 'straumur-payments-for-woocommerce' ) );
@@ -151,7 +151,6 @@ class WC_Straumur_Order_Handler {
 		$api = new WC_Straumur_API();
 		$this->logger->info( "Attempting Straumur payment refund for order #{$order_id}", array( 'source' => 'straumur-payments' ) );
 
-		// Based on instructions, refund also uses reverse call
 		$response = $api->reverse( $reference, $payfac_reference );
 		if ( $response ) {
 			// Mark as "refund requested" so that the webhook can recognize it as a refund event

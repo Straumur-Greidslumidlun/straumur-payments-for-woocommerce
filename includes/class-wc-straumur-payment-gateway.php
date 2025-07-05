@@ -182,8 +182,8 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// Convert order total to minor units.
 		$amount    = (int) round( $order->get_total() * 100 );
-		$currency  = get_woocommerce_currency();
-		$reference = $order->get_order_number();
+		$currency  = $order->get_currency();
+		$reference = (string) $order->get_id();
 
 		// Build line items if needed.
 		$items = $this->get_order_items( $order, $amount );
@@ -288,9 +288,9 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// Convert amount to minor units.
 		$amount_minor = (int) round( $amount * 100 );
-		$currency     = get_woocommerce_currency();
-		$reference    = $order->get_order_number();
-
+		$currency = $order->get_currency();		
+		$reference =(string) $order->get_id();
+		
 		// Retrieve shopper IP (if available) and origin.
 		$shopper_ip = method_exists( $order, 'get_customer_ip_address' ) ? $order->get_customer_ip_address() : '';
 		$origin     = home_url( '/' );
@@ -400,41 +400,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		}
 	}
 
-	/**
-	 * Save the payment method (tokenization) for auto-renewals, if needed.
-	 *
-	 * Creates and stores a payment token for future subscription renewal payments.
-	 * Always marks tokens as subscription_only since they're only used for recurring payments.
-	 *
-	 * @since 1.0.0
-	 *
-	 * @param int|WC_Order $order The completed order object or order ID.
-	 *
-	 * @return void
-	 */
-	public function save_payment_method( $order ): void {
-		if ( ! $order instanceof WC_Order ) {
-			$order = wc_get_order( $order );
-		}
-		if ( ! $order ) {
-			return;
-		}
 
-		if ( class_exists( 'WC_Payment_Token_CC' ) ) {
-			$token = new \WC_Payment_Token_CC();
-		} else {
-			$this->logger->error( 'WC_Payment_Token_CC class does not exist.', $this->context );
-			return;
-		}
-
-		$token->set_gateway_id( $this->id );
-		$token->set_token( 'SAVED_TOKEN_FROM_STRAUMUR' );
-		$token->set_user_id( $order->get_user_id() );
-		$token->set_default( true );
-		$token->update_meta_data( 'subscription_only', 'yes' );
-
-		$token->save();
-	}
 
 	/**
 	 * Handle the return from Straumur's payment gateway
