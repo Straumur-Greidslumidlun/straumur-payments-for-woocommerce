@@ -86,7 +86,7 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 == Changelog ==
 = 2.0.2 =
 * Support multiple currency
-* Changes so that custom order number doesnt affect payment confirmation
+* Changes so that custom order number doesn't affect payment confirmation
 
 = 2.0.1 =
 * Fix for order status hooks
