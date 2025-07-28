@@ -90,7 +90,11 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Get payment method icon with multiple card logos.
 	 *
-	 * @return string
+	 * This method generates HTML for displaying payment method icons, including Visa,
+	 * Mastercard, Google Pay, and Apple Pay. It uses custom logos defined in the plugin
+	 * assets directory and applies a WooCommerce filter for customization.
+	 *
+	 * @return string HTML string containing the payment method icons.
 	 */
 	public function get_icon(): string {
 		// Get the default icon from the parent method.
