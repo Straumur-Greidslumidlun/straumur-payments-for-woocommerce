@@ -131,6 +131,16 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			return;
 		}
 
+		// Check if CSS file exists before enqueuing
+		$css_file_path = STRAUMUR_PAYMENTS_PLUGIN_DIR . 'assets/css/straumur-payment-method.css';
+		if ( ! file_exists( $css_file_path ) ) {
+			$this->logger->warning( 
+				'Straumur payment method CSS file not found: ' . $css_file_path, 
+				$this->context 
+			);
+			return;
+		}
+
 		wp_enqueue_style(
 			'straumur-payment-method',
 			STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/css/straumur-payment-method.css',
