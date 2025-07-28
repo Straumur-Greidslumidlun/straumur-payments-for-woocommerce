@@ -57,7 +57,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->method_title       = esc_html__( 'Straumur Payments', 'straumur-payments-for-woocommerce' );
 		$this->method_description = esc_html__( 'Accept payments via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce' );
 		$this->has_fields         = false;
-		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-28x28.png';
+		$this->icon               = ''; // Icons are handled by custom get_icon() method
 
 		$this->supports = array(
 			'products',
@@ -93,28 +93,24 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon(): string {
-		$icon_html = '';
-		
-		if ( $this->icon ) {
-			$card_logos = array(
-				'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa logo.png',
-				'mastercard' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png',
-				'googlepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png',
-				'applepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png',
-			);
+		$card_logos = array(
+			'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa logo.png',
+			'mastercard' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png',
+			'googlepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png',
+			'applepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png',
+		);
 
-			$icon_html = '<span class="straumur-payment-icons">';
-			
-			foreach ( $card_logos as $card => $logo_url ) {
-				$icon_html .= sprintf(
-					'<img src="%s" alt="%s" />',
-					esc_url( $logo_url ),
-					esc_attr( ucfirst( $card ) )
-				);
-			}
-			
-			$icon_html .= '</span>';
+		$icon_html = '<span class="straumur-payment-icons">';
+		
+		foreach ( $card_logos as $card => $logo_url ) {
+			$icon_html .= sprintf(
+				'<img src="%s" alt="%s" />',
+				esc_url( $logo_url ),
+				esc_attr( ucfirst( $card ) )
+			);
 		}
+		
+		$icon_html .= '</span>';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
@@ -134,7 +130,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			'straumur-payment-method',
 			STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/css/straumur-payment-method.css',
 			array(),
-			'2.0.3'
+			STRAUMUR_PAYMENTS_VERSION
 		);
 	}
 
