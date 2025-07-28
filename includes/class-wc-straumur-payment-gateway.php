@@ -57,7 +57,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->method_title       = esc_html__( 'Straumur Payments', 'straumur-payments-for-woocommerce' );
 		$this->method_description = esc_html__( 'Accept payments via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce' );
 		$this->has_fields         = false;
-		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-28x28.png';
+		$this->icon               = ''; // Icons are handled by custom get_icon() method
 
 		$this->supports = array(
 			'products',
@@ -82,6 +82,75 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		add_action( 'woocommerce_scheduled_subscription_payment_straumur', array( $this, 'process_subscription_payment' ), 10, 2 );
 		add_action( 'woocommerce_subscription_payment_method_updated_to_straumur', array( $this, 'process_subscription_payment_method_change' ) );
+		
+		// Enqueue frontend styles
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
+	}
+
+	/**
+	 * Get payment method icon with multiple card logos.
+	 *
+	 * This method generates HTML for displaying payment method icons, including Visa,
+	 * Mastercard, Google Pay, and Apple Pay. It uses custom logos defined in the plugin
+	 * assets directory and applies a WooCommerce filter for customization.
+	 *
+	 * @return string HTML string containing the payment method icons.
+	 */
+	public function get_icon(): string {
+		// Get the default icon from the parent method.
+		$default_icon_html = parent::get_icon();
+
+		// Define custom card logos.
+		$card_logos = array(
+			'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa-logo.png',
+			'mastercard' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png',
+			'googlepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png',
+			'applepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png',
+		);
+
+		$icon_html = '<span class="straumur-payment-icons">';
+		
+		foreach ( $card_logos as $card => $logo_url ) {
+			$icon_html .= sprintf(
+				'<img src="%s" alt="%s" role="img" aria-label="Payment method: %s" />',
+				esc_url( $logo_url ),
+				esc_attr( ucfirst( $card ) ),
+				esc_attr( ucfirst( $card ) )
+			);
+		}
+		
+		$icon_html .= '</span>';
+
+		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
+	}
+
+	/**
+	 * Enqueue frontend styles for payment method.
+	 *
+	 * @return void
+	 */
+	public function enqueue_frontend_styles(): void {
+		// Only enqueue on checkout and cart pages, or if this payment method is enabled
+		if ( ! ( is_checkout() || is_cart() || is_account_page() ) || ! $this->is_available() ) {
+			return;
+		}
+
+		// Check if CSS file exists before enqueuing
+		$css_file_path = STRAUMUR_PAYMENTS_PLUGIN_DIR . 'assets/css/straumur-payment-method.css';
+		if ( ! file_exists( $css_file_path ) ) {
+			$this->logger->warning( 
+				'Straumur payment method CSS file not found: ' . $css_file_path, 
+				$this->context 
+			);
+			return;
+		}
+
+		wp_enqueue_style(
+			'straumur-payment-method',
+			STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/css/straumur-payment-method.css',
+			array(),
+			STRAUMUR_PAYMENTS_VERSION
+		);
 	}
 
 	public function init_form_fields(): void {
