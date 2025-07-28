@@ -84,6 +84,38 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_subscription_payment_method_updated_to_straumur', array( $this, 'process_subscription_payment_method_change' ) );
 	}
 
+	/**
+	 * Get payment method icon with multiple card logos.
+	 *
+	 * @return string
+	 */
+	public function get_icon(): string {
+		$icon_html = '';
+		
+		if ( $this->icon ) {
+			$card_logos = array(
+				'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa logo.png',
+				'mastercard' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png',
+				'googlepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png',
+				'applepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png',
+			);
+
+			$icon_html = '<span class="straumur-payment-icons" style="display: inline-flex; gap: 4px; align-items: center;">';
+			
+			foreach ( $card_logos as $card => $logo_url ) {
+				$icon_html .= sprintf(
+					'<img src="%s" alt="%s" style="height: 20px; width: auto; display: inline-block;" />',
+					esc_url( $logo_url ),
+					esc_attr( ucfirst( $card ) )
+				);
+			}
+			
+			$icon_html .= '</span>';
+		}
+
+		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
+	}
+
 	public function init_form_fields(): void {
 		$this->form_fields = WC_Straumur_Settings::get_form_fields();
 	}
