@@ -34,6 +34,7 @@ if (! defined('ABSPATH')) {
 
 /*
  * Define plugin constants.
+ * Previous version: 2.0.2
  */
 define('STRAUMUR_PAYMENTS_VERSION', '2.0.3');
 define('STRAUMUR_PAYMENTS_MAIN_FILE', __FILE__);
