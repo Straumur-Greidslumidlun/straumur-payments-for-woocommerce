@@ -82,6 +82,9 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		add_action( 'woocommerce_scheduled_subscription_payment_straumur', array( $this, 'process_subscription_payment' ), 10, 2 );
 		add_action( 'woocommerce_subscription_payment_method_updated_to_straumur', array( $this, 'process_subscription_payment_method_change' ) );
+		
+		// Enqueue frontend styles
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
 	}
 
 	/**
@@ -100,11 +103,11 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 				'applepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png',
 			);
 
-			$icon_html = '<span class="straumur-payment-icons" style="display: inline-flex; gap: 4px; align-items: center;">';
+			$icon_html = '<span class="straumur-payment-icons">';
 			
 			foreach ( $card_logos as $card => $logo_url ) {
 				$icon_html .= sprintf(
-					'<img src="%s" alt="%s" style="height: 20px; width: auto; display: inline-block;" />',
+					'<img src="%s" alt="%s" />',
 					esc_url( $logo_url ),
 					esc_attr( ucfirst( $card ) )
 				);
@@ -114,6 +117,25 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		}
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
+	}
+
+	/**
+	 * Enqueue frontend styles for payment method.
+	 *
+	 * @return void
+	 */
+	public function enqueue_frontend_styles(): void {
+		// Only enqueue on checkout and cart pages, or if this payment method is enabled
+		if ( ! ( is_checkout() || is_cart() || is_account_page() ) || ! $this->is_available() ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'straumur-payment-method',
+			STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/css/straumur-payment-method.css',
+			array(),
+			'2.0.3'
+		);
 	}
 
 	public function init_form_fields(): void {

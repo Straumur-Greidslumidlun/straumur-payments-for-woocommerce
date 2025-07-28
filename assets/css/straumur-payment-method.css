@@ -1,0 +1,36 @@
+/**
+ * Straumur Payment Method Styles
+ * 
+ * Styles for the payment method icons and layout
+ */
+
+.straumur-payment-icons {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.straumur-payment-icons img {
+    height: 20px;
+    width: auto;
+    display: inline-block;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 768px) {
+    .straumur-payment-icons {
+        gap: 2px;
+    }
+    
+    .straumur-payment-icons img {
+        height: 18px;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .straumur-payment-icons img {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
