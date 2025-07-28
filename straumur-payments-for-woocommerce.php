@@ -8,7 +8,7 @@
  * Author URI:      https://straumur.is
  * Text Domain:     straumur-payments-for-woocommerce
  * Domain Path:     /languages
- * Version:         2.0.2
+ * Version:         2.0.3
  * Requires Plugins: woocommerce
  * WC requires at least: 8.1
  * WC tested up to: 9.9
