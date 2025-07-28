@@ -108,8 +108,9 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		
 		foreach ( $card_logos as $card => $logo_url ) {
 			$icon_html .= sprintf(
-				'<img src="%s" alt="%s" />',
+				'<img src="%s" alt="%s" role="img" aria-label="Payment method: %s" />',
 				esc_url( $logo_url ),
+				esc_attr( ucfirst( $card ) ),
 				esc_attr( ucfirst( $card ) )
 			);
 		}
