@@ -94,7 +94,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 	 */
 	public function get_icon(): string {
 		$card_logos = array(
-			'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa logo.png',
+			'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa-logo.png',
 			'mastercard' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png',
 			'googlepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png',
 			'applepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png',
