@@ -102,7 +102,7 @@ msgstr "Greiðsluvilla:  Tókst ekki að setja upp greiðslulotu."
 
 #: includes/class-wc-straumur-payment-gateway.php:453
 msgid "Nonce verification failed."
-msgstr "Nonce staðfesting tókst ekki."
+msgstr "Staðfesting öryggiskóða tókst ekki."
 
 #: includes/class-wc-straumur-payment-gateway.php:510
 msgid "Your payment session was not completed. Please try again."
