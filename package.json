@@ -14,5 +14,8 @@
   "devDependencies": {
     "@woocommerce/dependency-extraction-webpack-plugin": "^2.2.0",
     "@wordpress/scripts": "^30.14.0"
+  },
+  "overrides": {
+    "webpack-dev-server": "^5.2.1"
   }
 }
