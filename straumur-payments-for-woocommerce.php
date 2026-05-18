@@ -47,7 +47,7 @@ define('STRAUMUR_PAYMENTS_PLUGIN_URL', plugin_dir_url(__FILE__));
  * @since 1.0.0
  * @return void
  */
-function straumur_payments_woocommerce_missing_notice(): void
+function straumur_missing_notice(): void
 {
 	if (! current_user_can('activate_plugins')) {
 		return;
@@ -156,11 +156,11 @@ function straumur_filter_customer_payment_tokens($tokens, $customer_id)
  * @since 1.0.0
  * @return void
  */
-function straumur_payments_init(): void
+function straumur_init(): void
 {
 	// Check if WooCommerce is active.
 	if (! function_exists('WC')) {
-		add_action('admin_notices', __NAMESPACE__ . '\\straumur_payments_woocommerce_missing_notice');
+		add_action('admin_notices', __NAMESPACE__ . '\\straumur_missing_notice');
 		return;
 	}
 
@@ -178,6 +178,8 @@ function straumur_payments_init(): void
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-payment-gateway.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-block-support.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-webhook-handler.php';
+	// Initialize the webhook handler.
+	WC_Straumur_Webhook_Handler::init();
 
 	// Register block-based checkout integrations if available.
 	if (class_exists(__NAMESPACE__ . '\\WC_Straumur_Block_Support')) {
@@ -235,11 +237,11 @@ function straumur_payments_init(): void
 	// Add plugin action links.
 	add_filter(
 		'plugin_action_links_' . plugin_basename(STRAUMUR_PAYMENTS_MAIN_FILE),
-		__NAMESPACE__ . '\\straumur_payments_action_links'
+		__NAMESPACE__ . '\\straumur_action_links'
 	);
 
 	// Add plugin row meta.
-	add_filter('plugin_row_meta', __NAMESPACE__ . '\\straumur_payments_plugin_row_meta', 10, 2);
+	add_filter('plugin_row_meta', __NAMESPACE__ . '\\straumur_plugin_row_meta', 10, 2);
 
 	// Instantiate the order handler (manages captures, refunds, cancellations).
 	$straumur_order_handler = new WC_Straumur_Order_Handler();
@@ -323,7 +325,7 @@ function add_straumur_payment_gateway(array $gateways): array
  * @param array $links Existing plugin action links.
  * @return array Modified plugin action links.
  */
-function straumur_payments_action_links(array $links): array
+function straumur_action_links(array $links): array
 {
 	$settings_url  = admin_url('admin.php?page=wc-settings&tab=checkout&section=straumur');
 	$settings_link = sprintf(
@@ -345,7 +347,7 @@ function straumur_payments_action_links(array $links): array
  * @param string $file  Plugin file path.
  * @return array Modified plugin meta links.
  */
-function straumur_payments_plugin_row_meta(array $links, string $file): array
+function straumur_plugin_row_meta(array $links, string $file): array
 {
 	if (plugin_basename(STRAUMUR_PAYMENTS_MAIN_FILE) === $file) {
 		$docs_link    = '<a href="https://docs.straumur.is" target="_blank" rel="noopener noreferrer">' .
@@ -362,4 +364,4 @@ function straumur_payments_plugin_row_meta(array $links, string $file): array
 
 
 // Initialize the plugin after all plugins are loaded, ensuring WooCommerce is ready.
-add_action('plugins_loaded', __NAMESPACE__ . '\\straumur_payments_init');
+add_action('plugins_loaded', __NAMESPACE__ . '\\straumur_init');

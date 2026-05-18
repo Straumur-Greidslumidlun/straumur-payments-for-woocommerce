@@ -1092,6 +1092,3 @@ class WC_Straumur_Webhook_Handler
 		}
 	}
 }
-
-// Initialize the handler.
-WC_Straumur_Webhook_Handler::init();

@@ -8,7 +8,7 @@ const settings = getSetting( 'straumur_data', {} );
 
 const defaultLabel = __(
     'Straumur Payments',
-    'woo-gutenberg-products-block'
+    'straumur-payments-for-woocommerce'
 );
 
 const label = decodeEntities( settings.title ) || defaultLabel;
