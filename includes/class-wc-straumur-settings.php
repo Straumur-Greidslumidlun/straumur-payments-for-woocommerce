@@ -2,7 +2,7 @@
 /**
  * Straumur Settings Class
  *
- * Provides and validates the settings fields used by the Straumur payment gateway.dsd
+ * Provides and validates the settings fields used by the Straumur payment gateway.
  *
  * @package Straumur\Payments
  * @since   1.0.0

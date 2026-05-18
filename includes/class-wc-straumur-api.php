@@ -36,13 +36,6 @@ use function wp_json_encode;
 class WC_Straumur_API {
 
 	/**
-	 * Holds the singleton instance.
-	 *
-	 * @var WC_Straumur_API|null
-	 */
-	private static $instance = null;
-
-	/**
 	 * API key for authentication.
 	 *
 	 * @var string
@@ -127,18 +120,6 @@ class WC_Straumur_API {
 	 * @var float
 	 */
 	private $checkout_expiry;
-
-	/**
-	 * Get the singleton instance.
-	 *
-	 * @return WC_Straumur_API
-	 */
-	public static function instance(): WC_Straumur_API {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 
 	/**
 	 * Constructor.
