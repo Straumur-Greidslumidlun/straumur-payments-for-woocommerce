@@ -16,6 +16,10 @@
     "@wordpress/scripts": "^30.14.0"
   },
   "overrides": {
-    "webpack-dev-server": "^5.2.1"
+    "webpack-dev-server": "^5.2.1",
+    "minimatch": "^9.0.7",
+    "serialize-javascript": "^7.0.5",
+    "@tootallnate/once": "^3.0.1",
+    "copy-webpack-plugin": "^13.0.0"
   }
 }
