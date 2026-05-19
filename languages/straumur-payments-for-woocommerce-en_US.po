@@ -185,6 +185,22 @@ msgid "Send cart items to the checkout page. Disable if using incompatible plugi
 msgstr ""
 
 #: includes/class-wc-straumur-settings.php:128
+msgid "Checkout Language"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:132
+msgid "Icelandic"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:133
+msgid "English"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:135
+msgid "Default language shown on the hosted checkout page. Shoppers can still switch languages manually."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php:140
 msgid "Checkout Expiry (hours)"
 msgstr ""
 
