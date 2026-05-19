@@ -124,7 +124,18 @@ class WC_Straumur_Settings {
 				'default'     => 'yes',
 				'desc_tip'    => false,
 			),
-			'checkout_expiry'             => array(
+			'checkout_language'           => array(
+			'title'       => esc_html__( 'Checkout Language', 'straumur-payments-for-woocommerce' ),
+			'type'        => 'select',
+			'default'     => 'is',
+			'options'     => array(
+				'is' => esc_html__( 'Icelandic', 'straumur-payments-for-woocommerce' ),
+				'en' => esc_html__( 'English', 'straumur-payments-for-woocommerce' ),
+			),
+			'description' => esc_html__( 'Default language shown on the hosted checkout page. Shoppers can still switch languages manually.', 'straumur-payments-for-woocommerce' ),
+			'desc_tip'    => true,
+		),
+		'checkout_expiry'             => array(
 				'title'       => esc_html__( 'Checkout Expiry (hours)', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'select',
 				'default'     => '1',
@@ -420,6 +431,18 @@ class WC_Straumur_Settings {
 		return ! empty( $settings['webhook_url'] )
 			? $settings['webhook_url']
 			: home_url( '/wp-json/straumur/v1/payment-callback' );
+	}
+
+	/**
+	 * Get the checkout language (culture code) from the settings.
+	 *
+	 * @since 1.2.0
+	 * @return string Either 'is' (Icelandic) or 'en' (English).
+	 */
+	public static function get_checkout_language(): string {
+		$settings = self::get_settings();
+		$language = $settings['checkout_language'] ?? 'is';
+		return in_array( $language, array( 'is', 'en' ), true ) ? $language : 'is';
 	}
 
 	/**
