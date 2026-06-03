@@ -11,7 +11,7 @@
  * Version:         2.0.4
  * Requires Plugins: woocommerce
  * WC requires at least: 8.1
- * WC tested up to: 10.7
+ * WC tested up to: 10.8.1
  * WC Payment Gateway: yes
  * WC Subscriptions Support: yes
  * WC Blocks Support: yes

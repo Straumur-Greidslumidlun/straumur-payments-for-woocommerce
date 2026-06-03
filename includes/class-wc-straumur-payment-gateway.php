@@ -7,7 +7,7 @@
  * return callbacks, and optional subscription payments.
  *
  * WC Subscriptions Support: yes
- * WC tested up to: 9.7
+ * WC tested up to: 10.8.1
  *
  * @package Straumur\Payments
  * @since   1.0.0
