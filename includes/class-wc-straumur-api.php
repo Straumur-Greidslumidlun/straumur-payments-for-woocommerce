@@ -145,7 +145,7 @@ class WC_Straumur_API {
 		$this->send_items                  = WC_Straumur_Settings::send_items();
 		$this->checkout_language           = WC_Straumur_Settings::get_checkout_language();
 
-		// Retrieve checkout expiryfrom settings, ensuring it's within a valid range.
+		// Retrieve checkout expiry from settings, ensuring it's within a valid range.
 		$hours = (float) WC_Straumur_Settings::get_checkout_expiry();
 		if ( $hours < 0.0833 ) {
 			$hours = 0.0833;
