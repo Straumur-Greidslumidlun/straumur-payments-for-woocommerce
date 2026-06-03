@@ -26,7 +26,20 @@ const Content = () => {
  */
 const Label = ( props ) => {
     const { PaymentMethodLabel } = props.components;
-    return <PaymentMethodLabel text={ label } />;
+    const icons = settings.icons || {};
+    return (
+        <span style={ { display: 'flex', alignItems: 'center', gap: '4px' } }>
+            <PaymentMethodLabel text={ label } />
+            { Object.entries( icons ).map( ( [ name, url ] ) => (
+                <img
+                    key={ name }
+                    src={ url }
+                    alt={ name }
+                    style={ { height: '24px', width: 'auto' } }
+                />
+            ) ) }
+        </span>
+    );
 };
 
 
