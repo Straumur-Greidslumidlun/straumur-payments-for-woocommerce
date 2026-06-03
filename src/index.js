@@ -27,6 +27,12 @@ const Content = () => {
 const Label = ( props ) => {
     const { PaymentMethodLabel } = props.components;
     const icons = settings.icons || {};
+    const iconAlts = {
+        visa: 'Visa',
+        mastercard: 'Mastercard',
+        googlepay: 'Google Pay',
+        applepay: 'Apple Pay',
+    };
     return (
         <span style={ { display: 'flex', alignItems: 'center', width: '100%' } }>
             <PaymentMethodLabel text={ label } />
@@ -35,7 +41,9 @@ const Label = ( props ) => {
                     <img
                         key={ name }
                         src={ url }
-                        alt={ name }
+                        alt={ iconAlts[ name ] || name }
+                        loading="lazy"
+                        decoding="async"
                         style={ { height: '24px', width: 'auto' } }
                     />
                 ) ) }
