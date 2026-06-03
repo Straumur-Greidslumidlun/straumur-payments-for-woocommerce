@@ -28,16 +28,18 @@ const Label = ( props ) => {
     const { PaymentMethodLabel } = props.components;
     const icons = settings.icons || {};
     return (
-        <span style={ { display: 'flex', alignItems: 'center', gap: '4px' } }>
+        <span style={ { display: 'flex', alignItems: 'center', width: '100%' } }>
             <PaymentMethodLabel text={ label } />
-            { Object.entries( icons ).map( ( [ name, url ] ) => (
-                <img
-                    key={ name }
-                    src={ url }
-                    alt={ name }
-                    style={ { height: '24px', width: 'auto' } }
-                />
-            ) ) }
+            <span style={ { display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' } }>
+                { Object.entries( icons ).map( ( [ name, url ] ) => (
+                    <img
+                        key={ name }
+                        src={ url }
+                        alt={ name }
+                        style={ { height: '24px', width: 'auto' } }
+                    />
+                ) ) }
+            </span>
         </span>
     );
 };
