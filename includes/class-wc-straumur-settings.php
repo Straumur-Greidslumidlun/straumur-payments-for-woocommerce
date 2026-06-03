@@ -436,7 +436,7 @@ class WC_Straumur_Settings {
 	/**
 	 * Get the checkout language (culture code) from the settings.
 	 *
-	 * @since 1.0.0
+	 * @since 2.0.3
 	 * @return string Either 'is' (Icelandic) or 'en' (English).
 	 */
 	public static function get_checkout_language(): string {
