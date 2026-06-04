@@ -2,7 +2,7 @@
 Contributors: smartmediais, straumur
 Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
-Tested up to: 6.9
+Tested up to: 7.0
 Requires PHP: 7.4
 Stable tag: 2.0.4
 License: GPLv2 or later
@@ -85,8 +85,11 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 == Changelog ==
 = 2.0.4 =
-* Tested with WordPress 6.9
-* Tested with WooCommerce 10.7
+* Add card brand logos (Visa, Mastercard, Google Pay, Apple Pay) to block-based checkout
+* Add default language (culture) setting for hosted checkout page
+* Tested with WordPress 7.0
+* Tested with WooCommerce 10.8.1
+* Minor bug fixes and code quality improvements
 
 = 2.0.3 =
 * Update payment method icons to display VISA, Mastercard, Google Pay, and Apple Pay logos

@@ -26,7 +26,30 @@ const Content = () => {
  */
 const Label = ( props ) => {
     const { PaymentMethodLabel } = props.components;
-    return <PaymentMethodLabel text={ label } />;
+    const icons = settings.icons || {};
+    const iconAlts = {
+        visa: 'Visa',
+        mastercard: 'Mastercard',
+        googlepay: 'Google Pay',
+        applepay: 'Apple Pay',
+    };
+    return (
+        <span style={ { display: 'flex', alignItems: 'center', width: '100%' } }>
+            <PaymentMethodLabel text={ label } />
+            <span style={ { display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' } }>
+                { Object.entries( icons ).map( ( [ name, url ] ) => (
+                    <img
+                        key={ name }
+                        src={ url }
+                        alt={ iconAlts[ name ] || name }
+                        loading="lazy"
+                        decoding="async"
+                        style={ { height: '24px', width: 'auto' } }
+                    />
+                ) ) }
+            </span>
+        </span>
+    );
 };
 
 
