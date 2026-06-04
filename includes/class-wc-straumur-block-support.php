@@ -72,7 +72,6 @@ class WC_Straumur_Block_Support extends AbstractPaymentMethodType {
 				'googlepay'  => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png' ),
 				'applepay'   => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png' ),
 			),
-			),
 		);
 	}
 
