@@ -185,6 +185,22 @@ msgid "Send cart items to the checkout page. Disable if using incompatible plugi
 msgstr "Senda inn hluti í körfu inn á greiðslusíðu Straums.  Afvirkið ef verið er að nota ósamhæfar viðbótir."
 
 #: includes/class-wc-straumur-settings.php:128
+msgid "Checkout Language"
+msgstr "Tungumál greiðslusíðu"
+
+#: includes/class-wc-straumur-settings.php:132
+msgid "Icelandic"
+msgstr "Íslenska"
+
+#: includes/class-wc-straumur-settings.php:133
+msgid "English"
+msgstr "Enska"
+
+#: includes/class-wc-straumur-settings.php:135
+msgid "Default language shown on the hosted checkout page. Shoppers can still switch languages manually."
+msgstr "Sjálfgefið tungumál á greiðslusíðu Straums. Kaupendur geta samt skipt um tungumál handvirkt."
+
+#: includes/class-wc-straumur-settings.php:140
 msgid "Checkout Expiry (hours)"
 msgstr "Tímamörk greiðsluferlis (klst)"
 
