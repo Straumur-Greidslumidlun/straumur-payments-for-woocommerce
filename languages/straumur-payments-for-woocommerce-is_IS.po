@@ -102,7 +102,7 @@ msgstr "Greiðsluvilla:  Tókst ekki að setja upp greiðslulotu."
 
 #: includes/class-wc-straumur-payment-gateway.php:453
 msgid "Nonce verification failed."
-msgstr "Nonce staðfesting tókst ekki."
+msgstr "Staðfesting öryggiskóða tókst ekki."
 
 #: includes/class-wc-straumur-payment-gateway.php:510
 msgid "Your payment session was not completed. Please try again."
@@ -185,6 +185,22 @@ msgid "Send cart items to the checkout page. Disable if using incompatible plugi
 msgstr "Senda inn hluti í körfu inn á greiðslusíðu Straums.  Afvirkið ef verið er að nota ósamhæfar viðbótir."
 
 #: includes/class-wc-straumur-settings.php:128
+msgid "Checkout Language"
+msgstr "Tungumál greiðslusíðu"
+
+#: includes/class-wc-straumur-settings.php:132
+msgid "Icelandic"
+msgstr "Íslenska"
+
+#: includes/class-wc-straumur-settings.php:133
+msgid "English"
+msgstr "Enska"
+
+#: includes/class-wc-straumur-settings.php:135
+msgid "Default language shown on the hosted checkout page. Shoppers can still switch languages manually."
+msgstr "Sjálfgefið tungumál á greiðslusíðu Straums. Kaupendur geta samt skipt um tungumál handvirkt."
+
+#: includes/class-wc-straumur-settings.php:140
 msgid "Checkout Expiry (hours)"
 msgstr "Tímamörk greiðsluferlis (klst)"
 
@@ -350,12 +366,12 @@ msgstr "Ekki tiltækt"
 #. translators: 1: authorized amount, 2: masked card number, 3: 3D Secure text, 4: auth code
 #: includes/class-wc-straumur-webhook-handler.php:520
 msgid "%1$s was authorized to card %2$s, %3$s. Auth code: %4$s. Payment captured automatically."
-msgstr ""
+msgstr "%1$s var heimild á kort %2$s, %3$s. Heimildarnúmer: %4$s. Greiðsla var skuldfærð sjálfvirkt."
 
 #. translators: 1: authorized amount, 2: masked card number, 3: 3D Secure text, 4: auth code
 #: includes/class-wc-straumur-webhook-handler.php:552
 msgid "%1$s was authorized to card %2$s, %3$s. Auth code: %4$s. Awaiting manual capture."
-msgstr ""
+msgstr "%1$s var heimild á kort %2$s, %3$s. Heimildarnúmer: %4$s. Bíður handvirkrar skuldfærslu."
 
 #. translators: 1: captured amount, 2: payfac reference ID
 #: includes/class-wc-straumur-webhook-handler.php:672
@@ -420,7 +436,7 @@ msgstr "Skuldfærsla gekk ekki"
 
 #: includes/class-wc-straumur-payment-gateway.php:484
 msgid "Unable to verify payment status. Please try again."
-msgstr ""
+msgstr "Ekki tókst að staðfesta greiðslustöðu. Vinsamlegast reyndu aftur."
 
 #: includes/class-wc-straumur-payment-gateway.php:498
 msgid "Thank you for your order! Your payment is being processed."
@@ -429,7 +445,7 @@ msgstr "Takk fyrir pöntunina, greiðslustaðfesting er í vinnslu"
 #: includes/class-wc-straumur-webhook-handler.php:112
 #: includes/class-wc-straumur-webhook-handler.php:115
 msgid "Invalid JSON payload."
-msgstr ""
+msgstr "Ógild JSON gögn."
 
 #. translators: %s: field name
 #: includes/class-wc-straumur-webhook-handler.php:127
@@ -439,7 +455,7 @@ msgstr "Nauðsynlegar upplýsingar vantar: %s."
 
 #: includes/class-wc-straumur-webhook-handler.php:151
 msgid "Invalid HMAC signature."
-msgstr ""
+msgstr "Ógild HMAC undirskrift."
 
 #: includes/class-wc-straumur-webhook-handler.php:204
 msgid "Failed payment processed successfully."
@@ -447,7 +463,7 @@ msgstr "Greiðsla tókst ekki"
 
 #: includes/class-wc-straumur-webhook-handler.php:224
 msgid "Webhook processed successfully."
-msgstr ""
+msgstr "Webhook afgreitt."
 
 #: includes/class-wc-straumur-webhook-handler.php:237
 msgid "Error processing webhook."
@@ -455,12 +471,12 @@ msgstr "Ekki gekk að vinna webhook"
 
 #: includes/class-wc-straumur-webhook-handler.php:264
 msgid "Invalid or missing order ID in failed webhook."
-msgstr ""
+msgstr "Ógilt eða vantar pöntunarnúmer í webhook."
 
 #: includes/class-wc-straumur-webhook-handler.php:267
 #: includes/class-wc-straumur-webhook-handler.php:350
 msgid "Invalid or missing order ID."
-msgstr ""
+msgstr "Ógilt eða vantar pöntunarnúmer."
 
 #. translators: %d: order ID
 #: includes/class-wc-straumur-webhook-handler.php:278

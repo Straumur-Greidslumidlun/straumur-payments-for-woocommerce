@@ -7,7 +7,7 @@
  * return callbacks, and optional subscription payments.
  *
  * WC Subscriptions Support: yes
- * WC tested up to: 9.7
+ * WC tested up to: 10.8.1
  *
  * @package Straumur\Payments
  * @since   1.0.0
@@ -97,9 +97,6 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 	 * @return string HTML string containing the payment method icons.
 	 */
 	public function get_icon(): string {
-		// Get the default icon from the parent method.
-		$default_icon_html = parent::get_icon();
-
 		// Define custom card logos.
 		$card_logos = array(
 			'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa-logo.png',

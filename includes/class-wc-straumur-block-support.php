@@ -66,6 +66,12 @@ class WC_Straumur_Block_Support extends AbstractPaymentMethodType {
 			'title'       => $this->get_payment_method_title(),
 			'description' => $this->get_payment_method_description(),
 			'supports'    => array( 'products', 'subscriptions' ),
+			'icons'       => array(
+				'visa'       => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa-logo.png' ),
+				'mastercard' => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png' ),
+				'googlepay'  => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png' ),
+				'applepay'   => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png' ),
+			),
 		);
 	}
 

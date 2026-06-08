@@ -36,13 +36,6 @@ use function wp_json_encode;
 class WC_Straumur_API {
 
 	/**
-	 * Holds the singleton instance.
-	 *
-	 * @var WC_Straumur_API|null
-	 */
-	private static $instance = null;
-
-	/**
 	 * API key for authentication.
 	 *
 	 * @var string
@@ -122,23 +115,18 @@ class WC_Straumur_API {
 	private $send_items;
 
 	/**
+	 * The checkout language (culture code) sent to the hosted checkout.
+	 *
+	 * @var string
+	 */
+	private $checkout_language;
+
+	/**
 	 * The checkout expiry in fractional hours (e.g., 0.0833 for 5 minutes).
 	 *
 	 * @var float
 	 */
 	private $checkout_expiry;
-
-	/**
-	 * Get the singleton instance.
-	 *
-	 * @return WC_Straumur_API
-	 */
-	public static function instance(): WC_Straumur_API {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-		}
-		return self::$instance;
-	}
 
 	/**
 	 * Constructor.
@@ -155,6 +143,7 @@ class WC_Straumur_API {
 		$this->gateway_terminal_identifier = WC_Straumur_Settings::get_gateway_terminal_identifier();
 		$this->test_mode                   = WC_Straumur_Settings::is_test_mode();
 		$this->send_items                  = WC_Straumur_Settings::send_items();
+		$this->checkout_language           = WC_Straumur_Settings::get_checkout_language();
 
 		// Retrieve checkout expiry from settings, ensuring it's within a valid range.
 		$hours = (float) WC_Straumur_Settings::get_checkout_expiry();
@@ -208,6 +197,7 @@ class WC_Straumur_API {
 			'reference'          => $reference,
 			'terminalIdentifier' => $this->terminal_identifier,
 			'expiresAt'          => $expires_at,
+			'culture'            => $this->checkout_language,
 		);
 
 		// Include line items if requested.
