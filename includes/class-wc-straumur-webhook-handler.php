@@ -796,28 +796,49 @@ class WC_Straumur_Webhook_Handler
 			}
 
 			// Delete the WooCommerce refund record that was created optimistically.
-			// Match by amount (converted back to order currency).
+			// Prefer deleting the most recent refund matching the amount to avoid deleting older refunds.
 			$refund_amount_float = $matched_amount / 100;
-			$refunds = $order->get_refunds();
+			$refunds             = $order->get_refunds();
+			usort(
+				$refunds,
+				static function ($a, $b) {
+					return $b->get_id() <=> $a->get_id();
+				}
+			);
+
+			$refund_deleted = false;
 			foreach ($refunds as $refund) {
 				if (abs((float) $refund->get_amount() - $refund_amount_float) < 0.01) {
 					$refund->delete(true);
+					$refund_deleted = true;
 					self::log_message(
-						sprintf('Deleted WC refund #%d for failed Straumur refund on order %d', $refund->get_id(), $order->get_id())
+						sprintf(
+							'Deleted WC refund #%d for failed Straumur refund on order %d',
+							$refund->get_id(),
+							$order->get_id()
+						)
 					);
 					break;
 				}
 			}
 		}
 
-		$order->add_order_note(
-			sprintf(
+		$note = $refund_deleted
+			? sprintf(
 				/* translators: 1: failure reason, 2: payfac reference */
 				esc_html__('Straumur refund failed: %1$s. Reference: %2$s. The refund record has been removed. You may retry the refund.', 'straumur-payments-for-woocommerce'),
 				esc_html($reason),
 				esc_html($payfac_reference)
 			)
-		);
+			: sprintf(
+				/* translators: 1: event type, 2: reason text, 3: payfac reference */
+				esc_html__('Straumur %1$s failed: %2$s. Reference: %3$s', 'straumur-payments-for-woocommerce'),
+				esc_html('Refund'),
+				esc_html($reason),
+				esc_html($payfac_reference)
+			);
+
+		$order->add_order_note($note);
 		$order->save();
 
 		self::log_message(
