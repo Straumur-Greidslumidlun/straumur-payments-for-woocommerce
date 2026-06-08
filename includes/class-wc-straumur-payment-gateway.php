@@ -597,7 +597,8 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			);
 		}
 
-		$refund_amount = null !== $amount ? (float) $amount : (float) $order->get_total();
+		// Use remaining refundable amount when no specific amount is given.
+		$refund_amount = null !== $amount ? (float) $amount : (float) $order->get_remaining_refund_amount();
 
 		if ( $refund_amount <= 0 ) {
 			return new WP_Error(
@@ -609,14 +610,34 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		// Convert to minor units (Straumur treats all currencies as 2-decimal).
 		$amount_minor = (int) round( $refund_amount * 100 );
 
+		// Acquire a transient lock to prevent duplicate concurrent requests.
+		$lock_key = '_straumur_refund_lock_' . $order_id;
+		if ( get_transient( $lock_key ) ) {
+			return new WP_Error(
+				'refund_in_progress',
+				__( 'A refund request is already being processed for this order. Please wait a moment and try again.', 'straumur-payments-for-woocommerce' )
+			);
+		}
+		set_transient( $lock_key, true, 30 );
+
 		// Block duplicate requests while an identical refund is still awaiting confirmation.
+		// Prune stale entries older than 24 hours before checking.
 		$pending_refunds = $order->get_meta( '_straumur_pending_refunds' );
 		if ( ! is_array( $pending_refunds ) ) {
 			$pending_refunds = array();
 		}
 
+		$pending_refunds = array_filter( $pending_refunds, function ( $pending ) {
+			if ( ! isset( $pending['requested_at'] ) ) {
+				return true;
+			}
+			$age_hours = ( time() - strtotime( $pending['requested_at'] ) ) / 3600;
+			return $age_hours < 24;
+		} );
+
 		foreach ( $pending_refunds as $pending ) {
 			if ( isset( $pending['amount'] ) && abs( $pending['amount'] - $amount_minor ) < 1 ) {
+				delete_transient( $lock_key );
 				$this->logger->warning(
 					sprintf(
 						'Refund request blocked: Similar pending refund exists for order %d (amount: %d)',
@@ -643,6 +664,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		);
 
 		if ( ! $response || ! isset( $response['responseIdentifier'] ) ) {
+			delete_transient( $lock_key );
 			$this->logger->error(
 				sprintf( 'Refund API request failed for order %d.', $order_id ),
 				$this->context
@@ -660,19 +682,22 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			'requested_at'        => current_time( 'mysql' ),
 		);
 		$order->update_meta_data( '_straumur_pending_refunds', $pending_refunds );
+		$order->update_meta_data( '_straumur_refund_requested', 'yes' );
 		$order->save();
+
+		delete_transient( $lock_key );
 
 		$note = sprintf(
 			/* translators: 1: refund amount, 2: response identifier */
 			__( 'Refund request of %1$s sent to Straumur. Reference: %2$s. Awaiting confirmation.', 'straumur-payments-for-woocommerce' ),
 			wc_price( $refund_amount, array( 'currency' => $order->get_currency() ) ),
-			$response['responseIdentifier']
+			esc_html( $response['responseIdentifier'] )
 		);
 		if ( ! empty( $reason ) ) {
 			$note .= ' ' . sprintf(
 				/* translators: %s: refund reason */
 				__( 'Reason: %s', 'straumur-payments-for-woocommerce' ),
-				$reason
+				esc_html( $reason )
 			);
 		}
 		$order->add_order_note( $note );

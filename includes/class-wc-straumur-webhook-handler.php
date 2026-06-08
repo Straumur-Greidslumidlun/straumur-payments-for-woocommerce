@@ -649,16 +649,27 @@ class WC_Straumur_Webhook_Handler
 		// Match the webhook to a pending refund, preferably by responseIdentifier.
 		$matched_index = -1;
 
-		foreach ($pending_refunds as $index => $pending) {
-			if ('' !== $response_id && isset($pending['response_identifier']) && $pending['response_identifier'] === $response_id) {
-				$matched_index = $index;
-				break;
+		// First pass: match by responseIdentifier (strong match).
+		if ('' !== $response_id) {
+			foreach ($pending_refunds as $index => $pending) {
+				if (isset($pending['response_identifier']) && $pending['response_identifier'] === $response_id) {
+					$matched_index = $index;
+					break;
+				}
 			}
+		}
 
-			// Fall back to matching by amount (within 1 minor unit tolerance).
-			if (isset($pending['amount']) && abs($pending['amount'] - $raw_amount) < 2) {
-				$matched_index = $index;
-				break;
+		// Second pass: fall back to amount matching only if there is exactly one
+		// pending refund for that amount (avoids ambiguous matches).
+		if ($matched_index < 0) {
+			$amount_matches = array();
+			foreach ($pending_refunds as $index => $pending) {
+				if (isset($pending['amount']) && abs($pending['amount'] - $raw_amount) < 2) {
+					$amount_matches[] = $index;
+				}
+			}
+			if (1 === count($amount_matches)) {
+				$matched_index = $amount_matches[0];
 			}
 		}
 
@@ -748,16 +759,30 @@ class WC_Straumur_Webhook_Handler
 
 		// Match the webhook to a pending refund, preferably by responseIdentifier.
 		$matched_index = -1;
+		$matched_amount = 0;
 
-		foreach ($pending_refunds as $index => $pending) {
-			if ('' !== $response_id && isset($pending['response_identifier']) && $pending['response_identifier'] === $response_id) {
-				$matched_index = $index;
-				break;
+		// First pass: match by responseIdentifier (strong match).
+		if ('' !== $response_id) {
+			foreach ($pending_refunds as $index => $pending) {
+				if (isset($pending['response_identifier']) && $pending['response_identifier'] === $response_id) {
+					$matched_index  = $index;
+					$matched_amount = isset($pending['amount']) ? $pending['amount'] : 0;
+					break;
+				}
 			}
+		}
 
-			if (isset($pending['amount']) && abs($pending['amount'] - $raw_amount) < 2) {
-				$matched_index = $index;
-				break;
+		// Second pass: fall back to amount matching only if unambiguous.
+		if ($matched_index < 0) {
+			$amount_matches = array();
+			foreach ($pending_refunds as $index => $pending) {
+				if (isset($pending['amount']) && abs($pending['amount'] - $raw_amount) < 2) {
+					$amount_matches[] = $index;
+				}
+			}
+			if (1 === count($amount_matches)) {
+				$matched_index  = $amount_matches[0];
+				$matched_amount = $pending_refunds[$matched_index]['amount'] ?? 0;
 			}
 		}
 
@@ -769,12 +794,26 @@ class WC_Straumur_Webhook_Handler
 			} else {
 				$order->update_meta_data('_straumur_pending_refunds', $pending_refunds);
 			}
+
+			// Delete the WooCommerce refund record that was created optimistically.
+			// Match by amount (converted back to order currency).
+			$refund_amount_float = $matched_amount / 100;
+			$refunds = $order->get_refunds();
+			foreach ($refunds as $refund) {
+				if (abs((float) $refund->get_amount() - $refund_amount_float) < 0.01) {
+					$refund->delete(true);
+					self::log_message(
+						sprintf('Deleted WC refund #%d for failed Straumur refund on order %d', $refund->get_id(), $order->get_id())
+					);
+					break;
+				}
+			}
 		}
 
 		$order->add_order_note(
 			sprintf(
 				/* translators: 1: failure reason, 2: payfac reference */
-				esc_html__('Straumur refund failed: %1$s. Reference: %2$s. Please review the refund on this order and try again.', 'straumur-payments-for-woocommerce'),
+				esc_html__('Straumur refund failed: %1$s. Reference: %2$s. The refund record has been removed. You may retry the refund.', 'straumur-payments-for-woocommerce'),
 				esc_html($reason),
 				esc_html($payfac_reference)
 			)

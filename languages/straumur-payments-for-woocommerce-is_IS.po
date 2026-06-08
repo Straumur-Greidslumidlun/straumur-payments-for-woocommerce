@@ -541,5 +541,8 @@ msgid "Refund of %1$s confirmed by Straumur. Reference: %2$s."
 msgstr "Endurgreiðsla að upphæð %1$s staðfest af Straumi. Tilvísun: %2$s."
 
 #. translators: 1: failure reason, 2: payfac reference
-msgid "Straumur refund failed: %1$s. Reference: %2$s. Please review the refund on this order and try again."
-msgstr "Endurgreiðsla mistókst hjá Straumi: %1$s. Tilvísun: %2$s. Vinsamlegast yfirfarið endurgreiðsluna á pöntuninni og reynið aftur."
+msgid "Straumur refund failed: %1$s. Reference: %2$s. The refund record has been removed. You may retry the refund."
+msgstr "Endurgreiðsla mistókst hjá Straumi: %1$s. Tilvísun: %2$s. Endurgreiðslufærslan hefur verið fjarlægð. Þú getur reynt aftur."
+
+msgid "A refund request is already being processed for this order. Please wait a moment and try again."
+msgstr "Endurgreiðslubeiðni er nú þegar í vinnslu fyrir þessa pöntun. Vinsamlegast bíðið augnablik og reynið aftur."
