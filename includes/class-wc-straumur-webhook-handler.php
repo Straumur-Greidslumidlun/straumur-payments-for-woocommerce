@@ -297,6 +297,15 @@ class WC_Straumur_Webhook_Handler
 		$additional_data  = isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : array();
 		$event_type       = isset($additional_data['eventType']) ? sanitize_text_field(strtolower($additional_data['eventType'])) : 'unknown';
 
+		// A failed refund must clear its pending tracker, otherwise process_refund()
+		// would keep blocking that amount as a duplicate forever.
+		if (self::EVENT_REFUND === $event_type) {
+			$pending_refunds = $order->get_meta('_straumur_pending_refunds');
+			if (is_array($pending_refunds) && ! empty($pending_refunds)) {
+				return self::handle_failed_refund($order, $data, $payfac_reference, $reason, $pending_refunds);
+			}
+		}
+
 		// Create failure note based on reason
 		if (0 === strcasecmp('Refused', $reason)) {
 			$note = esc_html__('Payment declined: The card was refused (declined).', 'straumur-payments-for-woocommerce');
@@ -582,6 +591,14 @@ class WC_Straumur_Webhook_Handler
 	 */
 	private static function handle_refund_event($order, array $data, string $display_amount, string $payfac_reference): bool
 	{
+		// Refunds initiated from the WooCommerce admin (process_refund) are tracked
+		// in order meta and matched against the webhook confirmation here.
+		$pending_refunds = $order->get_meta('_straumur_pending_refunds');
+		if (is_array($pending_refunds) && ! empty($pending_refunds)) {
+			return self::handle_admin_refund($order, $data, $display_amount, $payfac_reference, $pending_refunds);
+		}
+
+		// Status-triggered refunds (full reversal via the reverse endpoint).
 		if ('yes' === $order->get_meta('_straumur_refund_requested')) {
 			return self::handle_refund($order, $display_amount, $payfac_reference);
 		} elseif ('yes' === $order->get_meta('_straumur_cancel_requested')) {
@@ -599,6 +616,182 @@ class WC_Straumur_Webhook_Handler
 
 			return true;
 		}
+	}
+
+	/**
+	 * Handle a refund confirmation for an admin-initiated refund.
+	 *
+	 * Called when a refund webhook arrives for a refund that was started from
+	 * the WooCommerce order screen (process_refund). The WooCommerce refund
+	 * record already exists at this point, so this only confirms the result
+	 * and clears the matched pending request from order meta.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param \WC_Order $order            The order object.
+	 * @param array     $data             Webhook data.
+	 * @param string    $display_amount   Formatted amount.
+	 * @param string    $payfac_reference Payfac reference for this refund.
+	 * @param array     $pending_refunds  Pending refund requests from order meta.
+	 * @return true True on success.
+	 */
+	private static function handle_admin_refund(
+		$order,
+		array $data,
+		string $display_amount,
+		string $payfac_reference,
+		array $pending_refunds
+	): bool {
+		$raw_amount      = isset($data['amount']) ? absint($data['amount']) : 0;
+		$additional_data = isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : array();
+		$response_id     = isset($additional_data['responseIdentifier']) ? sanitize_text_field($additional_data['responseIdentifier']) : '';
+
+		// Match the webhook to a pending refund, preferably by responseIdentifier.
+		$matched_index = -1;
+
+		foreach ($pending_refunds as $index => $pending) {
+			if ('' !== $response_id && isset($pending['response_identifier']) && $pending['response_identifier'] === $response_id) {
+				$matched_index = $index;
+				break;
+			}
+
+			// Fall back to matching by amount (within 1 minor unit tolerance).
+			if (isset($pending['amount']) && abs($pending['amount'] - $raw_amount) < 2) {
+				$matched_index = $index;
+				break;
+			}
+		}
+
+		if ($matched_index < 0) {
+			self::log_message(
+				sprintf(
+					'Refund webhook for order %d could not be matched to a pending refund. Amount: %d, Reference: %s',
+					$order->get_id(),
+					$raw_amount,
+					$payfac_reference
+				),
+				'warning'
+			);
+
+			$order->add_order_note(
+				sprintf(
+					/* translators: 1: refund amount, 2: payfac reference */
+					esc_html__('Straumur refund confirmed: %1$s. Reference: %2$s.', 'straumur-payments-for-woocommerce'),
+					esc_html($display_amount),
+					esc_html($payfac_reference)
+				)
+			);
+			$order->save();
+
+			return true;
+		}
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: 1: refund amount, 2: payfac reference */
+				esc_html__('Refund of %1$s confirmed by Straumur. Reference: %2$s.', 'straumur-payments-for-woocommerce'),
+				esc_html($display_amount),
+				esc_html($payfac_reference)
+			)
+		);
+
+		self::log_message(
+			sprintf(
+				'Refund confirmed for order %d: %s (responseIdentifier: %s)',
+				$order->get_id(),
+				$display_amount,
+				$response_id
+			)
+		);
+
+		// Remove the matched pending refund and update or clear the meta.
+		array_splice($pending_refunds, $matched_index, 1);
+
+		if (empty($pending_refunds)) {
+			$order->delete_meta_data('_straumur_pending_refunds');
+		} else {
+			$order->update_meta_data('_straumur_pending_refunds', $pending_refunds);
+		}
+
+		$order->save();
+
+		return true;
+	}
+
+	/**
+	 * Handle a failed refund confirmation for an admin-initiated refund.
+	 *
+	 * Clears the matching pending refund tracker so the same amount can be
+	 * retried, and records the failure on the order. The WooCommerce refund
+	 * record was created optimistically when the request was sent, so the note
+	 * asks the merchant to review it.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param \WC_Order $order            The order object.
+	 * @param array     $data             Webhook data.
+	 * @param string    $payfac_reference Payfac reference for this refund.
+	 * @param string    $reason           Failure reason from Straumur.
+	 * @param array     $pending_refunds  Pending refund requests from order meta.
+	 * @return true True on success.
+	 */
+	private static function handle_failed_refund(
+		$order,
+		array $data,
+		string $payfac_reference,
+		string $reason,
+		array $pending_refunds
+	): bool {
+		$raw_amount      = isset($data['amount']) ? absint($data['amount']) : 0;
+		$additional_data = isset($data['additionalData']) && is_array($data['additionalData']) ? $data['additionalData'] : array();
+		$response_id     = isset($additional_data['responseIdentifier']) ? sanitize_text_field($additional_data['responseIdentifier']) : '';
+
+		// Match the webhook to a pending refund, preferably by responseIdentifier.
+		$matched_index = -1;
+
+		foreach ($pending_refunds as $index => $pending) {
+			if ('' !== $response_id && isset($pending['response_identifier']) && $pending['response_identifier'] === $response_id) {
+				$matched_index = $index;
+				break;
+			}
+
+			if (isset($pending['amount']) && abs($pending['amount'] - $raw_amount) < 2) {
+				$matched_index = $index;
+				break;
+			}
+		}
+
+		if ($matched_index >= 0) {
+			array_splice($pending_refunds, $matched_index, 1);
+
+			if (empty($pending_refunds)) {
+				$order->delete_meta_data('_straumur_pending_refunds');
+			} else {
+				$order->update_meta_data('_straumur_pending_refunds', $pending_refunds);
+			}
+		}
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: 1: failure reason, 2: payfac reference */
+				esc_html__('Straumur refund failed: %1$s. Reference: %2$s. Please review the refund on this order and try again.', 'straumur-payments-for-woocommerce'),
+				esc_html($reason),
+				esc_html($payfac_reference)
+			)
+		);
+		$order->save();
+
+		self::log_message(
+			sprintf(
+				'Refund failed for order %d: %s (responseIdentifier: %s)',
+				$order->get_id(),
+				$reason,
+				$response_id
+			),
+			'error'
+		);
+
+		return true;
 	}
 
 	/**

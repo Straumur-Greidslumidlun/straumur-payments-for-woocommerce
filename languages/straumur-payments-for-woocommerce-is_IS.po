@@ -508,3 +508,38 @@ msgstr "HMAC kenni ekki á réttu formi"
 #: includes/class-wc-straumur-webhook-handler.php:1035
 msgid "HMAC signature validation failed."
 msgstr "HMAC auðkenning gekk ekki"
+
+msgid "This order was not paid via Straumur."
+msgstr "Þessi pöntun var ekki greidd í gegnum Straum."
+
+msgid "Cannot refund: Payment reference not found. The payment may not have been captured yet."
+msgstr "Get ekki endurgreitt: tilvísunarnúmer greiðslu fannst ekki. Hugsanlega hefur greiðslan ekki enn verið staðfest."
+
+msgid "Refund amount must be greater than zero."
+msgstr "Endurgreiðsluupphæð verður að vera hærri en núll."
+
+msgid "A refund for this amount is already awaiting confirmation from Straumur. Please wait for it to be processed."
+msgstr "Endurgreiðsla fyrir þessa upphæð bíður nú þegar staðfestingar frá Straumi. Vinsamlegast bíðið þar til hún hefur verið afgreidd."
+
+msgid "Failed to send refund request to Straumur. Please try again."
+msgstr "Tókst ekki að senda endurgreiðslubeiðni til Straums. Vinsamlegast reynið aftur."
+
+#. translators: 1: refund amount, 2: response identifier
+msgid "Refund request of %1$s sent to Straumur. Reference: %2$s. Awaiting confirmation."
+msgstr "Endurgreiðslubeiðni að upphæð %1$s send til Straums. Tilvísun: %2$s. Bíður staðfestingar."
+
+#. translators: %s: refund reason
+msgid "Reason: %s"
+msgstr "Ástæða: %s"
+
+#. translators: 1: refund amount, 2: payfac reference
+msgid "Straumur refund confirmed: %1$s. Reference: %2$s."
+msgstr "Endurgreiðsla staðfest af Straumi: %1$s. Tilvísun: %2$s."
+
+#. translators: 1: refund amount, 2: payfac reference
+msgid "Refund of %1$s confirmed by Straumur. Reference: %2$s."
+msgstr "Endurgreiðsla að upphæð %1$s staðfest af Straumi. Tilvísun: %2$s."
+
+#. translators: 1: failure reason, 2: payfac reference
+msgid "Straumur refund failed: %1$s. Reference: %2$s. Please review the refund on this order and try again."
+msgstr "Endurgreiðsla mistókst hjá Straumi: %1$s. Tilvísun: %2$s. Vinsamlegast yfirfarið endurgreiðsluna á pöntuninni og reynið aftur."
