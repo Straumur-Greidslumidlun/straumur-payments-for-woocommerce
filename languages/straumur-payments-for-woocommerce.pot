@@ -545,3 +545,6 @@ msgstr ""
 #. translators: 1: failure reason, 2: payfac reference
 msgid "Straumur refund failed: %1$s. Reference: %2$s. The refund record has been removed. You may retry the refund."
 msgstr ""
+
+msgid "A refund request is already being processed for this order. Please wait a moment and try again."
+msgstr ""
