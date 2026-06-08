@@ -631,7 +631,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			if ( ! isset( $pending['requested_at'] ) ) {
 				return true;
 			}
-			$age_hours = ( time() - strtotime( $pending['requested_at'] ) ) / 3600;
+			$age_hours = ( time() - (int) get_gmt_from_date( $pending['requested_at'], 'U' ) ) / HOUR_IN_SECONDS;
 			return $age_hours < 24;
 		} );
 
