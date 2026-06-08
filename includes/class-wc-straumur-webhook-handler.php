@@ -786,6 +786,8 @@ class WC_Straumur_Webhook_Handler
 			}
 		}
 
+		$refund_deleted = false;
+
 		if ($matched_index >= 0) {
 			array_splice($pending_refunds, $matched_index, 1);
 
@@ -806,7 +808,6 @@ class WC_Straumur_Webhook_Handler
 				}
 			);
 
-			$refund_deleted = false;
 			foreach ($refunds as $refund) {
 				if (abs((float) $refund->get_amount() - $refund_amount_float) < 0.01) {
 					$refund->delete(true);
