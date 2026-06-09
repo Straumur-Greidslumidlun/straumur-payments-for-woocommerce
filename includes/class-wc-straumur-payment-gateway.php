@@ -69,8 +69,6 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			'subscription_suspension',
 			'subscription_reactivation',
 			'subscription_amount_changes',
-			'subscription_payment_method_change_customer',
-			'subscription_payment_method_change_admin',
 			'subscription_date_changes',
 			'multiple_subscriptions',
 		);
@@ -82,7 +80,6 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		add_action( 'woocommerce_scheduled_subscription_payment_straumur', array( $this, 'process_subscription_payment' ), 10, 2 );
-		add_action( 'woocommerce_subscription_payment_method_updated_to_straumur', array( $this, 'process_subscription_payment_method_change' ) );
 		
 		// Enqueue frontend styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
