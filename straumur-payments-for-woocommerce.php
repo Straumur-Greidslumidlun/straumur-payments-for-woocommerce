@@ -8,7 +8,7 @@
  * Author URI:      https://straumur.is
  * Text Domain:     straumur-payments-for-woocommerce
  * Domain Path:     /languages
- * Version:         2.0.4
+ * Version:         2.1.0
  * Requires Plugins: woocommerce
  * WC requires at least: 8.1
  * WC tested up to: 10.8.1
@@ -34,9 +34,9 @@ if (! defined('ABSPATH')) {
 
 /*
  * Define plugin constants.
- * Previous version: 2.0.3
+ * Previous version: 2.0.4
  */
-define('STRAUMUR_PAYMENTS_VERSION', '2.0.4');
+define('STRAUMUR_PAYMENTS_VERSION', '2.1.0');
 define('STRAUMUR_PAYMENTS_MAIN_FILE', __FILE__);
 define('STRAUMUR_PAYMENTS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('STRAUMUR_PAYMENTS_PLUGIN_URL', plugin_dir_url(__FILE__));

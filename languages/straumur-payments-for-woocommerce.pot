@@ -510,3 +510,41 @@ msgstr ""
 #: straumur-payments-for-woocommerce.php:344
 msgid "Support"
 msgstr ""
+
+msgid "This order was not paid via Straumur."
+msgstr ""
+
+msgid "Cannot refund: Payment reference not found. The payment may not have been captured yet."
+msgstr ""
+
+msgid "Refund amount must be greater than zero."
+msgstr ""
+
+msgid "A refund for this amount is already awaiting confirmation from Straumur. Please wait for it to be processed."
+msgstr ""
+
+msgid "Failed to send refund request to Straumur. Please try again."
+msgstr ""
+
+#. translators: 1: refund amount, 2: response identifier
+msgid "Refund request of %1$s sent to Straumur. Reference: %2$s. Awaiting confirmation."
+msgstr ""
+
+#. translators: %s: refund reason
+msgid "Reason: %s"
+msgstr ""
+
+#. translators: 1: refund amount, 2: payfac reference
+msgid "Straumur refund confirmed: %1$s. Reference: %2$s."
+msgstr ""
+
+#. translators: 1: refund amount, 2: payfac reference
+msgid "Refund of %1$s confirmed by Straumur. Reference: %2$s."
+msgstr ""
+
+#. translators: 1: failure reason, 2: payfac reference
+msgid "Straumur refund failed: %1$s. Reference: %2$s. The refund record has been removed. You may retry the refund."
+msgstr ""
+
+msgid "A refund request is already being processed for this order. Please wait a moment and try again."
+msgstr ""

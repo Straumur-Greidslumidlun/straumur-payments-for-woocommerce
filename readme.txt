@@ -4,7 +4,7 @@ Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 2.0.4
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -84,6 +84,13 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.1.0 =
+* Added: Partial and full refunds can now be done from the WooCommerce order screen
+* Refunds are sent through the Straumur refund API and confirmed via webhook
+* Added Icelandic translations for refund order notes and messages
+* Fixed: Straumur logo now appears in the WooCommerce payments settings list
+* Removed: unimplemented subscription payment method change support that could fail when used
+
 = 2.0.4 =
 * Add card brand logos (Visa, Mastercard, Google Pay, Apple Pay) to block-based checkout
 * Add default language (culture) setting for hosted checkout page

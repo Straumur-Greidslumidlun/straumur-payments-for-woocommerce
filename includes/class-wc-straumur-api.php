@@ -284,6 +284,64 @@ class WC_Straumur_API {
 	}
 
 	/**
+	 * Refund a captured transaction (partial or full).
+	 *
+	 * Only transactions that have been captured can be refunded.
+	 * The refund is processed asynchronously and confirmed via webhook.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $reference        Your internal reference (order ID).
+	 * @param string $payfac_reference Payfac reference from the original transaction.
+	 * @param int    $amount           Amount to refund in minor units.
+	 * @param string $currency         ISO currency code (e.g., "ISK").
+	 * @param string $refund_reason    Reason for refund. Valid values: OTHER, RETURN, DUPLICATE, FRAUD, CUSTOMER REQUEST.
+	 * @return array|false Response array with responseIdentifier on success, false on failure.
+	 */
+	public function refund(
+		string $reference,
+		string $payfac_reference,
+		int $amount,
+		string $currency,
+		string $refund_reason = 'CUSTOMER REQUEST'
+	) {
+		// Validate refund reason against allowed values.
+		$allowed_reasons = array( 'OTHER', 'RETURN', 'DUPLICATE', 'FRAUD', 'CUSTOMER REQUEST' );
+		if ( ! in_array( $refund_reason, $allowed_reasons, true ) ) {
+			$refund_reason = 'CUSTOMER REQUEST';
+		}
+
+		$body = array(
+			'reference'       => $reference,
+			'payfacReference' => $payfac_reference,
+			'amount'          => $amount,
+			'currency'        => $currency,
+			'refundReason'    => $refund_reason,
+		);
+
+		$this->log(
+			"Sending refund request for reference {$reference}, amount {$amount} {$currency}",
+			'info'
+		);
+
+		$response = $this->send_request( 'modification/refund', $body );
+
+		if ( $response && isset( $response['responseIdentifier'] ) ) {
+			$this->log(
+				"Refund request accepted for reference {$reference}, responseIdentifier: {$response['responseIdentifier']}",
+				'info'
+			);
+		} elseif ( ! $response ) {
+			$this->log(
+				"Refund request failed for reference {$reference}",
+				'error'
+			);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Process a token-based subscription payment.
 	 *
 	 * @since 1.0.0
