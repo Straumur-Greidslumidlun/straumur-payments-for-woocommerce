@@ -57,10 +57,11 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		$this->method_title       = esc_html__( 'Straumur Payments', 'straumur-payments-for-woocommerce' );
 		$this->method_description = esc_html__( 'Accept payments via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce' );
 		$this->has_fields         = false;
-		$this->icon               = ''; // Icons are handled by custom get_icon() method
+		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/straumur-128x128.png';
 
 		$this->supports = array(
 			'products',
+			'refunds',
 			'subscriptions',
 			'wc-blocks',
 			'wc-orders',
@@ -68,8 +69,6 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			'subscription_suspension',
 			'subscription_reactivation',
 			'subscription_amount_changes',
-			'subscription_payment_method_change_customer',
-			'subscription_payment_method_change_admin',
 			'subscription_date_changes',
 			'multiple_subscriptions',
 		);
@@ -81,7 +80,6 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		add_action( 'woocommerce_scheduled_subscription_payment_straumur', array( $this, 'process_subscription_payment' ), 10, 2 );
-		add_action( 'woocommerce_subscription_payment_method_updated_to_straumur', array( $this, 'process_subscription_payment_method_change' ) );
 		
 		// Enqueue frontend styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
@@ -546,5 +544,171 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			wp_safe_redirect( $checkout_url ? $checkout_url : wc_get_cart_url() );
 			exit;
 		}
+	}
+
+	/**
+	 * Process a refund for an order.
+	 *
+	 * Handles both partial and full refunds via the Straumur refund API.
+	 * The refund is asynchronous: this method sends the request and Straumur
+	 * confirms the result via webhook. WooCommerce has already created the
+	 * refund record before calling this method, so on success we only track
+	 * the request for webhook matching.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param int        $order_id The order ID.
+	 * @param float|null $amount   The amount to refund, or null for a full refund.
+	 * @param string     $reason   The reason for the refund.
+	 * @return bool|WP_Error True on success, WP_Error on failure.
+	 */
+	public function process_refund( $order_id, $amount = null, $reason = '' ) {
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			$this->logger->error(
+				sprintf( 'Refund failed: Order %d not found.', $order_id ),
+				$this->context
+			);
+			return new WP_Error( 'invalid_order', __( 'Order not found.', 'straumur-payments-for-woocommerce' ) );
+		}
+
+		// Check that the order was paid via Straumur.
+		if ( $order->get_payment_method() !== $this->id ) {
+			return new WP_Error(
+				'invalid_payment_method',
+				__( 'This order was not paid via Straumur.', 'straumur-payments-for-woocommerce' )
+			);
+		}
+
+		// The payfac reference is required for refunds and is only available after capture.
+		$payfac_reference = $order->get_meta( '_straumur_payfac_reference' );
+		if ( empty( $payfac_reference ) ) {
+			$this->logger->error(
+				sprintf( 'Refund failed: No payfac reference found for order %d.', $order_id ),
+				$this->context
+			);
+			return new WP_Error(
+				'missing_reference',
+				__( 'Cannot refund: Payment reference not found. The payment may not have been captured yet.', 'straumur-payments-for-woocommerce' )
+			);
+		}
+
+		// Use remaining refundable amount when no specific amount is given.
+		$refund_amount = null !== $amount ? (float) $amount : (float) $order->get_remaining_refund_amount();
+
+		if ( $refund_amount <= 0 ) {
+			return new WP_Error(
+				'invalid_amount',
+				__( 'Refund amount must be greater than zero.', 'straumur-payments-for-woocommerce' )
+			);
+		}
+
+		// Convert to minor units (Straumur treats all currencies as 2-decimal).
+		$amount_minor = (int) round( $refund_amount * 100 );
+
+		// Acquire a transient lock to prevent duplicate concurrent requests.
+		$lock_key = '_straumur_refund_lock_' . $order_id;
+		if ( get_transient( $lock_key ) ) {
+			return new WP_Error(
+				'refund_in_progress',
+				__( 'A refund request is already being processed for this order. Please wait a moment and try again.', 'straumur-payments-for-woocommerce' )
+			);
+		}
+		set_transient( $lock_key, true, 30 );
+
+		// Block duplicate requests while an identical refund is still awaiting confirmation.
+		// Prune stale entries older than 24 hours before checking.
+		$pending_refunds = $order->get_meta( '_straumur_pending_refunds' );
+		if ( ! is_array( $pending_refunds ) ) {
+			$pending_refunds = array();
+		}
+
+		$pending_refunds = array_filter( $pending_refunds, function ( $pending ) {
+			if ( ! isset( $pending['requested_at'] ) ) {
+				return true;
+			}
+			$age_hours = ( time() - (int) get_gmt_from_date( $pending['requested_at'], 'U' ) ) / HOUR_IN_SECONDS;
+			return $age_hours < 24;
+		} );
+
+		foreach ( $pending_refunds as $pending ) {
+			if ( isset( $pending['amount'] ) && abs( $pending['amount'] - $amount_minor ) < 1 ) {
+				delete_transient( $lock_key );
+				$this->logger->warning(
+					sprintf(
+						'Refund request blocked: Similar pending refund exists for order %d (amount: %d)',
+						$order_id,
+						$amount_minor
+					),
+					$this->context
+				);
+				return new WP_Error(
+					'duplicate_refund',
+					__( 'A refund for this amount is already awaiting confirmation from Straumur. Please wait for it to be processed.', 'straumur-payments-for-woocommerce' )
+				);
+			}
+		}
+
+		// Send the refund request to Straumur.
+		$api      = $this->get_api();
+		$response = $api->refund(
+			(string) $order_id,
+			$payfac_reference,
+			$amount_minor,
+			$order->get_currency(),
+			'CUSTOMER REQUEST'
+		);
+
+		if ( ! $response || ! isset( $response['responseIdentifier'] ) ) {
+			delete_transient( $lock_key );
+			$this->logger->error(
+				sprintf( 'Refund API request failed for order %d.', $order_id ),
+				$this->context
+			);
+			return new WP_Error(
+				'api_error',
+				__( 'Failed to send refund request to Straumur. Please try again.', 'straumur-payments-for-woocommerce' )
+			);
+		}
+
+		// Track the pending refund so the webhook can match the confirmation.
+		$pending_refunds[] = array(
+			'response_identifier' => sanitize_text_field( $response['responseIdentifier'] ),
+			'amount'              => $amount_minor,
+			'requested_at'        => current_time( 'mysql' ),
+		);
+		$order->update_meta_data( '_straumur_pending_refunds', $pending_refunds );
+		$order->update_meta_data( '_straumur_refund_requested', 'yes' );
+		$order->save();
+
+		delete_transient( $lock_key );
+
+		$note = sprintf(
+			/* translators: 1: refund amount, 2: response identifier */
+			__( 'Refund request of %1$s sent to Straumur. Reference: %2$s. Awaiting confirmation.', 'straumur-payments-for-woocommerce' ),
+			wc_price( $refund_amount, array( 'currency' => $order->get_currency() ) ),
+			esc_html( $response['responseIdentifier'] )
+		);
+		if ( ! empty( $reason ) ) {
+			$note .= ' ' . sprintf(
+				/* translators: %s: refund reason */
+				__( 'Reason: %s', 'straumur-payments-for-woocommerce' ),
+				esc_html( $reason )
+			);
+		}
+		$order->add_order_note( $note );
+
+		$this->logger->info(
+			sprintf(
+				'Refund request sent for order %d: amount=%d, responseIdentifier=%s',
+				$order_id,
+				$amount_minor,
+				$response['responseIdentifier']
+			),
+			$this->context
+		);
+
+		return true;
 	}
 }
