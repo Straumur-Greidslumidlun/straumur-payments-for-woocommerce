@@ -66,13 +66,26 @@ class WC_Straumur_Block_Support extends AbstractPaymentMethodType {
 			'title'       => $this->get_payment_method_title(),
 			'description' => $this->get_payment_method_description(),
 			'supports'    => array( 'products', 'subscriptions' ),
-			'icons'       => array(
-				'visa'       => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa-logo.png' ),
-				'mastercard' => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png' ),
-				'googlepay'  => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png' ),
-				'applepay'   => esc_url( STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png' ),
-			),
+			'icons'       => $this->get_payment_logo_data(),
 		);
+	}
+
+	/**
+	 * Payment method logos for the block checkout, as a list so their order is kept.
+	 *
+	 * @since 2.2.0
+	 * @return array List of arrays with 'name', 'label' and 'url'.
+	 */
+	private function get_payment_logo_data(): array {
+		$icons = array();
+		foreach ( WC_Straumur_Settings::get_payment_logos() as $key => $logo ) {
+			$icons[] = array(
+				'name'  => $key,
+				'label' => $logo['label'],
+				'url'   => esc_url( $logo['url'] ),
+			);
+		}
+		return $icons;
 	}
 
 	public function register_scripts(): void {

@@ -26,22 +26,16 @@ const Content = () => {
  */
 const Label = ( props ) => {
     const { PaymentMethodLabel } = props.components;
-    const icons = settings.icons || {};
-    const iconAlts = {
-        visa: 'Visa',
-        mastercard: 'Mastercard',
-        googlepay: 'Google Pay',
-        applepay: 'Apple Pay',
-    };
+    const icons = Array.isArray( settings.icons ) ? settings.icons : [];
     return (
         <span style={ { display: 'flex', alignItems: 'center', width: '100%' } }>
             <PaymentMethodLabel text={ label } />
-            <span style={ { display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' } }>
-                { Object.entries( icons ).map( ( [ name, url ] ) => (
+            <span style={ { display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center', gap: '4px', marginLeft: 'auto' } }>
+                { icons.map( ( { name, label: iconLabel, url } ) => (
                     <img
                         key={ name }
                         src={ url }
-                        alt={ iconAlts[ name ] || name }
+                        alt={ decodeEntities( iconLabel || name ) }
                         loading="lazy"
                         decoding="async"
                         style={ { height: '24px', width: 'auto' } }
