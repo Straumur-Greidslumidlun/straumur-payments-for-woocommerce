@@ -6,7 +6,7 @@ Scope: credentials, card and shopper data, webhooks, admin input, releases. This
 NEVER pass request headers, request or response bodies, or webhook payloads to a logger. Reduce them with `WC_Straumur_Log_Redactor::summarize()` and log the result. To log a new field, add it to `LOGGABLE_FIELDS` and justify it in the PR. Never add credentials (API key, HMAC key, theme key), card data or tokens (`tokenValue`, `cardNumber`, `cardSummary`, `authCode`), shopper details (IP, name, address, email) or URLs that grant access (payment page URL, return URL with the WooCommerce order key, 3DS action URL). `logger->error()` in the gateway writes even with `WP_DEBUG` off.
 
 ## §1.2 Webhook signatures `[ENFORCED]`
-WHEN changing `WC_Straumur_Webhook_Handler::validate_hmac_signature()`, keep the field order and `:` join identical to the backend's `HmacValidationHelper`, keep `hash_equals()` for the comparison, and reject a missing or non-hex HMAC key. A webhook that fails validation must not change an order.
+WHEN changing `WC_Straumur_Webhook_Handler::validate_hmac_signature()`, keep the field order and `:` join identical to the backend's `HmacHelpers.GetHmacSignature` (`Payfac.Core/Helpers/HmacValidationHelper.cs`), which the worker uses to sign outgoing webhooks, keep `hash_equals()` for the comparison, and reject a missing or non-hex HMAC key. A webhook that fails validation must not change an order.
 
 ## §1.3 Admin input and output `[ENFORCED by CI]`
 Escape all output (`esc_html`, `esc_attr`, `esc_url`), sanitise all input, check nonces on anything that changes state. `phpcs.xml.dist` (WordPress.Security) fails the PR otherwise. Use `phpcs:ignore` only with the sniff name and a reason on the same line.
