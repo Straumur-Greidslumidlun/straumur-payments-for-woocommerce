@@ -120,21 +120,23 @@ class WC_Straumur_Settings {
 				'desc_tip'    => true,
 			),
 			'payment_logos'               => array(
-				'title'       => esc_html__( 'Payment method logos', 'straumur-payments-for-woocommerce' ),
-				'type'        => 'multiselect',
-				'class'       => 'wc-enhanced-select',
-				'default'     => self::$default_payment_logos,
-				'options'     => array_map(
+				'title'             => esc_html__( 'Payment method logos', 'straumur-payments-for-woocommerce' ),
+				'type'              => 'multiselect',
+				'class'             => 'wc-enhanced-select',
+				// Keep the dropdown open while picking, so several logos can be chosen in one go.
+				'custom_attributes' => array( 'data-close-on-select' => 'false' ),
+				'default'           => self::$default_payment_logos,
+				'options'           => array_map(
 					static function ( array $logo ): string {
 						return $logo[0];
 					},
 					self::$payment_logos
 				),
-				'description' => esc_html__(
+				'description'       => esc_html__(
 					'Logos shown next to the Straumur payment option at checkout. This only changes the logos. Which payment methods shoppers can use on the payment page is set up by Straumur.',
 					'straumur-payments-for-woocommerce'
 				),
-				'desc_tip'    => false,
+				'desc_tip'          => false,
 			),
 			'theme_key'                   => array(
 				'title'       => esc_html__( 'Theme key', 'straumur-payments-for-woocommerce' ),
