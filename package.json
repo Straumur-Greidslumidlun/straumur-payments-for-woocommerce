@@ -1,6 +1,6 @@
 {
   "name": "straumur-payments",
-  "version": "1.1.0",
+  "version": "2.2.0",
   "scripts": {
     "build": "wp-scripts build src/index.js --output-path=assets/js/frontend --output-filename=straumur-block-payment-method.js --externals=@woocommerce/blocks-registry=wc-blocks-registry --externals=@woocommerce/settings=wc-settings",
     "start": "wp-scripts start src/index.js --output-path=assets/js/frontend --output-filename=straumur-block-payment-method.js --externals=@woocommerce/blocks-registry=wc-blocks-registry --externals=@woocommerce/settings=wc-settings",
@@ -12,7 +12,6 @@
     "update:translations": "npm run make:pot && npm run merge:po && npm run make:mo"
   },
   "devDependencies": {
-    "@woocommerce/dependency-extraction-webpack-plugin": "^2.2.0",
     "@wordpress/scripts": "^36.0.0"
   },
   "overrides": {

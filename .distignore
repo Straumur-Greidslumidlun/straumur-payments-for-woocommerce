@@ -2,6 +2,12 @@
 /.git
 /.github
 /node_modules
+/build
 
 .distignore
 .gitignore
+.gitattributes
+.nvmrc
+phpcs.xml.dist
+CLAUDE.md
+README.md

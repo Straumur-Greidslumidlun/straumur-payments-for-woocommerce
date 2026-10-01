@@ -2,7 +2,7 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Straumur Payments For WooCommerce 2.0.0\n"
+"Project-Id-Version: Straumur Payments For WooCommerce 2.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/straumur-payments-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -218,6 +218,13 @@ msgstr ""
 
 #: includes/class-wc-straumur-settings.php:128
 msgid "Checkout Language"
+msgstr ""
+#: includes/class-wc-straumur-settings.php
+msgid "Payment method logos"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Logos shown next to the Straumur payment option at checkout. This only changes the logos. Which payment methods shoppers can use on the payment page is set up by Straumur."
 msgstr ""
 
 #: includes/class-wc-straumur-settings.php:132

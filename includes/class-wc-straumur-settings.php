@@ -46,6 +46,35 @@ class WC_Straumur_Settings {
 	private static array $cached_settings = array();
 
 	/**
+	 * Payment method logos the merchant can show at checkout, in display order.
+	 * Each entry is the logo label and its file under assets/images.
+	 *
+	 * @since 2.2.0
+	 * @var array
+	 */
+	private static array $payment_logos = array(
+		'visa'        => array( 'Visa', 'visa-logo.png' ),
+		'mastercard'  => array( 'Mastercard', 'mastercard.png' ),
+		'amex'        => array( 'American Express', 'amex.svg' ),
+		'diners'      => array( 'Diners', 'diners.svg' ),
+		'discover'    => array( 'Discover', 'discover.svg' ),
+		'jcb'         => array( 'JCB', 'jcb.svg' ),
+		'unionpay'    => array( 'UnionPay', 'unionpay.svg' ),
+		'googlepay'   => array( 'Google Pay', 'googlepay.png' ),
+		'applepay'    => array( 'Apple Pay', 'applepay.png' ),
+		'wechatpay'   => array( 'WeChat Pay', 'wechatpay.svg' ),
+		'straumurpay' => array( 'Straumur Pay (Kortalán)', 'straumur-pay.svg' ),
+	);
+
+	/**
+	 * Logos shown before the merchant chooses any, matching what earlier versions always showed.
+	 *
+	 * @since 2.2.0
+	 * @var array
+	 */
+	private static array $default_payment_logos = array( 'visa', 'mastercard', 'googlepay', 'applepay' );
+
+	/**
 	 * Retrieve the gateway form fields for the settings page (all fields).
 	 * We'll split these into tabs in the gateway class.
 	 *
@@ -89,6 +118,25 @@ class WC_Straumur_Settings {
 				),
 				'default'     => esc_html__( 'Pay via Straumur Hosted Checkout.', 'straumur-payments-for-woocommerce' ),
 				'desc_tip'    => true,
+			),
+			'payment_logos'               => array(
+				'title'             => esc_html__( 'Payment method logos', 'straumur-payments-for-woocommerce' ),
+				'type'              => 'multiselect',
+				'class'             => 'wc-enhanced-select',
+				// Keep the dropdown open while picking, so several logos can be chosen in one go.
+				'custom_attributes' => array( 'data-close-on-select' => 'false' ),
+				'default'           => self::$default_payment_logos,
+				'options'           => array_map(
+					static function ( array $logo ): string {
+						return $logo[0];
+					},
+					self::$payment_logos
+				),
+				'description'       => esc_html__(
+					'Logos shown next to the Straumur payment option at checkout. This only changes the logos. Which payment methods shoppers can use on the payment page is set up by Straumur.',
+					'straumur-payments-for-woocommerce'
+				),
+				'desc_tip'          => false,
 			),
 			'theme_key'                   => array(
 				'title'       => esc_html__( 'Theme key', 'straumur-payments-for-woocommerce' ),
@@ -285,6 +333,33 @@ class WC_Straumur_Settings {
 			'Pay securely using Straumur hosted checkout.',
 			'straumur-payments-for-woocommerce'
 		);
+	}
+
+	/**
+	 * Get the payment method logos the merchant has chosen to show at checkout.
+	 *
+	 * Stores that have never saved this setting get the default set, so upgrading
+	 * does not change their checkout. A saved empty selection shows no logos.
+	 *
+	 * @since 2.2.0
+	 * @return array Logo key => array with 'label' and 'url', in display order.
+	 */
+	public static function get_payment_logos(): array {
+		$settings = self::get_settings();
+		$selected = array_key_exists( 'payment_logos', $settings )
+			? (array) $settings['payment_logos']
+			: self::$default_payment_logos;
+
+		$logos = array();
+		foreach ( self::$payment_logos as $key => $logo ) {
+			if ( in_array( $key, $selected, true ) ) {
+				$logos[ $key ] = array(
+					'label' => $logo[0],
+					'url'   => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/' . $logo[1],
+				);
+			}
+		}
+		return $logos;
 	}
 
 	/**

@@ -88,33 +88,30 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Get payment method icon with multiple card logos.
 	 *
-	 * This method generates HTML for displaying payment method icons, including Visa,
-	 * Mastercard, Google Pay, and Apple Pay. It uses custom logos defined in the plugin
-	 * assets directory and applies a WooCommerce filter for customization.
+	 * This method generates HTML for the payment method logos the merchant has chosen
+	 * in the settings (Visa, Mastercard, Google Pay and Apple Pay by default) and applies
+	 * a WooCommerce filter for customization.
 	 *
 	 * @return string HTML string containing the payment method icons.
 	 */
 	public function get_icon(): string {
-		// Define custom card logos.
-		$card_logos = array(
-			'visa' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/visa-logo.png',
-			'mastercard' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/mastercard.png',
-			'googlepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/googlepay.png',
-			'applepay' => STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/applepay.png',
-		);
+		$logos = WC_Straumur_Settings::get_payment_logos();
 
-		$icon_html = '<span class="straumur-payment-icons">';
-		
-		foreach ( $card_logos as $card => $logo_url ) {
-			$icon_html .= sprintf(
-				'<img src="%s" alt="%s" role="img" aria-label="Payment method: %s" />',
-				esc_url( $logo_url ),
-				esc_attr( ucfirst( $card ) ),
-				esc_attr( ucfirst( $card ) )
-			);
+		$icon_html = '';
+		if ( ! empty( $logos ) ) {
+			$icon_html = '<span class="straumur-payment-icons">';
+
+			foreach ( $logos as $logo ) {
+				$icon_html .= sprintf(
+					'<img src="%s" alt="%s" role="img" aria-label="Payment method: %s" />',
+					esc_url( $logo['url'] ),
+					esc_attr( $logo['label'] ),
+					esc_attr( $logo['label'] )
+				);
+			}
+
+			$icon_html .= '</span>';
 		}
-		
-		$icon_html .= '</span>';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}

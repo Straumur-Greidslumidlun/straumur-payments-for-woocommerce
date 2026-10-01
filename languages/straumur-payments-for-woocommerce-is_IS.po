@@ -187,6 +187,13 @@ msgstr "Senda inn hluti í körfu inn á greiðslusíðu Straums.  Afvirkið ef 
 #: includes/class-wc-straumur-settings.php:128
 msgid "Checkout Language"
 msgstr "Tungumál greiðslusíðu"
+#: includes/class-wc-straumur-settings.php
+msgid "Payment method logos"
+msgstr "Merki greiðsluleiða"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Logos shown next to the Straumur payment option at checkout. This only changes the logos. Which payment methods shoppers can use on the payment page is set up by Straumur."
+msgstr "Merki sem birtast við Straumur greiðsluleiðina í greiðsluferlinu. Þetta breytir aðeins merkjunum. Straumur setur upp hvaða greiðsluleiðir kaupendur geta notað á greiðslusíðunni."
 
 #: includes/class-wc-straumur-settings.php:132
 msgid "Icelandic"

@@ -3,22 +3,60 @@ name: Deploy to WordPress.org
 on:
   push:
     tags:
-    - "*"
+      # Release tags only, e.g. 2.2.0. Any other tag does nothing.
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-wordpress-org
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deploy to WordPress.org
     runs-on: ubuntu-latest
+    # Required reviewers on this environment approve each release before it runs.
+    environment:
+      name: wordpress-org
+      url: https://wordpress.org/plugins/straumur-payments-for-woocommerce/
 
     steps:
-      - uses: actions/checkout@master
-      - name: Build # Remove or modify this step as needed
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Tag is on main
         run: |
-          npm install
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag ${GITHUB_REF_NAME} is not on main. Release from main only."
+            exit 1
+          fi
+
+      - name: Tag matches the plugin version
+        run: bash .github/scripts/check-versions.sh "$GITHUB_REF_NAME"
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Build with the locked dependencies
+        run: |
+          npm ci
           npm run build
+
+      - name: Build matches what was tested
+        run: |
+          if ! git diff --exit-code -- assets/js/frontend; then
+            echo "::error::The built checkout script differs from the committed one. Fix on dev and re-tag."
+            exit 1
+          fi
+
       - name: WordPress Plugin Deploy
-        uses: 10up/action-wordpress-plugin-deploy@stable
+        uses: 10up/action-wordpress-plugin-deploy@54bd289b8525fd23a5c365ec369185f2966529c2 # 2.3.0
         env:
+          SVN_USERNAME: ${{ secrets.WP_ORG_USERNAME }}
           SVN_PASSWORD: ${{ secrets.WP_ORG_PASSWORD }}
-          SVN_USERNAME: ${{ secrets.WP_ORG_USERNAME}}
-          SLUG: straumur-payments-for-woocommerce # optional, remove if GitHub repo name matches SVN slug, including capitalization
+          SLUG: straumur-payments-for-woocommerce
