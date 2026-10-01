@@ -12,7 +12,6 @@
     "update:translations": "npm run make:pot && npm run merge:po && npm run make:mo"
   },
   "devDependencies": {
-    "@woocommerce/dependency-extraction-webpack-plugin": "^2.2.0",
     "@wordpress/scripts": "^36.0.0"
   },
   "overrides": {
