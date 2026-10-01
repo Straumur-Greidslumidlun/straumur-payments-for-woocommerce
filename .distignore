@@ -11,3 +11,4 @@
 phpcs.xml.dist
 CLAUDE.md
 README.md
+.git-blame-ignore-revs
