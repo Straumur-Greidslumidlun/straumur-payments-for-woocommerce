@@ -215,7 +215,7 @@ public static function get_setting($key) {
 
 ### WordPress Environment Requirements
 - **WordPress**: 5.2+
-- **WooCommerce**: 8.1+ (tested up to 9.9)
+- **WooCommerce**: 8.1+ (tested up to 11.1)
 - **PHP**: 7.4+
 - Subscription support requires WooCommerce Subscriptions
 
