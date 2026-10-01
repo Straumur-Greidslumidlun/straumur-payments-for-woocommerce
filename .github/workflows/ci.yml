@@ -80,6 +80,10 @@ jobs:
   plugin-check:
     name: WordPress.org Plugin Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # The action posts its findings as a PR comment.
+      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Assemble the package as WordPress.org receives it
