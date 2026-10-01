@@ -453,7 +453,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			);
 			$this->logger->error(
 				'Subscription payment failed for order ' . $order->get_id()
-				. '. Response: ' . wp_json_encode( $response ),
+				. '. Response: ' . wp_json_encode( WC_Straumur_Log_Redactor::summarize( (array) $response ) ),
 				$this->context
 			);
 

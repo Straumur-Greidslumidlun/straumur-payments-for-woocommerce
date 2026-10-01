@@ -88,6 +88,7 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 == Changelog ==
 = 2.2.0 =
 * Added: Choose which payment method logos show next to Straumur at checkout: Visa, Mastercard, American Express, Diners, Discover, JCB, UnionPay, Google Pay, Apple Pay, WeChat Pay and Straumur Pay (Kortalán). Existing stores keep the current four logos until they change the setting
+* Security: Debug logs no longer contain the Straumur API key, saved card tokens, shopper IP addresses, cart items or payment page links. If WordPress debug mode has been on, rotate your API key in the Straumur service portal
 * Added: Partial and full refunds can now be done from the WooCommerce order screen
 * Refunds are sent through the Straumur refund API and confirmed via webhook
 * Added Icelandic translations for refund order notes and messages
@@ -142,6 +143,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 * Partial refunds meta storage
 
 == Upgrade Notice ==
+
+= 2.2.0 =
+Debug logs no longer contain your Straumur API key. If WordPress debug mode has been on, rotate your API key in the Straumur service portal after updating.
 
 = 2.0 =
 Major update introducing subscriptions, session lifetime settings, customizable redirects, and improved troubleshooting tools.

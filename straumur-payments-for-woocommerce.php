@@ -173,6 +173,7 @@ function init(): void
 
 	// Include required plugin files.
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-settings.php';
+	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-log-redactor.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-api.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-order-handler.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-payment-gateway.php';

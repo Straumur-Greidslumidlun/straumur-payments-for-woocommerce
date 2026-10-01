@@ -96,16 +96,10 @@ class WC_Straumur_Webhook_Handler
 	{
 		$body = $request->get_body();
 
-		// Only log a redacted version of the payload without sensitive data
+		// Log only the allow-listed fields: the payload carries card, token and signature data.
 		$log_data = json_decode($body, true);
 		if (is_array($log_data)) {
-			if (isset($log_data['additionalData']['cardNumber'])) {
-				$log_data['additionalData']['cardNumber'] = '[REDACTED]';
-			}
-			if (isset($log_data['additionalData']['token'])) {
-				$log_data['additionalData']['token'] = '[REDACTED]';
-			}
-			self::log_message('Incoming webhook: ' . wp_json_encode($log_data));
+			self::log_message('Incoming webhook: ' . wp_json_encode(WC_Straumur_Log_Redactor::summarize($log_data)));
 		} else {
 			self::log_message('Incoming webhook: Invalid JSON payload');
 		}
