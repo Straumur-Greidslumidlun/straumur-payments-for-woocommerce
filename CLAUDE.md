@@ -233,15 +233,23 @@ public static function get_setting($key) {
 
 ## Deployment & Release Process
 
+### Continuous Integration
+`.github/workflows/ci.yml` runs on every PR to `dev`/`main`:
+- `php -l` on PHP 7.4 and 8.4
+- PHPCS with `phpcs.xml.dist` (WordPress security sniffs + PHP 7.4 compatibility). WordPress formatting is not enforced yet.
+- `npm ci && npm run build`, failing if `assets/js/frontend` differs from the commit — always commit the rebuilt bundle
+- `.github/scripts/check-versions.sh`: plugin header, `STRAUMUR_PAYMENTS_VERSION`, `Stable tag` and `package.json` must agree, and `readme.txt` needs a changelog entry for that version
+- WordPress.org Plugin Check on the package as `.distignore` assembles it
+
 ### Release Workflow
 1. **Development**: Work on `dev` branch
 2. **Pull Request**: Create PR from `dev` to `main`
-3. **Release**: Create tagged release matching version in `readme.txt`
-4. **Deployment**: GitHub Actions automatically deploys to WordPress.org SVN
+3. **Release**: Tag the release commit on `main` with the bare version, e.g. `2.2.0`
+4. **Deployment**: `deploy.yml` checks the tag is on `main` and matches the version, rebuilds, then waits for approval on the `wordpress-org` environment before deploying to WordPress.org SVN. Other tags are ignored.
 
 ### Version Management
-- Version defined in main plugin file header
-- Must match `Stable tag` in `readme.txt`
+- Version defined in main plugin file header and `STRAUMUR_PAYMENTS_VERSION`
+- Must match `Stable tag` in `readme.txt` and `version` in `package.json`
 - Follows semantic versioning (MAJOR.MINOR.PATCH)
 
 ### Distribution Files
