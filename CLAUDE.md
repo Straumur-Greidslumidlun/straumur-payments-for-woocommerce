@@ -37,31 +37,47 @@ npm run update:translations
 ```
 
 ### Git Workflow
-The project follows a standard Git Flow pattern:
-- `dev` branch: Development branch (default)
-- `main` branch: Production branch for releases
-- Feature branches: `feature/your-feature-name`
+- `dev` branch: Development branch (default). PRs target `dev`.
+- `main` branch: Production branch. Only release PRs from `dev`; every release is a tag on `main`.
+- Branches: `feat|fix|bug|task/SD-XXXX-description`, with the Jira key in the PR title as well.
+- Both `dev` and `main` require the six CI checks (below), an up-to-date branch and one approving review.
+- Merge with a merge commit, not squash: `.git-blame-ignore-revs` refers to commits by hash.
+
+Security and release rules are in `.claude/rules/security.md` and apply to every change.
+
+### Checklist for a user-facing change
+1. Rebuild and commit `assets/js/frontend` if `src/` changed (CI fails otherwise).
+2. New or changed admin strings: add them to `languages/straumur-payments-for-woocommerce.pot` and the Icelandic `.po`, then compile the `.mo`. Most merchants run the admin in Icelandic.
+3. New setting: document it under *Plugin Settings Documentation* in `readme.txt` and keep stores that upgrade unchanged (a missing option must mean today's behaviour).
+4. Add a line to the next version's `== Changelog ==` entry in `readme.txt`.
+5. The public docs page (straumur-documentation `docs/04-ecommerce-plugins/02-woocommerce.md`) lists features and the tested-up-to versions; update it in the same release.
 
 ## High-Level Architecture
 
 ### Plugin Structure
 
 ```
-straumur-woocommerce-plugin/
-├── straumur-payments-for-woocommerce.php    # Main plugin file & bootstrap
+straumur-payments-for-woocommerce/
+├── straumur-payments-for-woocommerce.php    # Main plugin file & bootstrap (header, version constant, require_once list)
 ├── includes/                                # Core PHP classes
-│   ├── class-wc-straumur-payment-gateway.php    # Main payment gateway
+│   ├── class-wc-straumur-payment-gateway.php    # Main payment gateway, checkout logos (get_icon)
 │   ├── class-wc-straumur-api.php                # API communication layer
-│   ├── class-wc-straumur-settings.php           # Settings management
+│   ├── class-wc-straumur-settings.php           # Settings fields, getters, payment logo registry
 │   ├── class-wc-straumur-order-handler.php      # Order lifecycle management
 │   ├── class-wc-straumur-block-support.php      # WooCommerce blocks integration
-│   └── class-wc-straumur-webhook-handler.php    # Webhook processing
+│   ├── class-wc-straumur-webhook-handler.php    # Webhook processing
+│   └── class-wc-straumur-log-redactor.php       # Allow-list for everything written to logs
 ├── src/                                     # JavaScript source files
 │   └── index.js                            # Block-based checkout React component
-├── assets/                                  # Compiled assets & images
+├── assets/                                  # Compiled assets & images (committed)
 │   ├── js/frontend/                        # Compiled JavaScript
-│   └── images/                             # Plugin icons & assets
-└── languages/                              # Translation files
+│   ├── css/                                # Checkout logo styles
+│   └── images/                             # Plugin icons & payment method logos
+├── languages/                              # .pot, Icelandic .po/.mo
+├── .github/workflows/                      # ci.yml (PR checks), deploy.yml (WordPress.org release)
+├── .github/scripts/check-versions.sh       # Version consistency check used by both workflows
+├── phpcs.xml.dist                          # Coding standards ruleset used by CI
+└── .nvmrc                                  # Node version for builds (CI and release)
 ```
 
 ### Core Components
@@ -73,16 +89,15 @@ straumur-woocommerce-plugin/
 - Manages order creation and payment session initialization
 
 #### 2. API Layer (`WC_Straumur_API`)
-- Singleton pattern for API communication
+- A new instance per use (`new WC_Straumur_API()`), reading credentials from `WC_Straumur_Settings`
 - Handles HTTP requests to Straumur's REST API
-- Manages payment sessions, captures, refunds, and cancellations
-- Implements proper error handling and logging
+- Manages payment sessions, token payments, captures, refunds, and cancellations
+- Logs only through `WC_Straumur_Log_Redactor` (see `.claude/rules/security.md` §1.1)
 
 #### 3. Settings Management (`WC_Straumur_Settings`)
-- Centralized settings configuration
-- Handles form field definitions and validation
-- Caches settings to optimize performance
-- Provides getter methods for all configuration options
+- Form field definitions (`get_form_fields()`) for the gateway settings page
+- One static getter per setting, reading the cached `woocommerce_straumur_settings` option
+- Payment method logo registry and `get_payment_logos()`; a store that never saved the setting gets the four default logos
 
 #### 4. Order Handler (`WC_Straumur_Order_Handler`)
 - Manages order lifecycle transitions
@@ -183,32 +198,34 @@ add_action('woocommerce_blocks_payment_method_type_registration', $register_call
 
 ### Error Handling & Logging
 ```php
-// Consistent logging pattern
+// Never log a payload as is: reduce it to the allow-listed fields first.
 $this->logger = wc_get_logger();
-$this->logger->error('Error message', array('source' => 'straumur'));
+$this->logger->error(
+	'Token payment failed: ' . wp_json_encode( WC_Straumur_Log_Redactor::summarize( (array) $response ) ),
+	array( 'source' => 'straumur-payments' )
+);
 ```
+- `WC_Straumur_API::log()` and the webhook handler's `log_message()` only write info/warning when `WP_DEBUG` is on; `logger->error()` always writes.
+- After `json_decode()`, read `json_last_error()` before calling anything else that encodes JSON (including a log call).
 
 ### Settings Pattern
 ```php
-// Centralized settings with caching
-private static array $cached_settings = array();
-public static function get_setting($key) {
-    if (empty(self::$cached_settings)) {
-        self::$cached_settings = get_option(self::$option_key, array());
-    }
-    return self::$cached_settings[$key] ?? '';
+// One typed getter per setting, over a cached copy of the option.
+public static function get_terminal_identifier(): string {
+	$settings = self::get_settings();
+	return $settings['terminal_identifier'] ?? '';
 }
 ```
+Add a setting by adding its field to `get_form_fields()` and a getter. Decide what a store that has never saved the new field should get (`array_key_exists()`, not `empty()`, when "nothing selected" is a valid choice).
 
 ### API Communication
-- **Singleton pattern** for API client
-- **WP HTTP API** for requests (`wp_remote_request`)
-- **Proper error handling** with `WP_Error` objects
-- **JSON validation** with proper error messages
+- **WP HTTP API** for requests (`wp_remote_request`), 60 s timeout
+- **Error handling** with `WP_Error` objects; non-2xx responses return `false`
+- **JSON validation** with the decode error logged
 
 ### Subscription Support
 - Implements WooCommerce Subscriptions hooks
-- Supports payment method changes, renewals, and lifecycle management
+- Supports renewals (token payments), cancellation, suspension and reactivation. Payment method changes are not supported (removed in 2.1.0)
 - Token-based payment handling for recurring transactions
 
 ## Testing & Quality Assurance
@@ -220,10 +237,10 @@ public static function get_setting($key) {
 - Subscription support requires WooCommerce Subscriptions
 
 ### Development Environment Setup
-1. Local WordPress installation (Local by Flywheel, XAMPP, Docker)
+1. Local WordPress installation (Local by Flywheel, XAMPP, Docker), or WordPress Playground without Docker: `npx @wp-playground/cli server --mount-dir <this repo> /wordpress/wp-content/plugins/straumur-payments-for-woocommerce` with a blueprint that installs WooCommerce. Playground needs a Node version its native dependencies ship binaries for (24 LTS works).
 2. WooCommerce installed and activated
-3. Node.js and npm for asset building
-4. Enable WordPress debugging in `wp-config.php`
+3. Node.js and npm for asset building (version in `.nvmrc`)
+4. Enable WordPress debugging in `wp-config.php`. Debug logs are redacted, but treat them as sensitive anyway.
 
 ### Plugin Testing
 - Test both traditional and block-based checkout
@@ -244,18 +261,21 @@ public static function get_setting($key) {
 ### Release Workflow
 1. **Development**: Work on `dev` branch
 2. **Pull Request**: Create PR from `dev` to `main`
-3. **Release**: Tag the release commit on `main` with the bare version, e.g. `2.2.0`
-4. **Deployment**: `deploy.yml` checks the tag is on `main` and matches the version, rebuilds, then waits for approval on the `wordpress-org` environment before deploying to WordPress.org SVN. Other tags are ignored.
+3. **Change request**: raise a CR for the release (workspace `change-request` skill). A WordPress.org release is a production deploy to every merchant with auto-updates on.
+4. **Release**: a human tags the release commit on `main` with the bare version, e.g. `2.2.0`
+5. **Deployment**: `deploy.yml` checks the tag is on `main` and matches the version, rebuilds, then waits for approval on the `wordpress-org` environment (required reviewers) before deploying to WordPress.org SVN. Other tags are ignored.
 
 ### Version Management
 - Version defined in main plugin file header and `STRAUMUR_PAYMENTS_VERSION`
-- Must match `Stable tag` in `readme.txt` and `version` in `package.json`
+- Must match `Stable tag` in `readme.txt` and `version` in `package.json` (and the root entries in `package-lock.json`); `check-versions.sh` enforces this
+- Also bump the `.pot` `Project-Id-Version` and the `Tested up to` / `WC tested up to` headers
 - Follows semantic versioning (MAJOR.MINOR.PATCH)
+- A version merged to `dev` is not released until it is tagged on `main`. Check the latest tag before writing a changelog entry; 2.1.0 was never released and was folded into 2.2.0.
 
 ### Distribution Files
-- `.distignore`: Defines files excluded from distribution
-- `.gitattributes`: Git export settings for clean releases
-- Excludes development files, documentation, and CI/CD configurations
+- `.distignore` is what decides the WordPress.org package: the deploy action and the Plugin Check job both use it. Add every new development-only file or folder here, or it ships (`.gitattributes` once did).
+- `.gitattributes` `export-ignore` only affects `git archive`, e.g. a hand-built test zip. Keep it in step with `.distignore`.
+- `src/` and `package.json` ship on purpose: WordPress.org requires the readable source of compiled scripts.
 
 ## Key Integration Points
 
@@ -276,5 +296,3 @@ public static function get_setting($key) {
 - **WooCommerce Subscriptions**: Recurring payment support
 - **WooCommerce Blocks**: Modern checkout experience
 - **WordPress REST API**: Webhook endpoint handling
-
-This plugin demonstrates modern WordPress development practices with proper separation of concerns, security considerations, and comprehensive WooCommerce integration patterns.
