@@ -236,7 +236,7 @@ public static function get_setting($key) {
 ### Continuous Integration
 `.github/workflows/ci.yml` runs on every PR to `dev`/`main`:
 - `php -l` on PHP 7.4 and 8.4
-- PHPCS with `phpcs.xml.dist` (WordPress security sniffs + PHP 7.4 compatibility). WordPress formatting is not enforced yet.
+- PHPCS with `phpcs.xml.dist` (WordPress-Core, WordPress security sniffs, PHP 7.4 compatibility). Run `phpcbf` with the same ruleset to fix formatting
 - `npm ci && npm run build`, failing if `assets/js/frontend` differs from the commit — always commit the rebuilt bundle
 - `.github/scripts/check-versions.sh`: plugin header, `STRAUMUR_PAYMENTS_VERSION`, `Stable tag` and `package.json` must agree, and `readme.txt` needs a changelog entry for that version
 - WordPress.org Plugin Check on the package as `.distignore` assembles it

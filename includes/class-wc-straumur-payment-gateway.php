@@ -80,7 +80,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 
 		add_action( 'woocommerce_scheduled_subscription_payment_straumur', array( $this, 'process_subscription_payment' ), 10, 2 );
-		
+
 		// Enqueue frontend styles
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
 	}
@@ -130,9 +130,9 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		// Check if CSS file exists before enqueuing
 		$css_file_path = STRAUMUR_PAYMENTS_PLUGIN_DIR . 'assets/css/straumur-payment-method.css';
 		if ( ! file_exists( $css_file_path ) ) {
-			$this->logger->warning( 
-				'Straumur payment method CSS file not found: ' . $css_file_path, 
-				$this->context 
+			$this->logger->warning(
+				'Straumur payment method CSS file not found: ' . $css_file_path,
+				$this->context
 			);
 			return;
 		}
@@ -207,7 +207,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 		}
 
 		$difference = $expected_amount - $calculated_total;
-		if ( $difference !== 0 && ! empty( $items ) ) {
+		if ( 0 !== $difference && ! empty( $items ) ) {
 			$items[ count( $items ) - 1 ]['Amount'] += $difference;
 		}
 
@@ -349,9 +349,9 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 		// Convert amount to minor units.
 		$amount_minor = (int) round( $amount * 100 );
-		$currency = $order->get_currency();		
-		$reference =(string) $order->get_id();
-		
+		$currency     = $order->get_currency();
+		$reference    = (string) $order->get_id();
+
 		// Retrieve shopper IP (if available) and origin.
 		$shopper_ip = method_exists( $order, 'get_customer_ip_address' ) ? $order->get_customer_ip_address() : '';
 		$origin     = home_url( '/' );
@@ -621,13 +621,16 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			$pending_refunds = array();
 		}
 
-		$pending_refunds = array_filter( $pending_refunds, function ( $pending ) {
-			if ( ! isset( $pending['requested_at'] ) ) {
-				return true;
+		$pending_refunds = array_filter(
+			$pending_refunds,
+			function ( $pending ) {
+				if ( ! isset( $pending['requested_at'] ) ) {
+					return true;
+				}
+				$age_hours = ( time() - (int) get_gmt_from_date( $pending['requested_at'], 'U' ) ) / HOUR_IN_SECONDS;
+				return $age_hours < 24;
 			}
-			$age_hours = ( time() - (int) get_gmt_from_date( $pending['requested_at'], 'U' ) ) / HOUR_IN_SECONDS;
-			return $age_hours < 24;
-		} );
+		);
 
 		foreach ( $pending_refunds as $pending ) {
 			if ( isset( $pending['amount'] ) && abs( $pending['amount'] - $amount_minor ) < 1 ) {

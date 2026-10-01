@@ -1,0 +1,5 @@
+# Revisions that only reformat code. GitHub blame skips these automatically; locally run:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Reformat PHP to WordPress-Core coding standards (SD-3984)
+92b1b3cf45b0a0e70f43e4fdacd1f97ad41acd54
