@@ -173,17 +173,17 @@ class WC_Straumur_Settings {
 				'desc_tip'    => false,
 			),
 			'checkout_language'           => array(
-			'title'       => esc_html__( 'Checkout Language', 'straumur-payments-for-woocommerce' ),
-			'type'        => 'select',
-			'default'     => 'is',
-			'options'     => array(
-				'is' => esc_html__( 'Icelandic', 'straumur-payments-for-woocommerce' ),
-				'en' => esc_html__( 'English', 'straumur-payments-for-woocommerce' ),
+				'title'       => esc_html__( 'Checkout Language', 'straumur-payments-for-woocommerce' ),
+				'type'        => 'select',
+				'default'     => 'is',
+				'options'     => array(
+					'is' => esc_html__( 'Icelandic', 'straumur-payments-for-woocommerce' ),
+					'en' => esc_html__( 'English', 'straumur-payments-for-woocommerce' ),
+				),
+				'description' => esc_html__( 'Default language shown on the hosted checkout page. Shoppers can still switch languages manually.', 'straumur-payments-for-woocommerce' ),
+				'desc_tip'    => true,
 			),
-			'description' => esc_html__( 'Default language shown on the hosted checkout page. Shoppers can still switch languages manually.', 'straumur-payments-for-woocommerce' ),
-			'desc_tip'    => true,
-		),
-		'checkout_expiry'             => array(
+			'checkout_expiry'             => array(
 				'title'       => esc_html__( 'Checkout Expiry (hours)', 'straumur-payments-for-woocommerce' ),
 				'type'        => 'select',
 				'default'     => '1',
