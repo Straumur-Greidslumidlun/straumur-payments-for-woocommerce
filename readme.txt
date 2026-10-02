@@ -148,7 +148,7 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 == Upgrade Notice ==
 
 = 2.2.1 =
-Renames the Kortalán logo option to Straumur Kortalán. Stores that selected it keep it selected.
+Minor fixes
 
 = 2.2.0 =
 Adds a payment method logo setting, refunds from the order screen, and tightens what is written to debug logs.
