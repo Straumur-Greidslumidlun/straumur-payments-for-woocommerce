@@ -284,6 +284,64 @@ class WC_Straumur_API {
 	}
 
 	/**
+	 * Refund a captured transaction (partial or full).
+	 *
+	 * Only transactions that have been captured can be refunded.
+	 * The refund is processed asynchronously and confirmed via webhook.
+	 *
+	 * @since 2.1.0
+	 *
+	 * @param string $reference        Your internal reference (order ID).
+	 * @param string $payfac_reference Payfac reference from the original transaction.
+	 * @param int    $amount           Amount to refund in minor units.
+	 * @param string $currency         ISO currency code (e.g., "ISK").
+	 * @param string $refund_reason    Reason for refund. Valid values: OTHER, RETURN, DUPLICATE, FRAUD, CUSTOMER REQUEST.
+	 * @return array|false Response array with responseIdentifier on success, false on failure.
+	 */
+	public function refund(
+		string $reference,
+		string $payfac_reference,
+		int $amount,
+		string $currency,
+		string $refund_reason = 'CUSTOMER REQUEST'
+	) {
+		// Validate refund reason against allowed values.
+		$allowed_reasons = array( 'OTHER', 'RETURN', 'DUPLICATE', 'FRAUD', 'CUSTOMER REQUEST' );
+		if ( ! in_array( $refund_reason, $allowed_reasons, true ) ) {
+			$refund_reason = 'CUSTOMER REQUEST';
+		}
+
+		$body = array(
+			'reference'       => $reference,
+			'payfacReference' => $payfac_reference,
+			'amount'          => $amount,
+			'currency'        => $currency,
+			'refundReason'    => $refund_reason,
+		);
+
+		$this->log(
+			"Sending refund request for reference {$reference}, amount {$amount} {$currency}",
+			'info'
+		);
+
+		$response = $this->send_request( 'modification/refund', $body );
+
+		if ( $response && isset( $response['responseIdentifier'] ) ) {
+			$this->log(
+				"Refund request accepted for reference {$reference}, responseIdentifier: {$response['responseIdentifier']}",
+				'info'
+			);
+		} elseif ( ! $response ) {
+			$this->log(
+				"Refund request failed for reference {$reference}",
+				'error'
+			);
+		}
+
+		return $response;
+	}
+
+	/**
 	 * Process a token-based subscription payment.
 	 *
 	 * @since 1.0.0
@@ -339,7 +397,7 @@ class WC_Straumur_API {
 			$this->log( "Token payment requires redirect for reference {$reference}", 'info' );
 		} else {
 			$this->log(
-				"Token payment failed for reference {$reference} with response: " . wp_json_encode( $result ),
+				"Token payment failed for reference {$reference} with response: " . wp_json_encode( WC_Straumur_Log_Redactor::summarize( (array) $result ) ),
 				'error'
 			);
 		}
@@ -373,15 +431,15 @@ class WC_Straumur_API {
 			$args['body'] = wp_json_encode( $body );
 		}
 
-		// Log outgoing request
+		// Log outgoing request. Headers carry the API key and the body can carry card tokens and
+		// shopper details, so only the redacted summary is written.
 		$this->log(
 			wp_json_encode(
 				array(
 					'straumur_request' => array(
-						'method'  => $method,
-						'url'     => $url,
-						'headers' => $args['headers'],
-						'body'    => $body,
+						'method'   => $method,
+						'endpoint' => WC_Straumur_Log_Redactor::endpoint( $url ),
+						'body'     => WC_Straumur_Log_Redactor::summarize( $body ),
 					),
 				)
 			),
@@ -409,8 +467,8 @@ class WC_Straumur_API {
 				wp_json_encode(
 					array(
 						'straumur_response' => array(
-							'url'   => $url,
-							'error' => $response->get_error_message(),
+							'endpoint' => WC_Straumur_Log_Redactor::endpoint( $url ),
+							'error'    => $response->get_error_message(),
 						),
 					)
 				),
@@ -421,24 +479,30 @@ class WC_Straumur_API {
 
 		$response_code = wp_remote_retrieve_response_code( $response );
 		$response_body = wp_remote_retrieve_body( $response );
+		$response_data = json_decode( $response_body, true );
+		// Read now: the wp_json_encode() in the log call below would reset it.
+		$json_error         = json_last_error();
+		$json_error_message = json_last_error_msg();
 
+		// The body can hold the payment page URL and token details, so log only the summary.
 		$this->log(
 			wp_json_encode(
 				array(
 					'straumur_response' => array(
-						'url'  => $url,
-						'code' => $response_code,
-						'body' => $response_body,
+						'endpoint' => WC_Straumur_Log_Redactor::endpoint( $url ),
+						'code'     => $response_code,
+						'body'     => is_array( $response_data )
+							? WC_Straumur_Log_Redactor::summarize( $response_data )
+							: sprintf( '[%d bytes, not JSON]', strlen( $response_body ) ),
 					),
 				)
 			),
 			'info'
 		);
 
-		$response_data = json_decode( $response_body, true );
-		if ( json_last_error() !== JSON_ERROR_NONE ) {
+		if ( JSON_ERROR_NONE !== $json_error ) {
 			$this->log(
-				'JSON decode error: ' . json_last_error_msg(),
+				'JSON decode error: ' . $json_error_message,
 				'error'
 			);
 			return false;

@@ -2,9 +2,9 @@
 Contributors: smartmediais, straumur
 Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.0.4
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -38,6 +38,7 @@ Straumur Payments allows you to accept payments via Straumur’s Hosted Checkout
    - **Payment Gateway Terminal Identifier** *(Required for subscriptions)*: Necessary only if you are using subscriptions.
    - **HMAC Key** *(Required)*: Obtain from your Straumur merchant dashboard.
    - **Theme Key** *(Optional)*: For customizing the appearance of the payment page.
+   - **Payment method logos** *(Optional)*: Choose which logos show next to Straumur at checkout.
    - **Authorize Only (Manual Capture)** *(Optional)*: Enable if you prefer to capture payments manually.
    - **Checkout Expiry (hours)** *(Required)*: Defines the payment session duration.
    - **Abandon URL** *(Optional)*: URL to redirect customers if the payment is abandoned.
@@ -65,6 +66,7 @@ These details are available from the Straumur merchant dashboard at [https://thj
 
 - **Title** *(Required)*: Display name shown at checkout.
 - **Description** *(Optional)*: Short description shown to customers.
+- **Payment method logos** *(Optional)*: Logos shown next to the Straumur payment option at checkout. Defaults to Visa, Mastercard, Google Pay and Apple Pay. This only changes the logos; which payment methods shoppers can use on the payment page is set up by Straumur.
 - **Theme Key** *(Optional)*: Customize payment page appearance.
 - **Authorize Only (Manual Capture)** *(Optional)*: Enables manual capture of authorized payments.
 - **Mark Order as Completed** *(Optional)*: Orders marked completed instead of processing after successful payment.
@@ -84,6 +86,17 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.2.0 =
+* Added: Choose which payment method logos show next to Straumur at checkout: Visa, Mastercard, American Express, Diners, Discover, JCB, UnionPay, Google Pay, Apple Pay, WeChat Pay and Straumur Pay (Kortalán). Existing stores keep the current four logos until they change the setting
+* Security: Sensitive information is now redacted from the debug logs the plugin writes when WordPress debug mode is on
+* Added: Partial and full refunds can now be done from the WooCommerce order screen
+* Refunds are sent through the Straumur refund API and confirmed via webhook
+* Added Icelandic translations for refund order notes and messages
+* Fixed: Straumur logo now appears in the WooCommerce payments settings list
+* Removed: unimplemented subscription payment method change support that could fail when used
+* Tested with WordPress 7.1
+* Tested with WooCommerce 11.1.2
+
 = 2.0.4 =
 * Add card brand logos (Visa, Mastercard, Google Pay, Apple Pay) to block-based checkout
 * Add default language (culture) setting for hosted checkout page
@@ -130,6 +143,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 * Partial refunds meta storage
 
 == Upgrade Notice ==
+
+= 2.2.0 =
+Adds a payment method logo setting, refunds from the order screen, and tightens what is written to debug logs.
 
 = 2.0 =
 Major update introducing subscriptions, session lifetime settings, customizable redirects, and improved troubleshooting tools.

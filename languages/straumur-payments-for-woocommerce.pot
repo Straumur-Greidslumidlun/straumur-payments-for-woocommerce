@@ -2,7 +2,7 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Straumur Payments For WooCommerce 2.0.0\n"
+"Project-Id-Version: Straumur Payments For WooCommerce 2.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/straumur-payments-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -218,6 +218,13 @@ msgstr ""
 
 #: includes/class-wc-straumur-settings.php:128
 msgid "Checkout Language"
+msgstr ""
+#: includes/class-wc-straumur-settings.php
+msgid "Payment method logos"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Logos shown next to the Straumur payment option at checkout. This only changes the logos. Which payment methods shoppers can use on the payment page is set up by Straumur."
 msgstr ""
 
 #: includes/class-wc-straumur-settings.php:132
@@ -509,4 +516,42 @@ msgstr ""
 
 #: straumur-payments-for-woocommerce.php:344
 msgid "Support"
+msgstr ""
+
+msgid "This order was not paid via Straumur."
+msgstr ""
+
+msgid "Cannot refund: Payment reference not found. The payment may not have been captured yet."
+msgstr ""
+
+msgid "Refund amount must be greater than zero."
+msgstr ""
+
+msgid "A refund for this amount is already awaiting confirmation from Straumur. Please wait for it to be processed."
+msgstr ""
+
+msgid "Failed to send refund request to Straumur. Please try again."
+msgstr ""
+
+#. translators: 1: refund amount, 2: response identifier
+msgid "Refund request of %1$s sent to Straumur. Reference: %2$s. Awaiting confirmation."
+msgstr ""
+
+#. translators: %s: refund reason
+msgid "Reason: %s"
+msgstr ""
+
+#. translators: 1: refund amount, 2: payfac reference
+msgid "Straumur refund confirmed: %1$s. Reference: %2$s."
+msgstr ""
+
+#. translators: 1: refund amount, 2: payfac reference
+msgid "Refund of %1$s confirmed by Straumur. Reference: %2$s."
+msgstr ""
+
+#. translators: 1: failure reason, 2: payfac reference
+msgid "Straumur refund failed: %1$s. Reference: %2$s. The refund record has been removed. You may retry the refund."
+msgstr ""
+
+msgid "A refund request is already being processed for this order. Please wait a moment and try again."
 msgstr ""

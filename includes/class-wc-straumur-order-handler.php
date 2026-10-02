@@ -109,7 +109,7 @@ class WC_Straumur_Order_Handler {
 
 		$amount       = (float) $order->get_total();
 		$amount_minor = (int) round( $amount * 100 );
-		$currency     =  $order->get_currency();
+		$currency     = $order->get_currency();
 
 		$api = new WC_Straumur_API();
 
