@@ -87,7 +87,7 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 == Changelog ==
 = 2.2.1 =
-* Changed: The Kortalán logo option is now named Straumur Kortalán in the Payment method logos setting and at checkout
+* Minor fixes
 
 = 2.2.0 =
 * Added: Choose which payment method logos show next to Straumur at checkout: Visa, Mastercard, American Express, Diners, Discover, JCB, UnionPay, Google Pay, Apple Pay, WeChat Pay and Straumur Kortalán. Existing stores keep the current four logos until they change the setting
