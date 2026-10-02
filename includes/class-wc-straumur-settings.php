@@ -53,17 +53,17 @@ class WC_Straumur_Settings {
 	 * @var array
 	 */
 	private static array $payment_logos = array(
-		'visa'        => array( 'Visa', 'visa-logo.png' ),
-		'mastercard'  => array( 'Mastercard', 'mastercard.png' ),
-		'amex'        => array( 'American Express', 'amex.svg' ),
-		'diners'      => array( 'Diners', 'diners.svg' ),
-		'discover'    => array( 'Discover', 'discover.svg' ),
-		'jcb'         => array( 'JCB', 'jcb.svg' ),
-		'unionpay'    => array( 'UnionPay', 'unionpay.svg' ),
-		'googlepay'   => array( 'Google Pay', 'googlepay.png' ),
-		'applepay'    => array( 'Apple Pay', 'applepay.png' ),
-		'wechatpay'   => array( 'WeChat Pay', 'wechatpay.svg' ),
-		'straumurpay' => array( 'Straumur Pay (Kortalán)', 'straumur-pay.svg' ),
+		'visa'       => array( 'Visa', 'visa-logo.png' ),
+		'mastercard' => array( 'Mastercard', 'mastercard.png' ),
+		'amex'       => array( 'American Express', 'amex.svg' ),
+		'diners'     => array( 'Diners', 'diners.svg' ),
+		'discover'   => array( 'Discover', 'discover.svg' ),
+		'jcb'        => array( 'JCB', 'jcb.svg' ),
+		'unionpay'   => array( 'UnionPay', 'unionpay.svg' ),
+		'googlepay'  => array( 'Google Pay', 'googlepay.png' ),
+		'applepay'   => array( 'Apple Pay', 'applepay.png' ),
+		'wechatpay'  => array( 'WeChat Pay', 'wechatpay.svg' ),
+		'kortalan'   => array( 'Straumur Kortalán', 'kortalan.svg' ),
 	);
 
 	/**
@@ -349,6 +349,14 @@ class WC_Straumur_Settings {
 		$selected = array_key_exists( 'payment_logos', $settings )
 			? (array) $settings['payment_logos']
 			: self::$default_payment_logos;
+
+		// 2.2.0 stored this logo under the key 'straumurpay'.
+		$selected = array_map(
+			static function ( $key ) {
+				return 'straumurpay' === $key ? 'kortalan' : $key;
+			},
+			$selected
+		);
 
 		$logos = array();
 		foreach ( self::$payment_logos as $key => $logo ) {
