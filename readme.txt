@@ -4,7 +4,7 @@ Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,8 +86,11 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.2.1 =
+* Minor fixes
+
 = 2.2.0 =
-* Added: Choose which payment method logos show next to Straumur at checkout: Visa, Mastercard, American Express, Diners, Discover, JCB, UnionPay, Google Pay, Apple Pay, WeChat Pay and Straumur Pay (Kortalán). Existing stores keep the current four logos until they change the setting
+* Added: Choose which payment method logos show next to Straumur at checkout: Visa, Mastercard, American Express, Diners, Discover, JCB, UnionPay, Google Pay, Apple Pay, WeChat Pay and Straumur Kortalán. Existing stores keep the current four logos until they change the setting
 * Security: Sensitive information is now redacted from the debug logs the plugin writes when WordPress debug mode is on
 * Added: Partial and full refunds can now be done from the WooCommerce order screen
 * Refunds are sent through the Straumur refund API and confirmed via webhook
@@ -143,6 +146,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 * Partial refunds meta storage
 
 == Upgrade Notice ==
+
+= 2.2.1 =
+Minor fixes
 
 = 2.2.0 =
 Adds a payment method logo setting, refunds from the order screen, and tightens what is written to debug logs.
