@@ -86,6 +86,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.2.2 =
+* Fixed: Orders paid with Straumur Kortalán get a clear order note naming Straumur Kortalán and the payment reference, instead of a card note with blank card details. Such orders are marked paid even when manual capture is on, since a Kortalán payment has nothing to capture
+
 = 2.2.1 =
 * Minor fixes
 

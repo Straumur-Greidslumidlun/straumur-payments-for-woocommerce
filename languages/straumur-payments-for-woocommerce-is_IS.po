@@ -380,6 +380,11 @@ msgstr "%1$s var heimild á kort %2$s, %3$s. Heimildarnúmer: %4$s. Greiðsla va
 msgid "%1$s was authorized to card %2$s, %3$s. Auth code: %4$s. Awaiting manual capture."
 msgstr "%1$s var heimild á kort %2$s, %3$s. Heimildarnúmer: %4$s. Bíður handvirkrar skuldfærslu."
 
+#. translators: 1: paid amount, 2: payment reference
+#: includes/class-wc-straumur-webhook-handler.php
+msgid "%1$s was paid with Straumur Kortalán. Reference: %2$s."
+msgstr "%1$s var greitt með Straumur Kortalán. Tilvísun: %2$s."
+
 #. translators: 1: captured amount, 2: payfac reference ID
 #: includes/class-wc-straumur-webhook-handler.php:672
 msgid "Manual capture completed for %1$s via Straumur (reference: %2$s)."
