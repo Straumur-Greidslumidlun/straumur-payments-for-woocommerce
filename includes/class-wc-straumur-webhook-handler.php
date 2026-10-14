@@ -55,6 +55,13 @@ class WC_Straumur_Webhook_Handler {
 	public const EVENT_TOKENIZATION  = 'tokenization';
 
 	/**
+	 * Payment method code Straumur sends for Straumur Kortalán payments.
+	 *
+	 * @since 2.2.2
+	 */
+	public const PAYMENT_METHOD_KORTALAN = 'KOR';
+
+	/**
 	 * Initialize the webhook routes.
 	 *
 	 * @since 1.0.0
@@ -464,6 +471,14 @@ class WC_Straumur_Webhook_Handler {
 		$additional_data = isset( $data['additionalData'] ) && is_array( $data['additionalData'] )
 			? $data['additionalData'] : array();
 
+		$payment_method = isset( $additional_data['paymentMethod'] )
+			? strtoupper( sanitize_text_field( $additional_data['paymentMethod'] ) ) : '';
+
+		if ( self::PAYMENT_METHOD_KORTALAN === $payment_method ) {
+			$payfac_reference = isset( $data['payfacReference'] ) ? sanitize_text_field( $data['payfacReference'] ) : '';
+			return self::handle_kortalan_authorization( $order, $display_amount, $payfac_reference );
+		}
+
 		$card_number = isset( $additional_data['cardNumber'] )
 			? sanitize_text_field( $additional_data['cardNumber'] ) : '';
 
@@ -562,6 +577,33 @@ class WC_Straumur_Webhook_Handler {
 		$order->update_status( 'on-hold', $note );
 		$order->save();
 
+		return true;
+	}
+
+	/**
+	 * Handle an approved Straumur Kortalán payment.
+	 *
+	 * Kortalán is a loan, not a card: the webhook carries no card number, 3D Secure result or
+	 * authorization code, and there is nothing to capture later. The order is marked paid even when
+	 * manual capture is on, because holding it for a capture that can never happen would leave it
+	 * on hold for good.
+	 *
+	 * @since 2.2.2
+	 *
+	 * @param \WC_Order $order            The order object.
+	 * @param string    $display_amount   Formatted amount.
+	 * @param string    $payfac_reference Straumur Kortalán reference for the payment.
+	 * @return true True on success.
+	 */
+	private static function handle_kortalan_authorization( $order, string $display_amount, string $payfac_reference ): bool {
+		$note = sprintf(
+			/* translators: 1: paid amount, 2: payment reference */
+			esc_html__( '%1$s was paid with Straumur Kortalán. Reference: %2$s.', 'straumur-payments-for-woocommerce' ),
+			esc_html( $display_amount ),
+			esc_html( $payfac_reference )
+		);
+
+		self::maybe_mark_order_paid( $order, $note );
 		return true;
 	}
 

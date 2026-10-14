@@ -449,6 +449,11 @@ msgstr ""
 msgid "%1$s was authorized to card %2$s, %3$s. Auth code: %4$s. Awaiting manual capture."
 msgstr ""
 
+#. translators: 1: paid amount, 2: payment reference
+#: includes/class-wc-straumur-webhook-handler.php
+msgid "%1$s was paid with Straumur Kortalán. Reference: %2$s."
+msgstr ""
+
 #. translators: %s: formatted refund or cancellation amount
 #: includes/class-wc-straumur-webhook-handler.php:586
 msgid "Straumur refund/cancellation %s (unknown type)"
