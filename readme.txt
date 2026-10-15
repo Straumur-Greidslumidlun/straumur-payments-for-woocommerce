@@ -4,7 +4,7 @@ Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.1
+Stable tag: 2.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.2.2 =
+* Fixed: Orders paid with Straumur Kortalán get a clear order note naming Straumur Kortalán and the payment reference, instead of a card note with blank card details. Such orders are marked paid even when manual capture is on, since a Kortalán payment has nothing to capture
+
 = 2.2.1 =
 * Minor fixes
 
@@ -146,6 +149,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 * Partial refunds meta storage
 
 == Upgrade Notice ==
+
+= 2.2.2 =
+Orders paid with Straumur Kortalán now get a clear order note and are marked paid even when manual capture is on.
 
 = 2.2.1 =
 Minor fixes
