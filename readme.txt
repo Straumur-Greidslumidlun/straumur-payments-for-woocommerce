@@ -4,7 +4,7 @@ Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.2
+Stable tag: 2.2.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,11 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.2.3 =
+* Fixed: The webhook answers 200 to correctly signed Straumur events for payments that were not made in this shop (card terminal payments, payment links, other integrations on the same contract) and leaves every order alone. It used to answer them with an error, which Straumur will start treating as a failing endpoint
+* Fixed: A payment reference that only starts with digits (such as "742eac9d-...") is no longer read as an order ID, and an event is only applied to an order paid with Straumur. A payment from another channel could previously be recorded on an unrelated order
+* A webhook with a wrong signature is still rejected (403): check the HMAC key in the plugin settings if Straumur reports failed deliveries
+
 = 2.2.2 =
 * Fixed: Orders paid with Straumur Kortalán get a clear order note naming Straumur Kortalán and the payment reference, instead of a card note with blank card details. Such orders are marked paid even when manual capture is on, since a Kortalán payment has nothing to capture
 
@@ -149,6 +154,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 * Partial refunds meta storage
 
 == Upgrade Notice ==
+
+= 2.2.3 =
+The webhook accepts Straumur events for payments made outside this shop instead of answering them with an error, and no longer applies them to unrelated orders. Recommended for every store.
 
 = 2.2.2 =
 Orders paid with Straumur Kortalán now get a clear order note and are marked paid even when manual capture is on.

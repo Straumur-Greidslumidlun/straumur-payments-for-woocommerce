@@ -40,7 +40,7 @@ npm run update:translations
 - `dev` branch: Development branch (default). PRs target `dev`.
 - `main` branch: Production branch. Only release PRs from `dev`; every release is a tag on `main`.
 - Branches: `feat|fix|bug|task/SD-XXXX-description`, with the Jira key in the PR title as well.
-- Both `dev` and `main` require the six CI checks (below), an up-to-date branch and one approving review.
+- Both `dev` and `main` require the seven CI checks (below), an up-to-date branch and one approving review.
 - Merge with a merge commit, not squash: `.git-blame-ignore-revs` refers to commits by hash.
 
 Security and release rules are in `.claude/rules/security.md` and apply to every change.
@@ -242,6 +242,11 @@ Add a setting by adding its field to `get_form_fields()` and a getter. Decide wh
 3. Node.js and npm for asset building (version in `.nvmrc`)
 4. Enable WordPress debugging in `wp-config.php`. Debug logs are redacted, but treat them as sensitive anyway.
 
+### Unit Tests
+- PHPUnit 13 with Brain Monkey, in `tests/`: `composer install && vendor/bin/phpunit` (PHP 8.4+; without local PHP, run it in the `php:8.4-cli` Docker image). Composer is for development only, the plugin has no runtime dependencies.
+- The tests run the plugin's classes without WordPress: WordPress functions are stubbed per test with Brain Monkey, and `tests/stubs/` holds minimal stand-ins for the WordPress and WooCommerce classes used (`WP_Error`, `WP_REST_*`, an in-memory `WC_Order`).
+- `tests/Unit/WebhookHandlerTest.php` sends signed webhooks through `check_webhook_hmac()` and `handle_payment_callback()` the way the REST server does. Add a case there for every change to the webhook handler.
+
 ### Plugin Testing
 - Test both traditional and block-based checkout
 - Verify subscription functionality if applicable
@@ -253,6 +258,7 @@ Add a setting by adding its field to `get_form_fields()` and a getter. Decide wh
 ### Continuous Integration
 `.github/workflows/ci.yml` runs on every PR to `dev`/`main`:
 - `php -l` on PHP 7.4 and 8.4
+- PHPUnit (`tests/`) on PHP 8.4
 - PHPCS with `phpcs.xml.dist` (WordPress-Core, WordPress security sniffs, PHP 7.4 compatibility). Run `phpcbf` with the same ruleset to fix formatting
 - `npm ci && npm run build`, failing if `assets/js/frontend` differs from the commit — always commit the rebuilt bundle
 - `.github/scripts/check-versions.sh`: plugin header, `STRAUMUR_PAYMENTS_VERSION`, `Stable tag` and `package.json` must agree, and `readme.txt` needs a changelog entry for that version
