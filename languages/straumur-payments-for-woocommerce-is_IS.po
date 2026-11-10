@@ -337,15 +337,6 @@ msgstr "Greiðsla mistókst: 3D Secure auðkenning tókst ekki."
 msgid "Straumur %1$s failed: %2$s. Reference: %3$s"
 msgstr "Straumur Webhook: payfacReference: %s"
 
-#: includes/class-wc-straumur-webhook-handler.php:347
-msgid "No merchantReference or invalid."
-msgstr "Vantar eða ógildur kaupanda tilvísunarkóði (merchantReference)."
-
-#. translators: %d: order ID
-#: includes/class-wc-straumur-webhook-handler.php:361
-msgid "No order found for merchantReference: %d"
-msgstr "Engin pöntun fannst með kaupanda tilvísunarkóða: %d"
-
 #: includes/class-wc-straumur-webhook-handler.php:474
 #: includes/class-wc-straumur-webhook-handler.php:713
 msgid "verified by 3D Secure"
@@ -477,23 +468,13 @@ msgstr "Greiðsla tókst ekki"
 msgid "Webhook processed successfully."
 msgstr "Webhook afgreitt."
 
+#: includes/class-wc-straumur-webhook-handler.php
+msgid "Ignored: not an order of this shop."
+msgstr "Hunsað: ekki pöntun í þessari verslun."
+
 #: includes/class-wc-straumur-webhook-handler.php:237
 msgid "Error processing webhook."
 msgstr "Ekki gekk að vinna webhook"
-
-#: includes/class-wc-straumur-webhook-handler.php:264
-msgid "Invalid or missing order ID in failed webhook."
-msgstr "Ógilt eða vantar pöntunarnúmer í webhook."
-
-#: includes/class-wc-straumur-webhook-handler.php:267
-#: includes/class-wc-straumur-webhook-handler.php:350
-msgid "Invalid or missing order ID."
-msgstr "Ógilt eða vantar pöntunarnúmer."
-
-#. translators: %d: order ID
-#: includes/class-wc-straumur-webhook-handler.php:278
-msgid "Order %d not found for failed webhook."
-msgstr "Pöntun fannst ekki við greiðslustaðfestingu"
 
 #: includes/class-wc-straumur-webhook-handler.php:284
 #: includes/class-wc-straumur-webhook-handler.php:367

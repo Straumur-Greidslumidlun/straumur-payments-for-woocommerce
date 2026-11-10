@@ -2,7 +2,7 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Straumur Payments For WooCommerce 2.2.1\n"
+"Project-Id-Version: Straumur Payments For WooCommerce 2.2.3\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/straumur-payments-for-woocommerce\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -371,22 +371,12 @@ msgstr ""
 msgid "Webhook processed successfully."
 msgstr ""
 
+#: includes/class-wc-straumur-webhook-handler.php
+msgid "Ignored: not an order of this shop."
+msgstr ""
+
 #: includes/class-wc-straumur-webhook-handler.php:237
 msgid "Error processing webhook."
-msgstr ""
-
-#: includes/class-wc-straumur-webhook-handler.php:264
-msgid "Invalid or missing order ID in failed webhook."
-msgstr ""
-
-#: includes/class-wc-straumur-webhook-handler.php:267
-#: includes/class-wc-straumur-webhook-handler.php:350
-msgid "Invalid or missing order ID."
-msgstr ""
-
-#. translators: %d: order ID
-#: includes/class-wc-straumur-webhook-handler.php:278
-msgid "Order %d not found for failed webhook."
 msgstr ""
 
 #: includes/class-wc-straumur-webhook-handler.php:284
@@ -413,15 +403,6 @@ msgstr ""
 #. translators: 1: event type, 2: reason text, 3: payfac reference
 #: includes/class-wc-straumur-webhook-handler.php:306
 msgid "Straumur %1$s failed: %2$s. Reference: %3$s"
-msgstr ""
-
-#: includes/class-wc-straumur-webhook-handler.php:347
-msgid "No merchantReference or invalid."
-msgstr ""
-
-#. translators: %d: order ID
-#: includes/class-wc-straumur-webhook-handler.php:361
-msgid "No order found for merchantReference: %d"
 msgstr ""
 
 #. translators: %s: event type
