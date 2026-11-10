@@ -119,6 +119,7 @@ final class WebhookHandlerTest extends TestCase {
 			'leading zero'              => array( '0742' ),
 			'exponent'                  => array( '7e2' ),
 			'surrounding space'         => array( ' 742' ),
+			'trailing newline'          => array( "742\n" ),
 			'decimal'                   => array( '742.0' ),
 			'zero'                      => array( '0' ),
 			'too long'                  => array( '7420000000000000000000' ),

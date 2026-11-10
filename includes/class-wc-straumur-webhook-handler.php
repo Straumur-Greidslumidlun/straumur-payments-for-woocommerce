@@ -274,8 +274,9 @@ class WC_Straumur_Webhook_Handler {
 			return 'no_reference';
 		}
 
-		// Digits only, no leading zero, and short enough to be an order ID.
-		if ( 1 !== preg_match( '/^[1-9][0-9]{0,17}$/', $reference ) ) {
+		// Digits only, no leading zero, and short enough to be an order ID. \A and \z anchor the
+		// whole string: $ would also match before a trailing newline, and (int) "742\n" is 742.
+		if ( 1 !== preg_match( '/\A[1-9][0-9]{0,17}\z/', $reference ) ) {
 			return 'not_an_order_id';
 		}
 
