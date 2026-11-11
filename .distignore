@@ -13,3 +13,9 @@ phpcs.xml.dist
 CLAUDE.md
 README.md
 .git-blame-ignore-revs
+/vendor
+/tests
+/.phpunit.cache
+composer.json
+composer.lock
+phpunit.xml.dist

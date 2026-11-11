@@ -119,27 +119,26 @@ class WC_Straumur_Webhook_Handler {
 			);
 		}
 
-		// Verify required fields exist
-		$required_fields = array( 'hmacSignature', 'checkoutReference', 'payfacReference', 'merchantReference' );
-		foreach ( $required_fields as $field ) {
-			if ( empty( $data[ $field ] ) ) {
-				self::log_message(
-					sprintf(
-						/* translators: %s: field name */
-						esc_html__( 'Required field missing: %s.', 'straumur-payments-for-woocommerce' ),
-						$field
-					)
-				);
-				return new WP_Error(
-					'straumur_missing_field',
-					sprintf(
-						/* translators: %s: field name */
-						esc_html__( 'Required field missing: %s.', 'straumur-payments-for-woocommerce' ),
-						$field
-					),
-					array( 'status' => 400 )
-				);
-			}
+		// Only the signature is required. The references are part of the signed values (an
+		// empty one is signed as an empty string), and terminal payments and payment links
+		// come without a merchantReference or checkoutReference.
+		if ( empty( $data['hmacSignature'] ) || ! is_string( $data['hmacSignature'] ) ) {
+			self::log_message(
+				sprintf(
+					/* translators: %s: field name */
+					esc_html__( 'Required field missing: %s.', 'straumur-payments-for-woocommerce' ),
+					'hmacSignature'
+				)
+			);
+			return new WP_Error(
+				'straumur_missing_field',
+				sprintf(
+					/* translators: %s: field name */
+					esc_html__( 'Required field missing: %s.', 'straumur-payments-for-woocommerce' ),
+					'hmacSignature'
+				),
+				array( 'status' => 400 )
+			);
 		}
 
 		$signature = $data['hmacSignature'];
@@ -175,9 +174,19 @@ class WC_Straumur_Webhook_Handler {
 	public static function handle_payment_callback( WP_REST_Request $request ) {
 		$body = $request->get_body();
 		$data = json_decode( $body, true );
+		if ( ! is_array( $data ) ) {
+			$data = array();
+		}
 
 		// Process in a try-catch block to ensure we catch all exceptions
 		try {
+			// Straumur sends every payment on the merchant's contracts, including terminal
+			// payments and other channels. Acknowledge those without touching any order.
+			$order = self::find_shop_order( $data );
+			if ( is_string( $order ) ) {
+				return self::ignore_event( $data, $order );
+			}
+
 			// Process with a database transaction if available
 			global $wpdb;
 			$transaction_started = false;
@@ -189,7 +198,7 @@ class WC_Straumur_Webhook_Handler {
 
 			// If success is explicitly false, treat it as a failed transaction
 			if ( isset( $data['success'] ) && ( 'false' === $data['success'] || false === $data['success'] ) ) {
-				$result = self::handle_failed_webhook( $data );
+				$result = self::handle_failed_webhook( $order, $data );
 
 				if ( is_wp_error( $result ) ) {
 					if ( $transaction_started ) {
@@ -209,7 +218,7 @@ class WC_Straumur_Webhook_Handler {
 			}
 
 			// Process the webhook for successful payments
-			$result = self::process_webhook_data( $data );
+			$result = self::process_webhook_data( $order, $data );
 
 			if ( is_wp_error( $result ) ) {
 				if ( $transaction_started ) {
@@ -226,7 +235,7 @@ class WC_Straumur_Webhook_Handler {
 				array( 'message' => esc_html__( 'Webhook processed successfully.', 'straumur-payments-for-woocommerce' ) ),
 				200
 			);
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			self::log_message( 'Exception processing webhook: ' . $e->getMessage() );
 
 			if ( isset( $transaction_started ) && $transaction_started ) {
@@ -242,13 +251,87 @@ class WC_Straumur_Webhook_Handler {
 	}
 
 	/**
+	 * Find the order of this shop that a webhook event belongs to.
+	 *
+	 * The plugin sends the WooCommerce order ID as the payment reference, so an event belongs to
+	 * this shop only when its merchantReference is exactly a positive order ID and that order was
+	 * paid with Straumur. Anything else is a payment from another channel on the same contract
+	 * (a terminal, a payment link, another integration), whose reference must not be read as an
+	 * order ID: "742eac9d-..." is not order 742.
+	 *
+	 * @since 2.2.3
+	 *
+	 * @param array $data Decoded JSON payload.
+	 * @return \WC_Order|string The order, or the reason the event is not for this shop.
+	 */
+	private static function find_shop_order( array $data ) {
+		$reference = $data['merchantReference'] ?? '';
+		if ( is_int( $reference ) ) {
+			$reference = (string) $reference;
+		}
+
+		if ( ! is_string( $reference ) || '' === $reference ) {
+			return 'no_reference';
+		}
+
+		// Digits only, no leading zero, and short enough to be an order ID. \A and \z anchor the
+		// whole string: $ would also match before a trailing newline, and (int) "742\n" is 742.
+		if ( 1 !== preg_match( '/\A[1-9][0-9]{0,17}\z/', $reference ) ) {
+			return 'not_an_order_id';
+		}
+
+		$order = wc_get_order( (int) $reference );
+		if ( ! $order instanceof \WC_Order ) {
+			return 'order_not_found';
+		}
+
+		if ( 'straumur' !== $order->get_payment_method() ) {
+			return 'other_payment_method';
+		}
+
+		return $order;
+	}
+
+	/**
+	 * Acknowledge a correctly signed event that is not for an order of this shop.
+	 *
+	 * Straumur treats any answer other than 2xx as the endpoint failing, so the event is
+	 * answered with 200 and no order is touched.
+	 *
+	 * @since 2.2.3
+	 *
+	 * @param array  $data   Decoded JSON payload.
+	 * @param string $reason Why the event is not for this shop.
+	 * @return WP_REST_Response
+	 */
+	private static function ignore_event( array $data, string $reason ): WP_REST_Response {
+		self::log_message(
+			sprintf(
+				'Ignored webhook (%s): %s',
+				$reason,
+				wp_json_encode( WC_Straumur_Log_Redactor::summarize( $data ) )
+			)
+		);
+
+		return new WP_REST_Response(
+			array(
+				'message' => esc_html__( 'Ignored: not an order of this shop.', 'straumur-payments-for-woocommerce' ),
+				'ignored' => true,
+			),
+			200
+		);
+	}
+
+	/**
 	 * Handle a failed transaction event from Straumur.
 	 *
-	 * Expects $data to contain at least 'merchantReference', 'payfacReference', and 'reason'.
+	 * Expects $data to contain at least 'payfacReference' and 'reason'.
 	 *
 	 * @since 1.0.0
+	 * @since 2.2.3 Takes the order found by find_shop_order().
 	 *
-	 * @param array $data {
+	 * @param \WC_Order $order The order the event is for.
+	 * @param array     $data {
 	 *     Decoded JSON payload from Straumur.
 	 *
 	 *     @type string $merchantReference WooCommerce order ID.
@@ -258,34 +341,8 @@ class WC_Straumur_Webhook_Handler {
 	 * }
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
-	private static function handle_failed_webhook( array $data ) {
-		// Validate the merchant reference (order ID)
-		$order_id = isset( $data['merchantReference'] ) ? absint( $data['merchantReference'] ) : 0;
-		if ( $order_id <= 0 ) {
-			self::log_message( esc_html__( 'Invalid or missing order ID in failed webhook.', 'straumur-payments-for-woocommerce' ) );
-			return new WP_Error(
-				'straumur_invalid_order',
-				esc_html__( 'Invalid or missing order ID.', 'straumur-payments-for-woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		// Get the order
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			self::log_message(
-				sprintf(
-					/* translators: %d: order ID */
-					esc_html__( 'Order %d not found for failed webhook.', 'straumur-payments-for-woocommerce' ),
-					$order_id
-				)
-			);
-			return new WP_Error(
-				'straumur_order_not_found',
-				esc_html__( 'Order not found.', 'straumur-payments-for-woocommerce' ),
-				array( 'status' => 404 )
-			);
-		}
+	private static function handle_failed_webhook( $order, array $data ) {
+		$order_id = $order->get_id();
 
 		// Get payment details
 		$payfac_reference = isset( $data['payfacReference'] ) ? sanitize_text_field( $data['payfacReference'] ) : '';
@@ -346,39 +403,13 @@ class WC_Straumur_Webhook_Handler {
 	 * Process a successful (or partially successful) Straumur webhook.
 	 *
 	 * @since 1.0.0
+	 * @since 2.2.3 Takes the order found by find_shop_order().
 	 *
-	 * @param array $data Decoded JSON payload.
+	 * @param \WC_Order $order The order the event is for.
+	 * @param array     $data  Decoded JSON payload.
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
-	private static function process_webhook_data( array $data ) {
-		// Validate the merchant reference (order ID)
-		$order_id = isset( $data['merchantReference'] ) ? absint( $data['merchantReference'] ) : 0;
-		if ( $order_id <= 0 ) {
-			self::log_message( esc_html__( 'No merchantReference or invalid.', 'straumur-payments-for-woocommerce' ) );
-			return new WP_Error(
-				'straumur_invalid_order',
-				esc_html__( 'Invalid or missing order ID.', 'straumur-payments-for-woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		// Get the order
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			self::log_message(
-				sprintf(
-					/* translators: %d: order ID */
-					esc_html__( 'No order found for merchantReference: %d', 'straumur-payments-for-woocommerce' ),
-					$order_id
-				)
-			);
-			return new WP_Error(
-				'straumur_order_not_found',
-				esc_html__( 'Order not found.', 'straumur-payments-for-woocommerce' ),
-				array( 'status' => 404 )
-			);
-		}
-
+	private static function process_webhook_data( $order, array $data ) {
 		// Get payment details
 		$additional_data  = isset( $data['additionalData'] ) && is_array( $data['additionalData'] ) ? $data['additionalData'] : array();
 		$event_type       = isset( $additional_data['eventType'] ) ? sanitize_text_field( strtolower( $additional_data['eventType'] ) ) : 'unknown';

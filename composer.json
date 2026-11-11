@@ -1,0 +1,20 @@
+{
+	"name": "straumur/straumur-payments-for-woocommerce",
+	"description": "Development tools for the Straumur Payments for WooCommerce plugin. Not part of the WordPress.org package.",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"require-dev": {
+		"brain/monkey": "2.7.0",
+		"mockery/mockery": "1.6.15",
+		"phpunit/phpunit": "13.4.6"
+	},
+	"config": {
+		"sort-packages": true,
+		"platform": {
+			"php": "8.4.1"
+		}
+	},
+	"scripts": {
+		"test": "phpunit"
+	}
+}
