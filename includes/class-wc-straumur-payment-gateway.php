@@ -521,7 +521,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			exit;
 		}
 
-		$api            = $this->get_api();
+		$api             = $this->get_api();
 		$status_response = $api->get_session_status( $checkout_reference );
 
 		if ( ! $status_response ) {
