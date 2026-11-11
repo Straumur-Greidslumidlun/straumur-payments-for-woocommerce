@@ -8,7 +8,7 @@
  * Author URI:      https://straumur.is
  * Text Domain:     straumur-payments-for-woocommerce
  * Domain Path:     /languages
- * Version:         2.2.3
+ * Version:         2.2.4
  * Requires Plugins: woocommerce
  * WC requires at least: 8.1
  * WC tested up to: 11.1.2
@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Define plugin constants.
  * Previous version: 2.0.4
  */
-define( 'STRAUMUR_PAYMENTS_VERSION', '2.2.3' );
+define( 'STRAUMUR_PAYMENTS_VERSION', '2.2.4' );
 define( 'STRAUMUR_PAYMENTS_MAIN_FILE', __FILE__ );
 define( 'STRAUMUR_PAYMENTS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'STRAUMUR_PAYMENTS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -171,6 +171,7 @@ function init(): void {
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-log-redactor.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-api.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-order-handler.php';
+	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-return-guard.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-payment-gateway.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-block-support.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-webhook-handler.php';

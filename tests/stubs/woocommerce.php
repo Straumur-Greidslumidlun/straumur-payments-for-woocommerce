@@ -51,6 +51,10 @@ class WC_Order {
 		return $this->payment_method;
 	}
 
+	public function get_order_key(): string {
+		return 'wc_order_key' . $this->id;
+	}
+
 	public function get_status(): string {
 		return $this->status;
 	}

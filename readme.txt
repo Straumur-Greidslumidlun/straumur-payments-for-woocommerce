@@ -4,7 +4,7 @@ Tags: woocommerce, payments, straumur, subscriptions
 Requires at least: 5.2
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 2.2.3
+Stable tag: 2.2.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,6 +86,10 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 
 
 == Changelog ==
+= 2.2.4 =
+* Security: The page a shopper returns to after paying now accepts only the payment session the shop created for that order, and only together with the order's key. A return that does not match is refused and leaves the order unchanged
+* An order whose payment page was opened before the update is still completed by the webhook, but the shopper is sent to the cart instead of the order confirmation page
+
 = 2.2.3 =
 * Fixed: The webhook answers 200 to correctly signed Straumur events for payments that were not made in this shop (card terminal payments, payment links, other integrations on the same contract) and leaves every order alone. It used to answer them with an error, which Straumur will start treating as a failing endpoint
 * Fixed: A payment reference that only starts with digits (such as "742eac9d-...") is no longer read as an order ID, and an event is only applied to an order paid with Straumur. A payment from another channel could previously be recorded on an unrelated order
@@ -154,6 +158,9 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 * Partial refunds meta storage
 
 == Upgrade Notice ==
+
+= 2.2.4 =
+Security release. The return from the payment page is now tied to the order and its own payment session. Update as soon as possible.
 
 = 2.2.3 =
 The webhook accepts Straumur events for payments made outside this shop instead of answering them with an error, and no longer applies them to unrelated orders. Recommended for every store.
