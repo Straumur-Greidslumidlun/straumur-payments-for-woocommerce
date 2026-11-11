@@ -254,6 +254,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			array(
 				'wc-api'         => $this->id,
 				'order_id'       => $order->get_id(),
+				'key'            => $order->get_order_key(),
 				'straumur_nonce' => wp_create_nonce( 'straumur_process_return' ),
 			),
 			home_url( '/' )
@@ -279,7 +280,11 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			$this->abandon_url
 		);
 
-		if ( ! $session || ! isset( $session['url'] ) ) {
+		$checkout_reference = is_array( $session ) && isset( $session['checkoutReference'] )
+			? sanitize_text_field( (string) $session['checkoutReference'] )
+			: '';
+
+		if ( ! $session || ! isset( $session['url'] ) || '' === $checkout_reference ) {
 			wc_add_notice(
 				esc_html__( 'Payment error: Unable to initiate payment session.', 'straumur-payments-for-woocommerce' ),
 				'error'
@@ -291,6 +296,10 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 
 			return array( 'result' => 'failure' );
 		}
+
+		// Remember which session belongs to this order: process_return() accepts no other.
+		$order->update_meta_data( WC_Straumur_Return_Guard::CHECKOUT_REFERENCE_META, $checkout_reference );
+		$order->save();
 
 		// Straumur returns the Hosted Checkout URL.
 		$redirect_url = $session['url'];
@@ -361,6 +370,7 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			array(
 				'wc-api'         => $this->id,
 				'order_id'       => $order->get_id(),
+				'key'            => $order->get_order_key(),
 				'straumur_nonce' => wp_create_nonce( 'straumur_process_return' ),
 			),
 			home_url( '/' )
@@ -488,19 +498,27 @@ class WC_Straumur_Payment_Gateway extends WC_Payment_Gateway {
 			exit;
 		}
 
-		$checkout_reference = isset( $_GET['checkoutReference'] )
+		$order_key     = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+		$url_reference = isset( $_GET['checkoutReference'] )
 			? sanitize_text_field( wp_unslash( $_GET['checkoutReference'] ) )
-			: $order->get_meta( '_straumur_checkout_reference' );
+			: '';
 
-		if ( empty( $checkout_reference ) ) {
-			$checkout_url = $order->get_checkout_payment_url();
-			wp_safe_redirect( $checkout_url ? $checkout_url : wc_get_cart_url() );
+		// The order ID in the URL proves nothing. Only a return that carries the order's key may
+		// continue, and only with the session this shop created for that order.
+		$checkout_reference = WC_Straumur_Return_Guard::bound_checkout_reference( $order, $order_key, $url_reference );
+
+		if ( '' === $checkout_reference ) {
+			$this->logger->warning(
+				sprintf( 'Return for order %d refused: order key or payment session does not match.', $order_id ),
+				$this->context
+			);
+			wc_add_notice(
+				esc_html__( 'Unable to verify payment status. Please try again.', 'straumur-payments-for-woocommerce' ),
+				'error'
+			);
+			// Not the order's payment page: its URL contains the order key.
+			wp_safe_redirect( wc_get_cart_url() );
 			exit;
-		}
-
-		if ( ! $order->get_meta( '_straumur_checkout_reference' ) ) {
-			$order->update_meta_data( '_straumur_checkout_reference', $checkout_reference );
-			$order->save();
 		}
 
 		$api             = $this->get_api();

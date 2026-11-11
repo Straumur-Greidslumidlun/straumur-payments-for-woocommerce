@@ -64,6 +64,7 @@ straumur-payments-for-woocommerce/
 │   ├── class-wc-straumur-api.php                # API communication layer
 │   ├── class-wc-straumur-settings.php           # Settings fields, getters, payment logo registry
 │   ├── class-wc-straumur-order-handler.php      # Order lifecycle management
+│   ├── class-wc-straumur-return-guard.php       # Accepts a return from Hosted Checkout only for the order's own session and key
 │   ├── class-wc-straumur-block-support.php      # WooCommerce blocks integration
 │   ├── class-wc-straumur-webhook-handler.php    # Webhook processing
 │   └── class-wc-straumur-log-redactor.php       # Allow-list for everything written to logs
