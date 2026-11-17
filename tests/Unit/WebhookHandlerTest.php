@@ -273,6 +273,25 @@ final class WebhookHandlerTest extends TestCase {
 		$this->assertStringContainsString( 'Payment captured automatically', implode( "\n", $order->notes ) );
 	}
 
+	public function test_kortalan_authorization_for_a_straumur_kortalan_order_marks_it_paid(): void {
+		// An order placed with the separate Straumur Kortalán option (2.3.0) is this shop's order too.
+		$order              = new WC_Order( 1004, 'straumur_kortalan' );
+		$this->orders[1004] = $order;
+
+		$payload                   = $this->event( array( 'merchantReference' => '1004' ) );
+		$payload['additionalData'] = array(
+			'eventType'     => 'Authorization',
+			'paymentMethod' => 'KOR',
+		);
+
+		$response = $this->send( $payload );
+
+		$this->assertSame( 200, $this->status_of( $response ) );
+		$this->assertArrayNotHasKey( 'ignored', $response->get_data() );
+		$this->assertTrue( $order->paid );
+		$this->assertStringContainsString( 'was paid with Straumur Kortalán. Reference: PF123456789.', implode( "\n", $order->notes ) );
+	}
+
 	public function test_numeric_merchant_reference_in_json_is_an_order_id(): void {
 		$order              = new WC_Order( 1002 );
 		$this->orders[1002] = $order;

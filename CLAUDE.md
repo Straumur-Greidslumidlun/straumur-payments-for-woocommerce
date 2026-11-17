@@ -65,7 +65,10 @@ straumur-payments-for-woocommerce/
 │   ├── class-wc-straumur-settings.php           # Settings fields, getters, payment logo registry
 │   ├── class-wc-straumur-order-handler.php      # Order lifecycle management
 │   ├── class-wc-straumur-return-guard.php       # Accepts a return from Hosted Checkout only for the order's own session and key
+│   ├── class-wc-straumur-kortalan-gateway.php   # Second gateway "Straumur Kortalán" (id straumur_kortalan): straight to the Kortalán application
+│   ├── class-wc-straumur-kortalan.php           # Kortalán availability (cached), status outcomes, follow-up check of pending orders
 │   ├── class-wc-straumur-block-support.php      # WooCommerce blocks integration
+│   ├── class-wc-straumur-kortalan-block-support.php # Blocks integration for the Kortalán option (same script)
 │   ├── class-wc-straumur-webhook-handler.php    # Webhook processing
 │   └── class-wc-straumur-log-redactor.php       # Allow-list for everything written to logs
 ├── src/                                     # JavaScript source files
@@ -88,6 +91,13 @@ straumur-payments-for-woocommerce/
 - Handles payment processing, redirects, and form fields
 - Supports subscriptions, blocks, and various WooCommerce features
 - Manages order creation and payment session initialization
+
+#### 1b. Straumur Kortalán Gateway (`WC_Straumur_Kortalan_Gateway`, since 2.3.0)
+- A separate payment option with its own on/off, title and description (`woocommerce_straumur_kortalan_settings`); credentials and test mode come from the Straumur Payments settings
+- `is_available()` asks Straumur whether Kortalán can be offered for the basket total (`WC_Straumur_Kortalan::is_available()`, cached in a transient, anything but an explicit yes hides the option); both checkouts list gateways from it
+- No subscriptions, no refunds, never manual capture. The webhook marks the order paid (`KOR` authorization), the return only decides where the shopper lands
+- A follow-up check runs from Action Scheduler after the session expires (`straumur_kortalan_check_order`) and marks a still-pending order paid or cancelled
+- Code that asks "is this one of our orders" must use `WC_Straumur_Settings::is_straumur_gateway()`, not `'straumur' ===`
 
 #### 2. API Layer (`WC_Straumur_API`)
 - A new instance per use (`new WC_Straumur_API()`), reading credentials from `WC_Straumur_Settings`

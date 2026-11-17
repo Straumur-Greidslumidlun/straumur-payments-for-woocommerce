@@ -541,3 +541,52 @@ msgstr ""
 
 msgid "A refund request is already being processed for this order. Please wait a moment and try again."
 msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Enable Straumur Kortalán"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. It uses the terminal identifier, API key and test mode from the Straumur Payments settings, and Kortalán must be enabled on that terminal by Straumur. The option is only shown for amounts Kortalán will finance."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Spread the payment with Straumur Kortalán. You complete the application on the next page."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "Offer Straumur Kortalán as its own payment option. Shoppers go straight to the Kortalán application."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "We could not confirm your Straumur Kortalán payment yet. If you completed the application, please do not pay again: your order will be updated shortly."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "Your Straumur Kortalán payment was not completed. Please choose another payment method or try again."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur Kortalán is not available for this order amount. Please choose another payment method."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur Kortalán is not available in this shop at the moment. Please choose another payment method."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Unable to start the Straumur Kortalán payment. Please try again or choose another payment method."
+msgstr ""
+
+#. translators: %s: payment reference
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur confirmed the Straumur Kortalán payment. Reference: %s."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "The Straumur Kortalán payment was not completed. Order cancelled."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur could not confirm whether the Straumur Kortalán payment went through. Look the payment up in the Straumur merchant portal before fulfilling or cancelling this order."
+msgstr ""

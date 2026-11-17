@@ -80,12 +80,25 @@ These details are available from the Straumur merchant dashboard at [https://thj
 - **HMAC Key** *(Required)*: Obtain from Straumur service portal.
 - **Webhook URL** *(Required)*: Configure this URL in the Straumur dashboard.
 
+**Straumur Kortalán** is a separate payment option with its own settings page (WooCommerce → Settings → Payments → Straumur Kortalán). It uses the terminal identifier, API key, HMAC key and test mode above.
+
+- **Enable Straumur Kortalán** *(Optional, off by default)*: Shows Straumur Kortalán as its own payment option. Shoppers who pick it go straight to the Kortalán application. Requires Kortalán on your Straumur terminal, and is only shown for amounts Kortalán will finance.
+- **Title** *(Optional)*: Display name shown at checkout. Defaults to Straumur Kortalán.
+- **Description** *(Optional)*: Short description shown to customers.
+
+Subscriptions cannot be paid with Straumur Kortalán, and Straumur Kortalán orders cannot be refunded from WooCommerce.
+
 All credentials available at [https://thjonustuvefur.straumur.is/](https://thjonustuvefur.straumur.is/) upon registration.
 
 == Screenshots ==
 
 
 == Changelog ==
+= 2.3.0 =
+* Added: Straumur Kortalán as its own payment option at checkout, next to Straumur Payments, in both the classic and the block checkout. A shopper who picks it goes straight to the Kortalán application instead of the Straumur payment page. Switch it on under WooCommerce → Settings → Payments → Straumur Kortalán; it is off until you do, and it needs Kortalán enabled on your Straumur terminal
+* The Straumur Kortalán option is only shown when Kortalán will finance the order amount, and such orders are always captured, whatever the capture setting says
+* An order whose shopper never returns from the Kortalán application is checked with Straumur after the payment session expires and is marked paid or cancelled
+
 = 2.2.4 =
 * Security: The page a shopper returns to after paying now accepts only the payment session the shop created for that order, and only together with the order's key. A return that does not match is refused and leaves the order unchanged
 * An order whose payment page was opened before the update is still completed by the webhook, but the shopper is sent to the cart instead of the order confirmation page

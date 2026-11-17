@@ -1,0 +1,344 @@
+<?php
+/**
+ * Straumur Kortalán Payment Gateway Class.
+ *
+ * A second payment option next to Straumur Payments. A shopper who picks it goes straight to
+ * the Straumur Kortalán application instead of the Straumur payment page.
+ *
+ * @package Straumur\Payments
+ * @since   2.3.0
+ */
+
+declare(strict_types=1);
+
+namespace Straumur\Payments;
+
+use WC_Payment_Gateway;
+use WC_Logger_Interface;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Class WC_Straumur_Kortalan_Gateway
+ *
+ * Credentials (terminal identifier, API key, HMAC key, test mode) are those of the Straumur
+ * Payments gateway. Kortalán is a loan: there are no subscriptions or saved payment details,
+ * nothing to capture later, and refunds are not offered from WooCommerce.
+ *
+ * @since 2.3.0
+ */
+class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
+
+	/**
+	 * Logger.
+	 *
+	 * @var WC_Logger_Interface
+	 */
+	private $logger;
+
+	/**
+	 * Logging context.
+	 *
+	 * @var array
+	 */
+	private $context = array( 'source' => 'straumur' );
+
+	/**
+	 * Constructor.
+	 *
+	 * @since 2.3.0
+	 */
+	public function __construct() {
+		$this->logger = wc_get_logger();
+
+		$this->id                 = WC_Straumur_Settings::KORTALAN_GATEWAY_ID;
+		$this->method_title       = 'Straumur Kortalán';
+		$this->method_description = esc_html__( 'Offer Straumur Kortalán as its own payment option. Shoppers go straight to the Kortalán application.', 'straumur-payments-for-woocommerce' );
+		$this->has_fields         = false;
+		$this->icon               = STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/images/kortalan.svg';
+		$this->supports           = array( 'products' );
+
+		$this->init_form_fields();
+		$this->init_settings();
+
+		$this->enabled     = WC_Straumur_Settings::is_kortalan_enabled() ? 'yes' : 'no';
+		$this->title       = WC_Straumur_Settings::get_kortalan_title();
+		$this->description = WC_Straumur_Settings::get_kortalan_description();
+
+		add_action( 'woocommerce_api_' . $this->id, array( $this, 'process_return' ) );
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
+	}
+
+	/**
+	 * Settings fields.
+	 *
+	 * @since 2.3.0
+	 * @return void
+	 */
+	public function init_form_fields(): void {
+		$this->form_fields = WC_Straumur_Settings::get_kortalan_form_fields();
+	}
+
+	/**
+	 * The Straumur Kortalán logo shown next to the option in the classic checkout.
+	 *
+	 * @since 2.3.0
+	 * @return string
+	 */
+	public function get_icon(): string {
+		$icon_html = sprintf(
+			'<span class="straumur-payment-icons"><img src="%s" alt="%s" /></span>',
+			esc_url( $this->icon ),
+			esc_attr( 'Straumur Kortalán' )
+		);
+
+		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
+	}
+
+	/**
+	 * Load the logo styles on the pages that list payment options.
+	 *
+	 * @since 2.3.0
+	 * @return void
+	 */
+	public function enqueue_frontend_styles(): void {
+		if ( 'yes' !== $this->enabled || ! ( is_checkout() || is_cart() ) ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'straumur-payment-method',
+			STRAUMUR_PAYMENTS_PLUGIN_URL . 'assets/css/straumur-payment-method.css',
+			array(),
+			STRAUMUR_PAYMENTS_VERSION
+		);
+	}
+
+	/**
+	 * Whether the option is shown for the basket or order being paid.
+	 *
+	 * Both the classic and the block checkout list only the gateways for which this is true,
+	 * and both ask again when the total changes. Straumur is asked whether Kortalán is enabled
+	 * on the terminal and will finance the amount; the answer is cached for a few minutes.
+	 *
+	 * @since 2.3.0
+	 * @return bool
+	 */
+	public function is_available() {
+		if ( ! parent::is_available() ) {
+			return false;
+		}
+
+		if ( '' === WC_Straumur_Settings::get_api_key() || '' === WC_Straumur_Settings::get_terminal_identifier() ) {
+			return false;
+		}
+
+		$payable = $this->get_payable_amount();
+
+		// No basket and no order to price, e.g. an admin screen listing the gateways.
+		if ( null === $payable ) {
+			return true;
+		}
+
+		return WC_Straumur_Kortalan::is_available( $payable['amount'], $payable['currency'] );
+	}
+
+	/**
+	 * The amount and currency the shopper is about to pay.
+	 *
+	 * @since 2.3.0
+	 * @return array|null Array with 'amount' (minor units) and 'currency', null when there is nothing to price.
+	 */
+	private function get_payable_amount(): ?array {
+		$order_id = absint( get_query_var( 'order-pay' ) );
+		if ( $order_id > 0 ) {
+			$order = wc_get_order( $order_id );
+			if ( $order ) {
+				return array(
+					'amount'   => (int) round( (float) $order->get_total() * 100 ),
+					'currency' => (string) $order->get_currency(),
+				);
+			}
+		}
+
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			return null;
+		}
+
+		return array(
+			'amount'   => (int) round( (float) WC()->cart->get_total( 'edit' ) * 100 ),
+			'currency' => (string) get_woocommerce_currency(),
+		);
+	}
+
+	/**
+	 * Start the Kortalán payment and send the shopper to the Kortalán application.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param int $order_id The WooCommerce order ID.
+	 * @return array
+	 */
+	public function process_payment( $order_id ) {
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			wc_add_notice( esc_html__( 'Invalid order.', 'straumur-payments-for-woocommerce' ), 'error' );
+			$this->logger->error( 'Invalid order: ' . $order_id, $this->context );
+
+			return array( 'result' => 'failure' );
+		}
+
+		// A Kortalán loan cannot be authorised now and captured later, whatever the capture setting says.
+		$order->update_meta_data( '_straumur_is_manual_capture', 'no' );
+		$order->save();
+
+		$amount   = (int) round( (float) $order->get_total() * 100 );
+		$currency = (string) $order->get_currency();
+
+		$return_url = add_query_arg(
+			array(
+				'wc-api'         => $this->id,
+				'order_id'       => $order->get_id(),
+				'key'            => $order->get_order_key(),
+				'straumur_nonce' => wp_create_nonce( 'straumur_process_return' ),
+			),
+			home_url( '/' )
+		);
+
+		// Same handler for both ways back: it asks Straumur what happened and never trusts the URL.
+		$abandon_url = add_query_arg( 'straumur_abandoned', '1', $return_url );
+
+		$api     = new WC_Straumur_API();
+		$payment = $api->create_kortalan_payment( $amount, $currency, $return_url, $abandon_url, (string) $order->get_id() );
+
+		$checkout_reference = is_array( $payment ) && isset( $payment['checkoutReference'] )
+			? sanitize_text_field( (string) $payment['checkoutReference'] )
+			: '';
+		$redirect_url       = is_array( $payment ) && isset( $payment['url'] )
+			? esc_url_raw( (string) $payment['url'], array( 'https', 'http' ) )
+			: '';
+
+		if ( '' === $checkout_reference || '' === $redirect_url ) {
+			$error_code = $api->get_last_error_code();
+
+			// The answer the checkout was given a moment ago no longer holds.
+			if ( WC_Straumur_Kortalan::ERROR_NOT_AVAILABLE === $error_code ) {
+				delete_transient( WC_Straumur_Kortalan::availability_cache_key( $amount, $currency ) );
+			}
+
+			wc_add_notice( WC_Straumur_Kortalan::start_error_message( $error_code ), 'error' );
+			$this->logger->error(
+				sprintf( 'Unable to start Straumur Kortalán payment for order %d. Error code: %s', $order_id, '' !== $error_code ? $error_code : 'none' ),
+				$this->context
+			);
+
+			return array( 'result' => 'failure' );
+		}
+
+		// Remember which payment belongs to this order: process_return() accepts no other.
+		$order->update_meta_data( WC_Straumur_Return_Guard::CHECKOUT_REFERENCE_META, $checkout_reference );
+		$order->save();
+
+		// The shopper may close the browser in the Kortalán application; look again after the payment expires.
+		WC_Straumur_Kortalan::schedule_check(
+			$order->get_id(),
+			$checkout_reference,
+			$api->get_checkout_expiry_seconds() + 5 * MINUTE_IN_SECONDS
+		);
+
+		return array(
+			'result'   => 'success',
+			'redirect' => $redirect_url,
+		);
+	}
+
+	/**
+	 * Handle the shopper coming back from the Kortalán application.
+	 *
+	 * The order is marked paid by the webhook, as for card payments. This only decides where the
+	 * shopper lands: the order-received page when Kortalán approved, otherwise back to paying.
+	 *
+	 * @since 2.3.0
+	 * @return void
+	 */
+	public function process_return(): void {
+		if (
+			! isset( $_GET['straumur_nonce'] )
+			|| ! wp_verify_nonce(
+				sanitize_text_field( wp_unslash( $_GET['straumur_nonce'] ) ),
+				'straumur_process_return'
+			)
+		) {
+			wp_die( esc_html__( 'Nonce verification failed.', 'straumur-payments-for-woocommerce' ) );
+		}
+
+		$order_id = isset( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) ) : 0;
+		$order    = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			wp_safe_redirect( wc_get_cart_url() );
+			exit;
+		}
+
+		$order_key     = isset( $_GET['key'] ) ? sanitize_text_field( wp_unslash( $_GET['key'] ) ) : '';
+		$url_reference = isset( $_GET['checkoutReference'] )
+			? sanitize_text_field( wp_unslash( $_GET['checkoutReference'] ) )
+			: '';
+
+		$checkout_reference = WC_Straumur_Return_Guard::bound_checkout_reference( $order, $order_key, $url_reference, $this->id );
+
+		if ( '' === $checkout_reference ) {
+			$this->logger->warning(
+				sprintf( 'Return for order %d refused: order key or payment session does not match.', $order_id ),
+				$this->context
+			);
+			wc_add_notice(
+				esc_html__( 'Unable to verify payment status. Please try again.', 'straumur-payments-for-woocommerce' ),
+				'error'
+			);
+			// Not the order's payment page: its URL contains the order key.
+			wp_safe_redirect( wc_get_cart_url() );
+			exit;
+		}
+
+		$api     = new WC_Straumur_API();
+		$status  = $api->get_kortalan_status( $checkout_reference );
+		$outcome = WC_Straumur_Kortalan::outcome( $status );
+
+		if ( WC_Straumur_Kortalan::OUTCOME_PAID === $outcome ) {
+			if ( is_array( $status ) && isset( $status['payfacReference'] ) && is_scalar( $status['payfacReference'] ) ) {
+				$order->update_meta_data( '_straumur_payfac_reference', sanitize_text_field( (string) $status['payfacReference'] ) );
+				$order->save();
+			}
+
+			wc_add_notice(
+				esc_html__( 'Thank you for your order! Your payment is being processed.', 'straumur-payments-for-woocommerce' ),
+				'success'
+			);
+
+			$custom_success_url = WC_Straumur_Settings::get_custom_success_url();
+
+			wp_safe_redirect( '' !== $custom_success_url ? $custom_success_url : $this->get_return_url( $order ) );
+			exit;
+		}
+
+		if ( WC_Straumur_Kortalan::OUTCOME_UNKNOWN === $outcome ) {
+			wc_add_notice(
+				esc_html__( 'We could not confirm your Straumur Kortalán payment yet. If you completed the application, please do not pay again: your order will be updated shortly.', 'straumur-payments-for-woocommerce' ),
+				'notice'
+			);
+		} else {
+			wc_add_notice(
+				esc_html__( 'Your Straumur Kortalán payment was not completed. Please choose another payment method or try again.', 'straumur-payments-for-woocommerce' ),
+				'error'
+			);
+		}
+
+		$checkout_url = $order->get_checkout_payment_url();
+		wp_safe_redirect( $checkout_url ? $checkout_url : wc_get_cart_url() );
+		exit;
+	}
+}

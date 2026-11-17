@@ -25,3 +25,4 @@ require_once dirname( __DIR__ ) . '/includes/class-wc-straumur-settings.php';
 require_once dirname( __DIR__ ) . '/includes/class-wc-straumur-log-redactor.php';
 require_once dirname( __DIR__ ) . '/includes/class-wc-straumur-webhook-handler.php';
 require_once dirname( __DIR__ ) . '/includes/class-wc-straumur-return-guard.php';
+require_once dirname( __DIR__ ) . '/includes/class-wc-straumur-kortalan.php';

@@ -36,16 +36,18 @@ class WC_Straumur_Return_Guard {
 	 * @param \WC_Order $order         The order named in the return URL.
 	 * @param string    $order_key     The order key sent with the return.
 	 * @param string    $url_reference The checkoutReference sent with the return, '' when absent.
+	 * @param string    $gateway_id    The gateway whose return URL was requested. A return to one
+	 *                                 gateway cannot act on an order paid with the other.
 	 * @return string The checkout reference stored on the order, or '' to refuse the return.
 	 */
-	public static function bound_checkout_reference( $order, string $order_key, string $url_reference ): string {
+	public static function bound_checkout_reference( $order, string $order_key, string $url_reference, string $gateway_id = 'straumur' ): string {
 		$expected_key = (string) $order->get_order_key();
 
 		if ( '' === $expected_key || '' === $order_key || ! hash_equals( $expected_key, $order_key ) ) {
 			return '';
 		}
 
-		if ( 'straumur' !== $order->get_payment_method() ) {
+		if ( $gateway_id !== $order->get_payment_method() ) {
 			return '';
 		}
 
