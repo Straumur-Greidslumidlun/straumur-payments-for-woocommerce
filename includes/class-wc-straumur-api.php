@@ -250,7 +250,7 @@ class WC_Straumur_API {
 	}
 
 	/**
-	 * Ask whether Straumur Kortalán can be offered for an amount and currency on this terminal.
+	 * Ask whether Straumur Kortalán can be offered for an amount and currency on the Kortalán terminal.
 	 *
 	 * Proposed Checkout API contract (SD-4135), not final:
 	 * POST kortalan/availability { terminalIdentifier, amount, currency }
@@ -266,7 +266,7 @@ class WC_Straumur_API {
 	 */
 	public function get_kortalan_availability( int $amount, string $currency ) {
 		$body = array(
-			'terminalIdentifier' => $this->terminal_identifier,
+			'terminalIdentifier' => WC_Straumur_Settings::get_kortalan_terminal_identifier(),
 			'amount'             => $amount,
 			'currency'           => $currency,
 		);
@@ -301,7 +301,7 @@ class WC_Straumur_API {
 		string $reference
 	) {
 		$body = array(
-			'terminalIdentifier' => $this->terminal_identifier,
+			'terminalIdentifier' => WC_Straumur_Settings::get_kortalan_terminal_identifier(),
 			'amount'             => $amount,
 			'currency'           => $currency,
 			'reference'          => $reference,

@@ -146,7 +146,7 @@ final class WC_Straumur_Kortalan {
 		$scope = implode(
 			'|',
 			array(
-				WC_Straumur_Settings::get_terminal_identifier(),
+				WC_Straumur_Settings::get_kortalan_terminal_identifier(),
 				WC_Straumur_Settings::is_test_mode() ? 'test' : 'live',
 				(string) $amount,
 				strtoupper( $currency ),

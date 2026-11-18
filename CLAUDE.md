@@ -93,7 +93,8 @@ straumur-payments-for-woocommerce/
 - Manages order creation and payment session initialization
 
 #### 1b. Straumur Kortalán Gateway (`WC_Straumur_Kortalan_Gateway`, since 2.3.0)
-- A separate payment option with its own on/off, title and description (`woocommerce_straumur_kortalan_settings`); credentials and test mode come from the Straumur Payments settings
+- A separate payment option with its own on/off, title and description (`woocommerce_straumur_kortalan_settings`); API key, HMAC key and test mode come from the Straumur Payments settings and apply whether or not that gateway is enabled, so a shop can offer Kortalán alone
+- Terminal: always read it with `WC_Straumur_Settings::get_kortalan_terminal_identifier()` (the optional Kortalán Terminal Identifier, falling back to the Payment Page Terminal Identifier), never `get_terminal_identifier()`, in Kortalán code
 - `is_available()` asks Straumur whether Kortalán can be offered for the basket total (`WC_Straumur_Kortalan::is_available()`, cached in a transient, anything but an explicit yes hides the option); both checkouts list gateways from it
 - No subscriptions, no refunds, never manual capture. The webhook marks the order paid (`KOR` authorization), the return only decides where the shopper lands
 - A follow-up check runs from Action Scheduler after the session expires (`straumur_kortalan_check_order`) and marks a still-pending order paid or cancelled

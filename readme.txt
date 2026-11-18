@@ -80,9 +80,11 @@ These details are available from the Straumur merchant dashboard at [https://thj
 - **HMAC Key** *(Required)*: Obtain from Straumur service portal.
 - **Webhook URL** *(Required)*: Configure this URL in the Straumur dashboard.
 
-**Straumur Kortalán** is a separate payment option with its own settings page (WooCommerce → Settings → Payments → Straumur Kortalán). It uses the terminal identifier, API key, HMAC key and test mode above.
+**Straumur Kortalán** is a separate payment option with its own settings page (WooCommerce → Settings → Payments → Straumur Kortalán). It uses the API key, HMAC key and test mode above, and can be used together with Straumur Payments or on its own: the shared settings apply even when the Straumur Payments option is switched off.
 
 - **Enable Straumur Kortalán** *(Optional, off by default)*: Shows Straumur Kortalán as its own payment option. Shoppers who pick it go straight to the Kortalán application. Requires Kortalán on your Straumur terminal, and is only shown for amounts Kortalán will finance.
+- **Terminal** *(On by default)*: Straumur Kortalán uses the Payment Page Terminal Identifier above. Uncheck only when Straumur Kortalán is on a different terminal than your card payments.
+- **Kortalán Terminal Identifier** *(Editable when Terminal is unchecked)*: The terminal Straumur has enabled Straumur Kortalán on. While Terminal is checked it shows the Payment Page Terminal Identifier and cannot be changed.
 - **Title** *(Optional)*: Display name shown at checkout. Defaults to Straumur Kortalán.
 - **Description** *(Optional)*: Short description shown to customers.
 
@@ -96,6 +98,7 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 == Changelog ==
 = 2.3.0 =
 * Added: Straumur Kortalán as its own payment option at checkout, next to Straumur Payments, in both the classic and the block checkout. A shopper who picks it goes straight to the Kortalán application instead of the Straumur payment page. Switch it on under WooCommerce → Settings → Payments → Straumur Kortalán; it is off until you do, and it needs Kortalán enabled on your Straumur terminal
+* Straumur Kortalán can be offered on its own, with the Straumur Payments option switched off, and can use a different terminal than card payments (Kortalán Terminal Identifier)
 * The Straumur Kortalán option is only shown when Kortalán will finance the order amount, and such orders are always captured, whatever the capture setting says
 * An order whose shopper never returns from the Kortalán application is checked with Straumur after the payment session expires and is marked paid or cancelled
 

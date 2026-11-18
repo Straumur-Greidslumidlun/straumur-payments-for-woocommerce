@@ -91,6 +91,57 @@ final class KortalanTest extends TestCase {
 	}
 
 	// -----------------------------------------------------------------
+	// Terminal: Kortalán's own when set, otherwise the card terminal.
+	// -----------------------------------------------------------------
+
+	/**
+	 * Stub the two settings options separately.
+	 *
+	 * @param array $main     Straumur Payments settings.
+	 * @param array $kortalan Straumur Kortalán settings.
+	 */
+	private function stub_settings( array $main, array $kortalan ): void {
+		Functions\when( 'get_option' )->alias(
+			static function ( $name ) use ( $main, $kortalan ) {
+				return WC_Straumur_Settings::KORTALAN_OPTION_KEY === $name ? $kortalan : $main;
+			}
+		);
+	}
+
+	public function test_kortalan_uses_the_card_terminal_when_it_has_none_of_its_own(): void {
+		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array( 'enabled' => 'yes' ) );
+
+		$this->assertSame( 'card111', WC_Straumur_Settings::get_kortalan_terminal_identifier() );
+	}
+
+	public function test_kortalan_uses_its_own_terminal_when_one_is_set(): void {
+		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array( 'inherit_terminal' => 'no', 'terminal_identifier' => ' kor222 ' ) );
+
+		$this->assertSame( 'kor222', WC_Straumur_Settings::get_kortalan_terminal_identifier() );
+	}
+
+	public function test_a_blank_kortalan_terminal_falls_back_to_the_card_terminal(): void {
+		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array( 'inherit_terminal' => 'no', 'terminal_identifier' => '   ' ) );
+
+		$this->assertSame( 'card111', WC_Straumur_Settings::get_kortalan_terminal_identifier() );
+	}
+
+	public function test_a_kortalan_terminal_is_ignored_while_the_card_terminal_box_is_ticked(): void {
+		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array( 'inherit_terminal' => 'yes', 'terminal_identifier' => 'kor222' ) );
+
+		$this->assertSame( 'card111', WC_Straumur_Settings::get_kortalan_terminal_identifier() );
+	}
+
+	public function test_availability_is_cached_per_kortalan_terminal(): void {
+		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array() );
+		$on_card_terminal = WC_Straumur_Kortalan::availability_cache_key( 4990000, 'ISK' );
+
+		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array( 'inherit_terminal' => 'no', 'terminal_identifier' => 'kor222' ) );
+
+		$this->assertNotSame( $on_card_terminal, WC_Straumur_Kortalan::availability_cache_key( 4990000, 'ISK' ) );
+	}
+
+	// -----------------------------------------------------------------
 	// Status answers.
 	// -----------------------------------------------------------------
 

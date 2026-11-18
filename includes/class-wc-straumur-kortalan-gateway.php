@@ -23,8 +23,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Class WC_Straumur_Kortalan_Gateway
  *
- * Credentials (terminal identifier, API key, HMAC key, test mode) are those of the Straumur
- * Payments gateway. Kortalán is a loan: there are no subscriptions or saved payment details,
+ * API key, HMAC key and test mode are those of the Straumur Payments gateway, and so is the
+ * terminal unless the Kortalán settings name another. The option works with that gateway
+ * switched on or off. Kortalán is a loan: there are no subscriptions or saved payment details,
  * nothing to capture later, and refunds are not offered from WooCommerce.
  *
  * @since 2.3.0
@@ -83,6 +84,124 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Settings page. The fields are rebuilt first so the connection summary reflects what was
+	 * saved in this same request.
+	 *
+	 * @since 2.3.0
+	 * @return void
+	 */
+	public function admin_options() {
+		$this->init_form_fields();
+		parent::admin_options();
+
+		// While the "use the Straumur Payments terminal" box is ticked, the terminal field is disabled and
+		// shows that terminal. Unticked, it is editable and shows the Kortalán terminal entered so far.
+		$script = sprintf(
+			'(function(){var box=document.getElementById(%1$s),field=document.getElementById(%2$s);if(!box||!field){return;}var own=field.value;function show(){if(box.checked){if(!field.disabled){own=field.value;}field.value=field.getAttribute("data-card-terminal")||"";field.disabled=true;}else{field.disabled=false;field.value=own;}}box.addEventListener("change",show);show();})();',
+			wp_json_encode( $this->get_field_key( 'inherit_terminal' ) ),
+			wp_json_encode( $this->get_field_key( 'terminal_identifier' ) )
+		);
+
+		wp_register_script( 'straumur-kortalan-settings', false, array(), STRAUMUR_PAYMENTS_VERSION, true );
+		wp_enqueue_script( 'straumur-kortalan-settings' );
+		wp_add_inline_script( 'straumur-kortalan-settings', $script );
+	}
+
+	/**
+	 * Save the "use the Straumur Payments terminal" box.
+	 *
+	 * Unticking it without entering a usable terminal would leave the option pointing nowhere,
+	 * so that is refused and the choice stays as it was saved before.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string      $key   Field key.
+	 * @param string|null $value Posted value, null when the box is unticked.
+	 * @return string 'yes' or 'no'.
+	 */
+	public function validate_inherit_terminal_field( $key, $value ) {
+		if ( null !== $value ) {
+			return 'yes';
+		}
+
+		$terminal = $this->get_posted_terminal_identifier();
+		// A refused save leaves the choice as it was.
+		$previous = 'no' === $this->get_option( 'inherit_terminal', 'yes' ) ? 'no' : 'yes';
+
+		if ( '' === $terminal ) {
+			\WC_Admin_Settings::add_error(
+				esc_html__( 'Enter the Kortalán Terminal Identifier, or keep using the terminal from the Straumur Payments settings.', 'straumur-payments-for-woocommerce' )
+			);
+
+			return $previous;
+		}
+
+		if ( ! self::is_plausible_terminal_identifier( $terminal ) ) {
+			\WC_Admin_Settings::add_error(
+				esc_html__( 'The Kortalán Terminal Identifier cannot contain spaces. Copy it again from the Straumur merchant portal.', 'straumur-payments-for-woocommerce' )
+			);
+
+			return $previous;
+		}
+
+		return 'no';
+	}
+
+	/**
+	 * Save the Kortalán terminal identifier.
+	 *
+	 * The field is disabled, and so not posted, while the "use the Straumur Payments terminal"
+	 * box is ticked: the terminal saved earlier is kept, so unticking the box brings it back.
+	 * A value the box validation refused is not saved either.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string      $key   Field key.
+	 * @param string|null $value Posted value.
+	 * @return string
+	 */
+	public function validate_terminal_identifier_field( $key, $value ) {
+		$post_data = $this->get_post_data();
+		$inherits  = isset( $post_data[ $this->get_field_key( 'inherit_terminal' ) ] );
+		$terminal  = $this->get_posted_terminal_identifier();
+
+		if ( $inherits || '' === $terminal || ! self::is_plausible_terminal_identifier( $terminal ) ) {
+			return (string) $this->get_option( 'terminal_identifier', '' );
+		}
+
+		return $terminal;
+	}
+
+	/**
+	 * The Kortalán terminal identifier in the posted settings form, trimmed.
+	 *
+	 * @since 2.3.0
+	 * @return string
+	 */
+	private function get_posted_terminal_identifier(): string {
+		$post_data = $this->get_post_data();
+		$terminal  = $post_data[ $this->get_field_key( 'terminal_identifier' ) ] ?? '';
+
+		return is_string( $terminal ) ? trim( sanitize_text_field( wp_unslash( $terminal ) ) ) : '';
+	}
+
+	/**
+	 * Whether a value can be a terminal identifier at all.
+	 *
+	 * Deliberately not a format check: Straumur may change what identifiers look like. It only
+	 * catches what no identifier can be, a value with whitespace in it or an absurdly long one,
+	 * which is what a bad paste looks like.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $terminal Trimmed value.
+	 * @return bool
+	 */
+	public static function is_plausible_terminal_identifier( string $terminal ): bool {
+		return '' !== $terminal && strlen( $terminal ) <= 64 && 1 !== preg_match( '/\s/', $terminal );
+	}
+
+	/**
 	 * The Straumur Kortalán logo shown next to the option in the classic checkout.
 	 *
 	 * @since 2.3.0
@@ -132,7 +251,7 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		if ( '' === WC_Straumur_Settings::get_api_key() || '' === WC_Straumur_Settings::get_terminal_identifier() ) {
+		if ( '' === WC_Straumur_Settings::get_api_key() || '' === WC_Straumur_Settings::get_kortalan_terminal_identifier() ) {
 			return false;
 		}
 

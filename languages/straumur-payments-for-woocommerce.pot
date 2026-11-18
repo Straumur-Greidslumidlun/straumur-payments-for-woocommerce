@@ -547,10 +547,6 @@ msgid "Enable Straumur Kortalán"
 msgstr ""
 
 #: includes/class-wc-straumur-settings.php
-msgid "Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. It uses the terminal identifier, API key and test mode from the Straumur Payments settings, and Kortalán must be enabled on that terminal by Straumur. The option is only shown for amounts Kortalán will finance."
-msgstr ""
-
-#: includes/class-wc-straumur-settings.php
 msgid "Spread the payment with Straumur Kortalán. You complete the application on the next page."
 msgstr ""
 
@@ -589,4 +585,76 @@ msgstr ""
 
 #: includes/class-wc-straumur-kortalan.php
 msgid "Straumur could not confirm whether the Straumur Kortalán payment went through. Look the payment up in the Straumur merchant portal before fulfilling or cancelling this order."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. Kortalán must be enabled on the terminal by Straumur, and the option is only shown for amounts Kortalán will finance. It can be used with or without the Straumur Payments option."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Kortalán Terminal Identifier"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Connection to Straumur"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Straumur Kortalán uses the API key, HMAC key and test mode from the Straumur Payments settings. They apply here even when the Straumur Payments option itself is switched off."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "set"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "missing"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "the Payment Page Terminal Identifier from Straumur Payments"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Terminal"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Mode"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "test"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "live"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Open the Straumur Payments settings"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Use the Payment Page Terminal Identifier from the Straumur Payments settings"
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "Uncheck only when Straumur Kortalán is on a different terminal than your card payments, then enter that terminal below."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "the Kortalán Terminal Identifier below"
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "Enter the Kortalán Terminal Identifier, or keep using the terminal from the Straumur Payments settings."
+msgstr ""
+
+#: includes/class-wc-straumur-settings.php
+msgid "The terminal Straumur Kortalán uses. While the box above is ticked, this shows the terminal from the Straumur Payments settings and cannot be changed here."
+msgstr ""
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "The Kortalán Terminal Identifier cannot contain spaces. Copy it again from the Straumur merchant portal."
 msgstr ""
