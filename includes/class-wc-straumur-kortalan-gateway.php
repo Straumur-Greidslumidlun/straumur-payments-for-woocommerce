@@ -361,7 +361,14 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 		$order->update_meta_data( WC_Straumur_Return_Guard::CHECKOUT_REFERENCE_META, $checkout_reference );
 		$order->save();
 
-		// The shopper may close the browser in the Kortalán application; look again after the payment expires.
+		// The shopper may close the browser in the Kortalán application. Look once early, for a loan
+		// that was approved while the webhook was lost, and again after the payment expires.
+		WC_Straumur_Kortalan::schedule_check(
+			$order->get_id(),
+			$checkout_reference,
+			WC_Straumur_Kortalan::EARLY_CHECK_DELAY,
+			WC_Straumur_Kortalan::EARLY_CHECK
+		);
 		WC_Straumur_Kortalan::schedule_check(
 			$order->get_id(),
 			$checkout_reference,
@@ -377,22 +384,25 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Handle the shopper coming back from the Kortalán application.
 	 *
-	 * The order is marked paid by the webhook, as for card payments. This only decides where the
-	 * shopper lands: the order-received page when Kortalán approved, otherwise back to paying.
+	 * Straumur is asked what happened; nothing in the URL is trusted beyond finding the order,
+	 * which takes its key and the payment reference stored on it. When Kortalán approved, the
+	 * order is marked paid here, so a shop whose webhook does not arrive is not left with a
+	 * thanked shopper and an unpaid order. The webhook then finds it paid.
+	 *
+	 * The nonce belongs to the browser session that started the payment. A Kortalán application
+	 * can end in another browser (phone, electronic ID), where it cannot verify. That shopper is
+	 * still sent to the right page, but the order is not written to from such a request: the
+	 * webhook or the follow-up check marks it paid.
 	 *
 	 * @since 2.3.0
 	 * @return void
 	 */
 	public function process_return(): void {
-		if (
-			! isset( $_GET['straumur_nonce'] )
-			|| ! wp_verify_nonce(
+		$nonce_ok = isset( $_GET['straumur_nonce'] )
+			&& false !== wp_verify_nonce(
 				sanitize_text_field( wp_unslash( $_GET['straumur_nonce'] ) ),
 				'straumur_process_return'
-			)
-		) {
-			wp_die( esc_html__( 'Nonce verification failed.', 'straumur-payments-for-woocommerce' ) );
-		}
+			);
 
 		$order_id = isset( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) ) : 0;
 		$order    = wc_get_order( $order_id );
@@ -428,9 +438,13 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 		$outcome = WC_Straumur_Kortalan::outcome( $status );
 
 		if ( WC_Straumur_Kortalan::OUTCOME_PAID === $outcome ) {
-			if ( is_array( $status ) && isset( $status['payfacReference'] ) && is_scalar( $status['payfacReference'] ) ) {
-				$order->update_meta_data( '_straumur_payfac_reference', sanitize_text_field( (string) $status['payfacReference'] ) );
-				$order->save();
+			if ( $nonce_ok ) {
+				WC_Straumur_Kortalan::record_paid( $order, WC_Straumur_Kortalan::payfac_reference( $status ) );
+			} else {
+				$this->logger->info(
+					sprintf( 'Return for order %d came from another browser session; the order is left for the webhook to mark paid.', $order_id ),
+					$this->context
+				);
 			}
 
 			wc_add_notice(

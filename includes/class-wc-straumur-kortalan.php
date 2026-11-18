@@ -73,6 +73,25 @@ final class WC_Straumur_Kortalan {
 	const RECHECK_DELAY = 900;
 
 	/**
+	 * Seconds after the payment was started at which an order is first looked at. This check
+	 * only ever marks an order paid: it exists for the loan that was approved while the webhook
+	 * was lost and the shopper never came back, so the order is not left unpaid until the
+	 * payment session expires.
+	 */
+	const EARLY_CHECK_DELAY = 900;
+
+	/**
+	 * Attempt number of the early check. It is not part of the chain of checks after expiry.
+	 */
+	const EARLY_CHECK = 0;
+
+	/**
+	 * Seconds to wait for an availability answer. The question is asked while the checkout page
+	 * is built, so a slow answer is treated as no answer.
+	 */
+	const AVAILABILITY_TIMEOUT = 3;
+
+	/**
 	 * Seconds a yes or no about availability is reused. The answer depends only on the terminal,
 	 * amount and currency, and the checkout asks again on every refresh.
 	 */
@@ -249,6 +268,20 @@ final class WC_Straumur_Kortalan {
 	}
 
 	/**
+	 * The Straumur reference of the payment in a status answer, '' when there is none.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param mixed $status_response Decoded status response, or false.
+	 * @return string
+	 */
+	public static function payfac_reference( $status_response ): string {
+		return is_array( $status_response ) && isset( $status_response['payfacReference'] ) && is_scalar( $status_response['payfacReference'] )
+			? sanitize_text_field( (string) $status_response['payfacReference'] )
+			: '';
+	}
+
+	/**
 	 * Schedule a check of an order whose shopper may never come back.
 	 *
 	 * @since 2.3.0
@@ -256,7 +289,7 @@ final class WC_Straumur_Kortalan {
 	 * @param int    $order_id           The order.
 	 * @param string $checkout_reference The payment the check is for.
 	 * @param int    $delay              Seconds from now.
-	 * @param int    $attempt            Which check this is, starting at 1.
+	 * @param int    $attempt            Which check this is: EARLY_CHECK, or 1 and up after expiry.
 	 * @return void
 	 */
 	public static function schedule_check( int $order_id, string $checkout_reference, int $delay, int $attempt = 1 ): void {
@@ -275,14 +308,18 @@ final class WC_Straumur_Kortalan {
 	/**
 	 * Resolve an order that is still unpaid after its Kortalán payment should have finished.
 	 *
-	 * Runs from Action Scheduler. Does nothing when the order has moved on: paid by the webhook,
-	 * cancelled, or paid for again with another payment (a new attempt has its own reference).
+	 * Runs from Action Scheduler. Does nothing when the order has moved on: paid by the webhook
+	 * or the return, or paid for again with another payment (a new attempt has its own reference).
+	 *
+	 * A cancelled order is still looked at. WooCommerce cancels unpaid orders after its
+	 * "hold stock" time, by default sooner than the payment session expires, and the loan may
+	 * have been approved all the same. Such an order is marked paid, as the webhook would have.
 	 *
 	 * @since 2.3.0
 	 *
 	 * @param int    $order_id           The order.
 	 * @param string $checkout_reference The payment the check was scheduled for.
-	 * @param int    $attempt            Which check this is, starting at 1.
+	 * @param int    $attempt            Which check this is: EARLY_CHECK, or 1 and up after expiry.
 	 * @return void
 	 */
 	public static function check_order( $order_id, $checkout_reference, $attempt = 1 ): void {
@@ -292,7 +329,7 @@ final class WC_Straumur_Kortalan {
 		}
 
 		$checkout_reference = (string) $checkout_reference;
-		$attempt            = max( 1, (int) $attempt );
+		$attempt            = max( self::EARLY_CHECK, (int) $attempt );
 
 		if ( WC_Straumur_Settings::KORTALAN_GATEWAY_ID !== $order->get_payment_method() ) {
 			return;
@@ -302,19 +339,35 @@ final class WC_Straumur_Kortalan {
 			return;
 		}
 
-		if ( $order->is_paid() || ! $order->has_status( array( 'pending', 'failed' ) ) ) {
+		if ( $order->is_paid() || ! $order->has_status( array( 'pending', 'failed', 'cancelled' ) ) ) {
 			return;
 		}
+
+		$was_cancelled = $order->has_status( 'cancelled' );
 
 		$api     = new WC_Straumur_API();
 		$status  = $api->get_kortalan_status( $checkout_reference );
 		$outcome = self::outcome( $status );
 
 		if ( self::OUTCOME_PAID === $outcome ) {
-			$payfac_reference = is_array( $status ) && isset( $status['payfacReference'] ) && is_scalar( $status['payfacReference'] )
-				? sanitize_text_field( (string) $status['payfacReference'] )
-				: '';
-			self::record_paid( $order, $payfac_reference );
+			if ( self::record_paid( $order, self::payfac_reference( $status ) ) && $was_cancelled ) {
+				$order->add_order_note(
+					esc_html__( 'This order had been cancelled as unpaid, but the Straumur Kortalán payment went through, so it was marked paid. Check stock before fulfilling it.', 'straumur-payments-for-woocommerce' )
+				);
+			}
+			return;
+		}
+
+		// The early check only looks for an approved loan. A cancelled order needs nothing more either.
+		if ( self::EARLY_CHECK === $attempt ) {
+			return;
+		}
+
+		if ( $was_cancelled ) {
+			// The shopper may still be in the application: keep looking until the chain ends.
+			if ( self::OUTCOME_FAILED !== $outcome && $attempt < self::MAX_CHECKS ) {
+				self::schedule_check( $order->get_id(), $checkout_reference, self::RECHECK_DELAY, $attempt + 1 );
+			}
 			return;
 		}
 

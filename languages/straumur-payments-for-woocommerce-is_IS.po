@@ -656,3 +656,7 @@ msgstr "Útstöðin sem Straumur Kortalán notar. Á meðan hakað er í reitinn
 #: includes/class-wc-straumur-kortalan-gateway.php
 msgid "The Kortalán Terminal Identifier cannot contain spaces. Copy it again from the Straumur merchant portal."
 msgstr "Auðkenni útstöðvar fyrir Kortalán má ekki innihalda bil. Afritaðu það aftur af þjónustuvef Straums."
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "This order had been cancelled as unpaid, but the Straumur Kortalán payment went through, so it was marked paid. Check stock before fulfilling it."
+msgstr "Þessi pöntun hafði verið felld niður sem ógreidd, en greiðsla með Straumur Kortalán gekk í gegn og því var hún merkt greidd. Athugaðu lagerstöðu áður en pöntunin er afgreidd."

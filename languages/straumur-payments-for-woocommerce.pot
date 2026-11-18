@@ -658,3 +658,7 @@ msgstr ""
 #: includes/class-wc-straumur-kortalan-gateway.php
 msgid "The Kortalán Terminal Identifier cannot contain spaces. Copy it again from the Straumur merchant portal."
 msgstr ""
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "This order had been cancelled as unpaid, but the Straumur Kortalán payment went through, so it was marked paid. Check stock before fulfilling it."
+msgstr ""

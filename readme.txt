@@ -100,7 +100,8 @@ All credentials available at [https://thjonustuvefur.straumur.is/](https://thjon
 * Added: Straumur Kortalán as its own payment option at checkout, next to Straumur Payments, in both the classic and the block checkout. A shopper who picks it goes straight to the Kortalán application instead of the Straumur payment page. Switch it on under WooCommerce → Settings → Payments → Straumur Kortalán; it is off until you do, and it needs Kortalán enabled on your Straumur terminal
 * Straumur Kortalán can be offered on its own, with the Straumur Payments option switched off, and can use a different terminal than card payments (Kortalán Terminal Identifier)
 * The Straumur Kortalán option is only shown when Kortalán will finance the order amount, and such orders are always captured, whatever the capture setting says
-* An order whose shopper never returns from the Kortalán application is checked with Straumur after the payment session expires and is marked paid or cancelled
+* A Straumur Kortalán order is marked paid when the shopper returns from an approved application, without waiting for the webhook
+* An order whose shopper never returns from the Kortalán application is checked with Straumur, first after 15 minutes and again after the payment session expires, and is marked paid or cancelled. An order WooCommerce had already cancelled as unpaid is marked paid if the loan turns out to be approved, with a note asking you to check stock
 
 = 2.2.4 =
 * Security: The page a shopper returns to after paying now accepts only the payment session the shop created for that order, and only together with the order's key. A return that does not match is refused and leaves the order unchanged

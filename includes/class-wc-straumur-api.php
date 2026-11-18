@@ -271,7 +271,7 @@ class WC_Straumur_API {
 			'currency'           => $currency,
 		);
 
-		return $this->send_request( 'kortalan/availability', $body, 'POST', 8 );
+		return $this->send_request( 'kortalan/availability', $body, 'POST', WC_Straumur_Kortalan::AVAILABILITY_TIMEOUT );
 	}
 
 	/**
