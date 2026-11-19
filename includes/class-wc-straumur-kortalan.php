@@ -63,6 +63,13 @@ final class WC_Straumur_Kortalan {
 	const ERROR_NOT_AVAILABLE        = '2042';
 
 	/**
+	 * Field of the hosted checkout request that sends the shopper straight to one payment method.
+	 * Its value for Kortalán is WC_Straumur_Webhook_Handler::PAYMENT_METHOD_KORTALAN, the code the
+	 * webhook carries. The field name is not final (SD-4075): change it here only.
+	 */
+	const DIRECT_PAYMENT_FIELD = 'directPaymentMethod';
+
+	/**
 	 * How many times a pending order is checked before the merchant is asked to look at it.
 	 */
 	const MAX_CHECKS = 5;
@@ -86,16 +93,26 @@ final class WC_Straumur_Kortalan {
 	const EARLY_CHECK = 0;
 
 	/**
-	 * Seconds to wait for an availability answer. The question is asked while the checkout page
-	 * is built, so a slow answer is treated as no answer.
+	 * Name of Kortalán in the list of payment methods Straumur has enabled for a store (SD-4133).
+	 */
+	const STORE_PAYMENT_METHOD = 'Kortalan';
+
+	/**
+	 * Seconds to wait for an availability answer. The question can be asked while the checkout
+	 * page is built, so a slow answer is treated as no answer.
 	 */
 	const AVAILABILITY_TIMEOUT = 3;
 
 	/**
-	 * Seconds a yes or no about availability is reused. The answer depends only on the terminal,
-	 * amount and currency, and the checkout asks again on every refresh.
+	 * Seconds a yes about availability is reused. Whether a store has Kortalán changes rarely,
+	 * and saving the settings of either Straumur option asks again.
 	 */
-	const AVAILABILITY_TTL = 600;
+	const AVAILABILITY_TTL = 3600;
+
+	/**
+	 * Seconds a no is reused: shorter, so a shop that just had Kortalán enabled is not kept waiting.
+	 */
+	const UNAVAILABLE_TTL = 600;
 
 	/**
 	 * Seconds an unanswered availability question is treated as a no before it is asked again.
@@ -103,23 +120,24 @@ final class WC_Straumur_Kortalan {
 	const AVAILABILITY_ERROR_TTL = 120;
 
 	/**
-	 * Whether Straumur Kortalán can be offered for an amount and currency.
+	 * Whether Straumur has Kortalán enabled for the store of the Kortalán terminal.
 	 *
 	 * Only an explicit yes offers the option: an option that then fails is worse for the shopper
 	 * than one fewer option. That includes Straumur not answering.
 	 *
-	 * @since 2.3.0
+	 * This says nothing about the basket. Whether Kortalán will finance a particular amount is
+	 * decided when the payment is started, and a refusal there is shown to the shopper.
 	 *
-	 * @param int    $amount   Minor units.
-	 * @param string $currency ISO currency code.
+	 * @since 2.3.0
 	 * @return bool
 	 */
-	public static function is_available( int $amount, string $currency ): bool {
-		if ( $amount <= 0 || '' === $currency ) {
+	public static function is_available(): bool {
+		$terminal = WC_Straumur_Settings::get_kortalan_terminal_identifier();
+		if ( '' === $terminal ) {
 			return false;
 		}
 
-		$cache_key = self::availability_cache_key( $amount, $currency );
+		$cache_key = self::availability_cache_key();
 		$cached    = get_transient( $cache_key );
 
 		if ( 'yes' === $cached || 'no' === $cached ) {
@@ -127,7 +145,7 @@ final class WC_Straumur_Kortalan {
 		}
 
 		$api      = new WC_Straumur_API();
-		$response = $api->get_kortalan_availability( $amount, $currency );
+		$response = $api->get_payment_methods( $terminal );
 
 		if ( ! is_array( $response ) ) {
 			set_transient( $cache_key, 'no', self::AVAILABILITY_ERROR_TTL );
@@ -135,13 +153,13 @@ final class WC_Straumur_Kortalan {
 		}
 
 		$available = self::is_available_answer( $response );
-		set_transient( $cache_key, $available ? 'yes' : 'no', self::AVAILABILITY_TTL );
+		set_transient( $cache_key, $available ? 'yes' : 'no', $available ? self::AVAILABILITY_TTL : self::UNAVAILABLE_TTL );
 
 		return $available;
 	}
 
 	/**
-	 * Whether an availability response is an explicit yes.
+	 * Whether a payment methods response lists Kortalán.
 	 *
 	 * @since 2.3.0
 	 *
@@ -149,30 +167,45 @@ final class WC_Straumur_Kortalan {
 	 * @return bool
 	 */
 	public static function is_available_answer( $response ): bool {
-		return is_array( $response ) && isset( $response['available'] ) && true === $response['available'];
+		if ( ! is_array( $response ) || ! isset( $response['paymentMethods'] ) || ! is_array( $response['paymentMethods'] ) ) {
+			return false;
+		}
+
+		foreach ( $response['paymentMethods'] as $method ) {
+			if ( is_string( $method ) && 0 === strcasecmp( $method, self::STORE_PAYMENT_METHOD ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
-	 * Transient name for one availability answer.
+	 * Transient name of the availability answer for the Kortalán terminal.
 	 *
 	 * @since 2.3.0
-	 *
-	 * @param int    $amount   Minor units.
-	 * @param string $currency ISO currency code.
 	 * @return string
 	 */
-	public static function availability_cache_key( int $amount, string $currency ): string {
+	public static function availability_cache_key(): string {
 		$scope = implode(
 			'|',
 			array(
 				WC_Straumur_Settings::get_kortalan_terminal_identifier(),
 				WC_Straumur_Settings::is_test_mode() ? 'test' : 'live',
-				(string) $amount,
-				strtoupper( $currency ),
 			)
 		);
 
 		return 'straumur_kor_avail_' . md5( $scope );
+	}
+
+	/**
+	 * Forget the availability answer, so Straumur is asked again the next time it matters.
+	 *
+	 * @since 2.3.0
+	 * @return void
+	 */
+	public static function forget_availability(): void {
+		delete_transient( self::availability_cache_key() );
 	}
 
 	/**

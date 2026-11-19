@@ -312,7 +312,7 @@ class WC_Straumur_Settings {
 				'label'       => esc_html__( 'Enable Straumur Kortalán', 'straumur-payments-for-woocommerce' ),
 				'default'     => 'no',
 				'description' => esc_html__(
-					'Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. Kortalán must be enabled on the terminal by Straumur, and the option is only shown for amounts Kortalán will finance. It can be used with or without the Straumur Payments option.',
+					'Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. Kortalán must be enabled on the terminal by Straumur. A shopper whose order amount Kortalán will not finance is asked to choose another payment method. It can be used with or without the Straumur Payments option.',
 					'straumur-payments-for-woocommerce'
 				),
 				'desc_tip'    => false,

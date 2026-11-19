@@ -586,10 +586,6 @@ msgid "Straumur could not confirm whether the Straumur Kortalán payment went th
 msgstr "Straumur gat ekki staðfest hvort greiðsla með Straumur Kortalán gekk í gegn. Flettu greiðslunni upp á þjónustuvef Straums áður en pöntunin er afgreidd eða felld niður."
 
 #: includes/class-wc-straumur-settings.php
-msgid "Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. Kortalán must be enabled on the terminal by Straumur, and the option is only shown for amounts Kortalán will finance. It can be used with or without the Straumur Payments option."
-msgstr "Sýnir Straumur Kortalán sem sérstakan greiðslumáta í greiðsluferlinu. Kaupendur sem velja hann fara beint í umsókn um Kortalán. Straumur þarf að hafa virkjað Kortalán á útstöðinni og greiðslumátinn birtist aðeins fyrir upphæðir sem Kortalán fjármagnar. Hægt er að nota hann með eða án greiðslumátans Straumur Payments."
-
-#: includes/class-wc-straumur-settings.php
 msgid "Kortalán Terminal Identifier"
 msgstr "Auðkenni útstöðvar fyrir Kortalán"
 
@@ -660,3 +656,7 @@ msgstr "Auðkenni útstöðvar fyrir Kortalán má ekki innihalda bil. Afritaðu
 #: includes/class-wc-straumur-kortalan.php
 msgid "This order had been cancelled as unpaid, but the Straumur Kortalán payment went through, so it was marked paid. Check stock before fulfilling it."
 msgstr "Þessi pöntun hafði verið felld niður sem ógreidd, en greiðsla með Straumur Kortalán gekk í gegn og því var hún merkt greidd. Athugaðu lagerstöðu áður en pöntunin er afgreidd."
+
+#: includes/class-wc-straumur-settings.php
+msgid "Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. Kortalán must be enabled on the terminal by Straumur. A shopper whose order amount Kortalán will not finance is asked to choose another payment method. It can be used with or without the Straumur Payments option."
+msgstr "Sýnir Straumur Kortalán sem sérstakan greiðslumáta í greiðsluferlinu. Kaupendur sem velja hann fara beint í umsókn um Kortalán. Straumur þarf að hafa virkjað Kortalán á útstöðinni. Kaupandi með pöntunarupphæð sem Kortalán fjármagnar ekki er beðinn um að velja annan greiðslumáta. Hægt er að nota hann með eða án greiðslumátans Straumur Payments."

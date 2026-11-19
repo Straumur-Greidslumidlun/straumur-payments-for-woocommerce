@@ -49,11 +49,14 @@ final class KortalanTest extends TestCase {
 	 */
 	public static function availability_answers(): array {
 		return array(
-			'yes'                    => array( array( 'available' => true ), true ),
-			'no'                     => array( array( 'available' => false, 'reason' => 'AmountNotFinanced' ), false ),
-			'yes as a string'        => array( array( 'available' => 'true' ), false ),
-			'yes as a number'        => array( array( 'available' => 1 ), false ),
-			'field missing'          => array( array( 'responseIdentifier' => 'abc' ), false ),
+			'listed'                  => array( array( 'paymentMethods' => array( 'Cards', 'Kortalan' ) ), true ),
+			'listed in another case'  => array( array( 'paymentMethods' => array( 'kortalan' ) ), true ),
+			'not listed'              => array( array( 'paymentMethods' => array( 'Cards', 'ApplePay' ) ), false ),
+			'empty list'              => array( array( 'paymentMethods' => array() ), false ),
+			'list is not a list'      => array( array( 'paymentMethods' => 'Kortalan' ), false ),
+			'only a longer name'      => array( array( 'paymentMethods' => array( 'KortalanPos' ) ), false ),
+			'entry is not a string'   => array( array( 'paymentMethods' => array( true ) ), false ),
+			'field missing'           => array( array( 'responseIdentifier' => 'abc' ), false ),
 			'no answer from Straumur' => array( false, false ),
 		);
 	}
@@ -62,32 +65,35 @@ final class KortalanTest extends TestCase {
 	 * @param mixed $response
 	 */
 	#[DataProvider( 'availability_answers' )]
-	public function test_only_an_explicit_yes_makes_kortalan_available( $response, bool $expected ): void {
+	public function test_only_a_store_that_lists_kortalan_makes_it_available( $response, bool $expected ): void {
 		$this->assertSame( $expected, WC_Straumur_Kortalan::is_available_answer( $response ) );
 	}
 
-	public function test_a_zero_amount_is_never_available_and_straumur_is_not_asked(): void {
+	public function test_without_a_terminal_it_is_never_available_and_straumur_is_not_asked(): void {
+		Functions\when( 'get_option' )->justReturn( array() );
+
 		// No get_transient() stub: reaching the cache or the API would fail the test.
-		$this->assertFalse( WC_Straumur_Kortalan::is_available( 0, 'ISK' ) );
+		$this->assertFalse( WC_Straumur_Kortalan::is_available() );
 	}
 
 	public function test_a_cached_answer_is_used_without_asking_straumur(): void {
 		Functions\when( 'get_option' )->justReturn( array( 'terminal_identifier' => 'abc123', 'test_mode' => 'yes' ) );
 		Functions\when( 'get_transient' )->justReturn( 'yes' );
 
-		$this->assertTrue( WC_Straumur_Kortalan::is_available( 4990000, 'ISK' ) );
+		$this->assertTrue( WC_Straumur_Kortalan::is_available() );
 	}
 
-	public function test_cache_key_differs_by_amount_and_currency(): void {
+	public function test_cache_key_differs_by_mode(): void {
 		Functions\when( 'get_option' )->justReturn( array( 'terminal_identifier' => 'abc123', 'test_mode' => 'yes' ) );
+		$test_key = WC_Straumur_Kortalan::availability_cache_key();
 
-		$key = WC_Straumur_Kortalan::availability_cache_key( 4990000, 'ISK' );
+		$cache = new \ReflectionProperty( WC_Straumur_Settings::class, 'cached_settings' );
+		$cache->setValue( null, array() );
+		Functions\when( 'get_option' )->justReturn( array( 'terminal_identifier' => 'abc123', 'test_mode' => 'no' ) );
 
-		$this->assertNotSame( $key, WC_Straumur_Kortalan::availability_cache_key( 4990100, 'ISK' ) );
-		$this->assertNotSame( $key, WC_Straumur_Kortalan::availability_cache_key( 4990000, 'EUR' ) );
-		$this->assertSame( $key, WC_Straumur_Kortalan::availability_cache_key( 4990000, 'isk' ) );
+		$this->assertNotSame( $test_key, WC_Straumur_Kortalan::availability_cache_key() );
 		// Transient names are limited to 172 characters.
-		$this->assertLessThan( 172, strlen( $key ) );
+		$this->assertLessThan( 172, strlen( $test_key ) );
 	}
 
 	// -----------------------------------------------------------------
@@ -134,11 +140,11 @@ final class KortalanTest extends TestCase {
 
 	public function test_availability_is_cached_per_kortalan_terminal(): void {
 		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array() );
-		$on_card_terminal = WC_Straumur_Kortalan::availability_cache_key( 4990000, 'ISK' );
+		$on_card_terminal = WC_Straumur_Kortalan::availability_cache_key();
 
 		$this->stub_settings( array( 'terminal_identifier' => 'card111' ), array( 'inherit_terminal' => 'no', 'terminal_identifier' => 'kor222' ) );
 
-		$this->assertNotSame( $on_card_terminal, WC_Straumur_Kortalan::availability_cache_key( 4990000, 'ISK' ) );
+		$this->assertNotSame( $on_card_terminal, WC_Straumur_Kortalan::availability_cache_key() );
 	}
 
 	// -----------------------------------------------------------------

@@ -250,39 +250,39 @@ class WC_Straumur_API {
 	}
 
 	/**
-	 * Ask whether Straumur Kortalán can be offered for an amount and currency on the Kortalán terminal.
+	 * Ask which payment methods and card brands Straumur has enabled for a terminal's store.
 	 *
-	 * Proposed Checkout API contract (SD-4135), not final:
-	 * POST kortalan/availability { terminalIdentifier, amount, currency }
-	 * 200 { available: bool, reason?: string, responseIdentifier }
+	 * Proposed Checkout API contract (SD-4133), not final:
+	 * GET terminal/{terminalIdentifier}/payment-methods
+	 * 200 { paymentMethods: string[], cardBrands: string[], responseIdentifier }
 	 *
-	 * The call runs while the checkout page is built, so it gets a short timeout.
+	 * The call can run while the checkout page is built, so it gets a short timeout.
 	 *
 	 * @since 2.3.0
 	 *
-	 * @param int    $amount   Minor units.
-	 * @param string $currency ISO currency code.
+	 * @param string $terminal_identifier The terminal to ask about.
 	 * @return array|false Response array, false when the question could not be answered.
 	 */
-	public function get_kortalan_availability( int $amount, string $currency ) {
-		$body = array(
-			'terminalIdentifier' => WC_Straumur_Settings::get_kortalan_terminal_identifier(),
-			'amount'             => $amount,
-			'currency'           => $currency,
-		);
+	public function get_payment_methods( string $terminal_identifier ) {
+		$endpoint = 'terminal/' . rawurlencode( $terminal_identifier ) . '/payment-methods';
 
-		return $this->send_request( 'kortalan/availability', $body, 'POST', WC_Straumur_Kortalan::AVAILABILITY_TIMEOUT );
+		return $this->send_request( $endpoint, array(), 'GET', WC_Straumur_Kortalan::AVAILABILITY_TIMEOUT );
 	}
 
 	/**
 	 * Start a payment that sends the shopper straight to the Straumur Kortalán application.
 	 *
-	 * Proposed Checkout API contract (SD-4075), not final:
-	 * POST kortalan { terminalIdentifier, amount, currency, reference, returnUrl, abandonUrl, culture, expiresAt }
+	 * It is an ordinary hosted checkout session with one extra field (SD-4075, field name not final):
+	 * POST hostedcheckout { ..., directPaymentMethod: "KOR" }
 	 * 200 { url, checkoutReference, responseIdentifier }
 	 * 400 { errorMessage, errorCode, responseIdentifier }; read the code with get_last_error_code().
 	 *
-	 * A Kortalán payment is always captured, so isManualCapture is never sent.
+	 * With the field set, the payment page passes the shopper on to the Kortalán application without
+	 * showing itself, and offers no other payment method if Kortalán refuses. Straumur refuses the
+	 * request when Kortalán cannot be used; it does not fall back to the payment page.
+	 *
+	 * A Kortalán payment is always captured, so isManualCapture is never sent. Line items and the
+	 * theme key belong to the payment page the shopper does not see, so they are not sent either.
 	 *
 	 * @since 2.3.0
 	 *
@@ -311,15 +311,16 @@ class WC_Straumur_API {
 			'expiresAt'          => gmdate( 'Y-m-d\\TH:i:s.v\\Z', time() + $this->get_checkout_expiry_seconds() ),
 		);
 
-		return $this->send_request( 'kortalan', $body );
+		$body[ WC_Straumur_Kortalan::DIRECT_PAYMENT_FIELD ] = WC_Straumur_Webhook_Handler::PAYMENT_METHOD_KORTALAN;
+
+		return $this->send_request( 'hostedcheckout/', $body );
 	}
 
 	/**
 	 * Retrieve the result of a Straumur Kortalán payment by its checkout reference.
 	 *
-	 * Proposed Checkout API contract (SD-4075), not final:
-	 * GET kortalan/status/{checkoutReference}
-	 * 200 { status: New|Completed|Expired|Refused|Cancelled, payfacReference?, responseIdentifier }
+	 * The same call as get_session_status(): a Kortalán payment is a hosted checkout session.
+	 * 200 { status: New|Completed|Expired|..., payfacReference?, responseIdentifier }
 	 *
 	 * @since 2.3.0
 	 *
@@ -327,7 +328,7 @@ class WC_Straumur_API {
 	 * @return array|false Array on success, false otherwise.
 	 */
 	public function get_kortalan_status( string $checkout_reference ) {
-		return $this->send_request( 'kortalan/status/' . rawurlencode( $checkout_reference ), array(), 'GET' );
+		return $this->send_request( 'hostedcheckout/status/' . rawurlencode( $checkout_reference ), array(), 'GET' );
 	}
 
 	/**

@@ -70,6 +70,10 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 
 		add_action( 'woocommerce_api_' . $this->id, array( $this, 'process_return' ) );
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
+
+		// Saving either Straumur settings page asks Straumur again whether the store has Kortalán.
+		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( WC_Straumur_Kortalan::class, 'forget_availability' ), 20 );
+		add_action( 'woocommerce_update_options_payment_gateways_straumur', array( WC_Straumur_Kortalan::class, 'forget_availability' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_frontend_styles' ) );
 	}
 
@@ -237,11 +241,12 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Whether the option is shown for the basket or order being paid.
+	 * Whether the option is shown at checkout.
 	 *
-	 * Both the classic and the block checkout list only the gateways for which this is true,
-	 * and both ask again when the total changes. Straumur is asked whether Kortalán is enabled
-	 * on the terminal and will finance the amount; the answer is cached for a few minutes.
+	 * Both the classic and the block checkout list only the gateways for which this is true.
+	 * Straumur is asked whether Kortalán is enabled for the terminal's store; the answer is cached.
+	 * The basket is not part of the question: an amount Kortalán will not finance is refused when
+	 * the payment is started, with a message to the shopper.
 	 *
 	 * @since 2.3.0
 	 * @return bool
@@ -251,46 +256,11 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		if ( '' === WC_Straumur_Settings::get_api_key() || '' === WC_Straumur_Settings::get_kortalan_terminal_identifier() ) {
+		if ( '' === WC_Straumur_Settings::get_api_key() ) {
 			return false;
 		}
 
-		$payable = $this->get_payable_amount();
-
-		// No basket and no order to price, e.g. an admin screen listing the gateways.
-		if ( null === $payable ) {
-			return true;
-		}
-
-		return WC_Straumur_Kortalan::is_available( $payable['amount'], $payable['currency'] );
-	}
-
-	/**
-	 * The amount and currency the shopper is about to pay.
-	 *
-	 * @since 2.3.0
-	 * @return array|null Array with 'amount' (minor units) and 'currency', null when there is nothing to price.
-	 */
-	private function get_payable_amount(): ?array {
-		$order_id = absint( get_query_var( 'order-pay' ) );
-		if ( $order_id > 0 ) {
-			$order = wc_get_order( $order_id );
-			if ( $order ) {
-				return array(
-					'amount'   => (int) round( (float) $order->get_total() * 100 ),
-					'currency' => (string) $order->get_currency(),
-				);
-			}
-		}
-
-		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
-			return null;
-		}
-
-		return array(
-			'amount'   => (int) round( (float) WC()->cart->get_total( 'edit' ) * 100 ),
-			'currency' => (string) get_woocommerce_currency(),
-		);
+		return WC_Straumur_Kortalan::is_available();
 	}
 
 	/**
@@ -343,9 +313,9 @@ class WC_Straumur_Kortalan_Gateway extends WC_Payment_Gateway {
 		if ( '' === $checkout_reference || '' === $redirect_url ) {
 			$error_code = $api->get_last_error_code();
 
-			// The answer the checkout was given a moment ago no longer holds.
-			if ( WC_Straumur_Kortalan::ERROR_NOT_AVAILABLE === $error_code ) {
-				delete_transient( WC_Straumur_Kortalan::availability_cache_key( $amount, $currency ) );
+			// Straumur says the store does not have Kortalán: the cached yes no longer holds.
+			if ( WC_Straumur_Kortalan::ERROR_NOT_CONFIGURED === $error_code ) {
+				WC_Straumur_Kortalan::forget_availability();
 			}
 
 			wc_add_notice( WC_Straumur_Kortalan::start_error_message( $error_code ), 'error' );
