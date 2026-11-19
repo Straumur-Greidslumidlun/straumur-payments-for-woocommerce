@@ -36,6 +36,10 @@ class WC_Straumur_Block_Support extends AbstractPaymentMethodType {
 	public static function register_payment_method_type( $registry ): void {
 		$instance = new self();
 		$registry->register( $instance );
+
+		if ( class_exists( __NAMESPACE__ . '\\WC_Straumur_Kortalan_Block_Support' ) ) {
+			$registry->register( new WC_Straumur_Kortalan_Block_Support() );
+		}
 	}
 
 	/**

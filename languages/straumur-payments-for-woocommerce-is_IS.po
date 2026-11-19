@@ -539,3 +539,124 @@ msgstr "Endurgreiðsla mistókst hjá Straumi: %1$s. Tilvísun: %2$s. Endurgrei�
 
 msgid "A refund request is already being processed for this order. Please wait a moment and try again."
 msgstr "Endurgreiðslubeiðni er nú þegar í vinnslu fyrir þessa pöntun. Vinsamlegast bíðið augnablik og reynið aftur."
+
+#: includes/class-wc-straumur-settings.php
+msgid "Enable Straumur Kortalán"
+msgstr "Virkja Straumur Kortalán"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Spread the payment with Straumur Kortalán. You complete the application on the next page."
+msgstr "Dreifðu greiðslunni með Straumur Kortalán. Þú klárar umsóknina á næstu síðu."
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "Offer Straumur Kortalán as its own payment option. Shoppers go straight to the Kortalán application."
+msgstr "Bjóddu Straumur Kortalán sem sérstakan greiðslumáta. Kaupendur fara beint í umsókn um Kortalán."
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "We could not confirm your Straumur Kortalán payment yet. If you completed the application, please do not pay again: your order will be updated shortly."
+msgstr "Ekki tókst að staðfesta greiðslu með Straumur Kortalán að svo stöddu. Ef þú kláraðir umsóknina skaltu ekki greiða aftur: pöntunin verður uppfærð innan skamms."
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "Your Straumur Kortalán payment was not completed. Please choose another payment method or try again."
+msgstr "Greiðslu með Straumur Kortalán var ekki lokið. Vinsamlegast veldu annan greiðslumáta eða reyndu aftur."
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur Kortalán is not available for this order amount. Please choose another payment method."
+msgstr "Straumur Kortalán er ekki í boði fyrir þessa upphæð. Vinsamlegast veldu annan greiðslumáta."
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur Kortalán is not available in this shop at the moment. Please choose another payment method."
+msgstr "Straumur Kortalán er ekki í boði í þessari verslun eins og er. Vinsamlegast veldu annan greiðslumáta."
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Unable to start the Straumur Kortalán payment. Please try again or choose another payment method."
+msgstr "Ekki tókst að hefja greiðslu með Straumur Kortalán. Vinsamlegast reyndu aftur eða veldu annan greiðslumáta."
+
+#. translators: %s: payment reference
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur confirmed the Straumur Kortalán payment. Reference: %s."
+msgstr "Straumur staðfesti greiðslu með Straumur Kortalán. Tilvísun: %s."
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "The Straumur Kortalán payment was not completed. Order cancelled."
+msgstr "Greiðslu með Straumur Kortalán var ekki lokið. Pöntun felld niður."
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "Straumur could not confirm whether the Straumur Kortalán payment went through. Look the payment up in the Straumur merchant portal before fulfilling or cancelling this order."
+msgstr "Straumur gat ekki staðfest hvort greiðsla með Straumur Kortalán gekk í gegn. Flettu greiðslunni upp á þjónustuvef Straums áður en pöntunin er afgreidd eða felld niður."
+
+#: includes/class-wc-straumur-settings.php
+msgid "Kortalán Terminal Identifier"
+msgstr "Auðkenni útstöðvar fyrir Kortalán"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Connection to Straumur"
+msgstr "Tenging við Straum"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Straumur Kortalán uses the API key, HMAC key and test mode from the Straumur Payments settings. They apply here even when the Straumur Payments option itself is switched off."
+msgstr "Straumur Kortalán notar API lykil, HMAC lykil og prófunarham úr stillingum Straumur Payments. Þær stillingar gilda hér þó að slökkt sé á greiðslumátanum Straumur Payments."
+
+#: includes/class-wc-straumur-settings.php
+msgid "set"
+msgstr "skráð"
+
+#: includes/class-wc-straumur-settings.php
+msgid "missing"
+msgstr "vantar"
+
+#: includes/class-wc-straumur-settings.php
+msgid "the Payment Page Terminal Identifier from Straumur Payments"
+msgstr "auðkenni útstöðvar fyrir greiðslusíðu úr Straumur Payments"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Terminal"
+msgstr "Útstöð"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Mode"
+msgstr "Hamur"
+
+#: includes/class-wc-straumur-settings.php
+msgid "test"
+msgstr "prófun"
+
+#: includes/class-wc-straumur-settings.php
+msgid "live"
+msgstr "raun"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Open the Straumur Payments settings"
+msgstr "Opna stillingar Straumur Payments"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Use the Payment Page Terminal Identifier from the Straumur Payments settings"
+msgstr "Nota auðkenni útstöðvar fyrir greiðslusíðu úr stillingum Straumur Payments"
+
+#: includes/class-wc-straumur-settings.php
+msgid "Uncheck only when Straumur Kortalán is on a different terminal than your card payments, then enter that terminal below."
+msgstr "Taktu hakið aðeins af ef Straumur Kortalán er á annarri útstöð en kortagreiðslur og sláðu þá inn auðkenni þeirrar útstöðvar hér að neðan."
+
+#: includes/class-wc-straumur-settings.php
+msgid "the Kortalán Terminal Identifier below"
+msgstr "auðkenni útstöðvar fyrir Kortalán hér að neðan"
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "Enter the Kortalán Terminal Identifier, or keep using the terminal from the Straumur Payments settings."
+msgstr "Sláðu inn auðkenni útstöðvar fyrir Kortalán eða notaðu áfram útstöðina úr stillingum Straumur Payments."
+
+#: includes/class-wc-straumur-settings.php
+msgid "The terminal Straumur Kortalán uses. While the box above is ticked, this shows the terminal from the Straumur Payments settings and cannot be changed here."
+msgstr "Útstöðin sem Straumur Kortalán notar. Á meðan hakað er í reitinn hér að ofan sést útstöðin úr stillingum Straumur Payments og henni er ekki hægt að breyta hér."
+
+#: includes/class-wc-straumur-kortalan-gateway.php
+msgid "The Kortalán Terminal Identifier cannot contain spaces. Copy it again from the Straumur merchant portal."
+msgstr "Auðkenni útstöðvar fyrir Kortalán má ekki innihalda bil. Afritaðu það aftur af þjónustuvef Straums."
+
+#: includes/class-wc-straumur-kortalan.php
+msgid "This order had been cancelled as unpaid, but the Straumur Kortalán payment went through, so it was marked paid. Check stock before fulfilling it."
+msgstr "Þessi pöntun hafði verið felld niður sem ógreidd, en greiðsla með Straumur Kortalán gekk í gegn og því var hún merkt greidd. Athugaðu lagerstöðu áður en pöntunin er afgreidd."
+
+#: includes/class-wc-straumur-settings.php
+msgid "Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. Kortalán must be enabled on the terminal by Straumur. A shopper whose order amount Kortalán will not finance is asked to choose another payment method. It can be used with or without the Straumur Payments option."
+msgstr "Sýnir Straumur Kortalán sem sérstakan greiðslumáta í greiðsluferlinu. Kaupendur sem velja hann fara beint í umsókn um Kortalán. Straumur þarf að hafa virkjað Kortalán á útstöðinni. Kaupandi með pöntunarupphæð sem Kortalán fjármagnar ekki er beðinn um að velja annan greiðslumáta. Hægt er að nota hann með eða án greiðslumátans Straumur Payments."

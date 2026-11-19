@@ -82,6 +82,34 @@ final class ReturnGuardTest extends TestCase {
 		);
 	}
 
+	public function test_kortalan_return_is_accepted_for_a_kortalan_order(): void {
+		$order = $this->order_with_session( 17, 'straumur_kortalan' );
+
+		$this->assertSame(
+			self::OWN_SESSION,
+			WC_Straumur_Return_Guard::bound_checkout_reference( $order, $order->get_order_key(), self::OWN_SESSION, 'straumur_kortalan' )
+		);
+	}
+
+	public function test_card_return_is_refused_for_a_kortalan_order(): void {
+		// The two gateways have separate return URLs and separate status lookups.
+		$order = $this->order_with_session( 17, 'straumur_kortalan' );
+
+		$this->assertSame(
+			'',
+			WC_Straumur_Return_Guard::bound_checkout_reference( $order, $order->get_order_key(), self::OWN_SESSION )
+		);
+	}
+
+	public function test_kortalan_return_is_refused_for_a_card_order(): void {
+		$order = $this->order_with_session();
+
+		$this->assertSame(
+			'',
+			WC_Straumur_Return_Guard::bound_checkout_reference( $order, $order->get_order_key(), self::OWN_SESSION, 'straumur_kortalan' )
+		);
+	}
+
 	public function test_order_paid_with_another_gateway_is_refused(): void {
 		$order = $this->order_with_session( 17, 'bacs' );
 

@@ -129,6 +129,13 @@ class WC_Straumur_API {
 	private $checkout_expiry;
 
 	/**
+	 * Straumur error code of the last refused request, '' when the last request was not refused.
+	 *
+	 * @var string
+	 */
+	private $last_error_code = '';
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 1.0.0
@@ -240,6 +247,108 @@ class WC_Straumur_API {
 		$endpoint = "hostedcheckout/status/{$checkout_reference}";
 
 		return $this->send_request( $endpoint, array(), 'GET' );
+	}
+
+	/**
+	 * Ask which payment methods and card brands Straumur has enabled for a terminal's store.
+	 *
+	 * Proposed Checkout API contract (SD-4133), not final:
+	 * GET terminal/{terminalIdentifier}/payment-methods
+	 * 200 { paymentMethods: string[], cardBrands: string[], responseIdentifier }
+	 *
+	 * The call can run while the checkout page is built, so it gets a short timeout.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $terminal_identifier The terminal to ask about.
+	 * @return array|false Response array, false when the question could not be answered.
+	 */
+	public function get_payment_methods( string $terminal_identifier ) {
+		$endpoint = 'terminal/' . rawurlencode( $terminal_identifier ) . '/payment-methods';
+
+		return $this->send_request( $endpoint, array(), 'GET', WC_Straumur_Kortalan::AVAILABILITY_TIMEOUT );
+	}
+
+	/**
+	 * Start a payment that sends the shopper straight to the Straumur Kortalán application.
+	 *
+	 * It is an ordinary hosted checkout session with one extra field (SD-4075, field name not final):
+	 * POST hostedcheckout { ..., directPaymentMethod: "KOR" }
+	 * 200 { url, checkoutReference, responseIdentifier }
+	 * 400 { errorMessage, errorCode, responseIdentifier }; read the code with get_last_error_code().
+	 *
+	 * With the field set, the payment page passes the shopper on to the Kortalán application without
+	 * showing itself, and offers no other payment method if Kortalán refuses. Straumur refuses the
+	 * request when Kortalán cannot be used; it does not fall back to the payment page.
+	 *
+	 * A Kortalán payment is always captured, so isManualCapture is never sent. Line items and the
+	 * theme key belong to the payment page the shopper does not see, so they are not sent either.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param int    $amount      Minor units.
+	 * @param string $currency    ISO currency code.
+	 * @param string $return_url  Where Straumur sends the shopper when Kortalán approves.
+	 * @param string $abandon_url Where Straumur sends the shopper when Kortalán refuses or they give up.
+	 * @param string $reference   Merchant reference (order ID).
+	 * @return array|false Response array on success, false otherwise.
+	 */
+	public function create_kortalan_payment(
+		int $amount,
+		string $currency,
+		string $return_url,
+		string $abandon_url,
+		string $reference
+	) {
+		$body = array(
+			'terminalIdentifier' => WC_Straumur_Settings::get_kortalan_terminal_identifier(),
+			'amount'             => $amount,
+			'currency'           => $currency,
+			'reference'          => $reference,
+			'returnUrl'          => $return_url,
+			'abandonUrl'         => $abandon_url,
+			'culture'            => $this->checkout_language,
+			'expiresAt'          => gmdate( 'Y-m-d\\TH:i:s.v\\Z', time() + $this->get_checkout_expiry_seconds() ),
+		);
+
+		$body[ WC_Straumur_Kortalan::DIRECT_PAYMENT_FIELD ] = WC_Straumur_Webhook_Handler::PAYMENT_METHOD_KORTALAN;
+
+		return $this->send_request( 'hostedcheckout/', $body );
+	}
+
+	/**
+	 * Retrieve the result of a Straumur Kortalán payment by its checkout reference.
+	 *
+	 * The same call as get_session_status(): a Kortalán payment is a hosted checkout session.
+	 * 200 { status: New|Completed|Expired|..., payfacReference?, responseIdentifier }
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $checkout_reference The checkout reference returned when the payment was started.
+	 * @return array|false Array on success, false otherwise.
+	 */
+	public function get_kortalan_status( string $checkout_reference ) {
+		return $this->send_request( 'hostedcheckout/status/' . rawurlencode( $checkout_reference ), array(), 'GET' );
+	}
+
+	/**
+	 * How long a payment session stays open, in seconds.
+	 *
+	 * @since 2.3.0
+	 * @return int
+	 */
+	public function get_checkout_expiry_seconds(): int {
+		return (int) ( $this->checkout_expiry * HOUR_IN_SECONDS );
+	}
+
+	/**
+	 * The Straumur error code of the last request that was refused, '' when there was none.
+	 *
+	 * @since 2.3.0
+	 * @return string
+	 */
+	public function get_last_error_code(): string {
+		return $this->last_error_code;
 	}
 
 	/**
@@ -411,15 +520,18 @@ class WC_Straumur_API {
 	 * @param string $endpoint
 	 * @param array  $body
 	 * @param string $method
+	 * @param int    $timeout Seconds to wait, 0 for the default.
 	 * @return array|false
 	 */
-	private function send_request( string $endpoint, array $body = array(), string $method = 'POST' ) {
+	private function send_request( string $endpoint, array $body = array(), string $method = 'POST', int $timeout = 0 ) {
 		$url = $this->base_url . $endpoint;
+
+		$this->last_error_code = '';
 
 		$args = array(
 			'headers' => $this->get_request_headers(),
 			'method'  => $method,
-			'timeout' => $this->timeout,
+			'timeout' => $timeout > 0 ? $timeout : $this->timeout,
 		);
 
 		if ( 'GET' === $method && ! empty( $body ) ) {
@@ -511,6 +623,11 @@ class WC_Straumur_API {
 		// Return data only if HTTP status is 2xx.
 		if ( $response_code >= 200 && $response_code < 300 ) {
 			return $response_data;
+		}
+
+		// A refusal carries a Straumur error code, e.g. 2042 when Kortalán will not finance the amount.
+		if ( is_array( $response_data ) && isset( $response_data['errorCode'] ) && is_scalar( $response_data['errorCode'] ) ) {
+			$this->last_error_code = sanitize_text_field( (string) $response_data['errorCode'] );
 		}
 
 		return false;

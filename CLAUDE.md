@@ -65,7 +65,10 @@ straumur-payments-for-woocommerce/
 │   ├── class-wc-straumur-settings.php           # Settings fields, getters, payment logo registry
 │   ├── class-wc-straumur-order-handler.php      # Order lifecycle management
 │   ├── class-wc-straumur-return-guard.php       # Accepts a return from Hosted Checkout only for the order's own session and key
+│   ├── class-wc-straumur-kortalan-gateway.php   # Second gateway "Straumur Kortalán" (id straumur_kortalan): straight to the Kortalán application
+│   ├── class-wc-straumur-kortalan.php           # Kortalán availability (cached), status outcomes, follow-up check of pending orders
 │   ├── class-wc-straumur-block-support.php      # WooCommerce blocks integration
+│   ├── class-wc-straumur-kortalan-block-support.php # Blocks integration for the Kortalán option (same script)
 │   ├── class-wc-straumur-webhook-handler.php    # Webhook processing
 │   └── class-wc-straumur-log-redactor.php       # Allow-list for everything written to logs
 ├── src/                                     # JavaScript source files
@@ -88,6 +91,16 @@ straumur-payments-for-woocommerce/
 - Handles payment processing, redirects, and form fields
 - Supports subscriptions, blocks, and various WooCommerce features
 - Manages order creation and payment session initialization
+
+#### 1b. Straumur Kortalán Gateway (`WC_Straumur_Kortalan_Gateway`, since 2.3.0)
+- A separate payment option with its own on/off, title and description (`woocommerce_straumur_kortalan_settings`); API key, HMAC key and test mode come from the Straumur Payments settings and apply whether or not that gateway is enabled, so a shop can offer Kortalán alone
+- Terminal: always read it with `WC_Straumur_Settings::get_kortalan_terminal_identifier()` (the optional Kortalán Terminal Identifier, falling back to the Payment Page Terminal Identifier), never `get_terminal_identifier()`, in Kortalán code
+- `is_available()` asks Straumur whether the terminal's store has Kortalán enabled (`WC_Straumur_Kortalan::is_available()`, the payment methods call of SD-4133, cached in a transient per terminal, anything but an explicit yes hides the option; saving either settings page asks again); both checkouts list gateways from it. The basket amount is deliberately not part of it: there is no per-amount question to ask (SD-4135 was dropped), so an amount Kortalán will not finance is refused when the payment is started (error 2042) and the shopper is told to choose another method
+- A Kortalán payment is an ordinary hosted checkout session started with one extra field (`WC_Straumur_Kortalan::DIRECT_PAYMENT_FIELD` = `KOR`, name not final, SD-4075): Straumur passes the shopper through the payment page to the Kortalán application without showing it. Status is the same `hostedcheckout/status/{ref}` call as cards. Nothing else about a Kortalán payment has an endpoint of its own
+- No subscriptions, no refunds, never manual capture. The order is marked paid by whichever comes first: the webhook (`KOR` authorization), the shopper's return (`process_return()` asks Straumur for the status and calls `WC_Straumur_Kortalan::record_paid()`), or the follow-up check
+- A return whose nonce does not verify (the application ended in another browser) is routed to the right page but never writes to the order; do not turn that back into `wp_die()`
+- Follow-up checks run from Action Scheduler (`straumur_kortalan_check_order`): an early one 15 minutes after the start that only ever marks paid (`EARLY_CHECK`), then a chain after the session expires that marks a still-unpaid order paid or cancelled. A cancelled order is checked too, because WooCommerce cancels unpaid orders after its hold-stock time, usually before the session expires
+- Code that asks "is this one of our orders" must use `WC_Straumur_Settings::is_straumur_gateway()`, not `'straumur' ===`
 
 #### 2. API Layer (`WC_Straumur_API`)
 - A new instance per use (`new WC_Straumur_API()`), reading credentials from `WC_Straumur_Settings`

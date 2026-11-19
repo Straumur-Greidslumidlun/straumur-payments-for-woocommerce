@@ -80,10 +80,21 @@ class WC_Order {
 		return count( $this->notes );
 	}
 
-	public function payment_complete(): bool {
+	public function payment_complete( string $transaction_id = '' ): bool {
 		$this->paid   = true;
 		$this->status = 'processing';
 		return true;
+	}
+
+	public function is_paid(): bool {
+		return $this->paid;
+	}
+
+	/**
+	 * @param string|string[] $status
+	 */
+	public function has_status( $status ): bool {
+		return in_array( $this->status, (array) $status, true );
 	}
 
 	public function needs_processing(): bool {

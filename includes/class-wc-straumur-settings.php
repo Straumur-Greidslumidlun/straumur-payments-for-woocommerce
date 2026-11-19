@@ -30,6 +30,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Straumur_Settings {
 
 	/**
+	 * ID of the gateway that sends shoppers to the Straumur payment page.
+	 *
+	 * @since 2.3.0
+	 */
+	const GATEWAY_ID = 'straumur';
+
+	/**
+	 * ID of the gateway that sends shoppers straight to Straumur Kortalán.
+	 *
+	 * @since 2.3.0
+	 */
+	const KORTALAN_GATEWAY_ID = 'straumur_kortalan';
+
+	/**
+	 * Option key for the Straumur Kortalán gateway's own settings.
+	 *
+	 * @since 2.3.0
+	 */
+	const KORTALAN_OPTION_KEY = 'woocommerce_straumur_kortalan_settings';
+
+	/**
 	 * Option key for Straumur settings.
 	 *
 	 * @since 1.0.0
@@ -259,6 +280,219 @@ class WC_Straumur_Settings {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Whether a payment method ID belongs to one of this plugin's gateways.
+	 *
+	 * @since 2.3.0
+	 *
+	 * @param string $gateway_id Payment method ID stored on an order.
+	 * @return bool
+	 */
+	public static function is_straumur_gateway( string $gateway_id ): bool {
+		return in_array( $gateway_id, array( self::GATEWAY_ID, self::KORTALAN_GATEWAY_ID ), true );
+	}
+
+	/**
+	 * Settings fields of the Straumur Kortalán gateway.
+	 *
+	 * The gateway has no API key, HMAC key or test mode of its own: it uses those of the
+	 * Straumur Payments gateway, whether or not that gateway is switched on. It may name its
+	 * own terminal, for a merchant whose Kortalán is on another terminal than card payments.
+	 *
+	 * @since 2.3.0
+	 * @return array Settings fields.
+	 */
+	public static function get_kortalan_form_fields(): array {
+		return array(
+			'enabled'             => array(
+				'title'       => esc_html__( 'Enable/Disable', 'straumur-payments-for-woocommerce' ),
+				'type'        => 'checkbox',
+				'label'       => esc_html__( 'Enable Straumur Kortalán', 'straumur-payments-for-woocommerce' ),
+				'default'     => 'no',
+				'description' => esc_html__(
+					'Shows Straumur Kortalán as its own payment option at checkout. Shoppers who pick it go straight to the Kortalán application. Kortalán must be enabled on the terminal by Straumur. A shopper whose order amount Kortalán will not finance is asked to choose another payment method. It can be used with or without the Straumur Payments option.',
+					'straumur-payments-for-woocommerce'
+				),
+				'desc_tip'    => false,
+			),
+			'title'               => array(
+				'title'       => esc_html__( 'Title', 'straumur-payments-for-woocommerce' ),
+				'type'        => 'text',
+				'description' => esc_html__(
+					'This controls the title which the user sees during checkout.',
+					'straumur-payments-for-woocommerce'
+				),
+				'default'     => 'Straumur Kortalán',
+				'desc_tip'    => true,
+			),
+			'description'         => array(
+				'title'       => esc_html__( 'Description', 'straumur-payments-for-woocommerce' ),
+				'type'        => 'text',
+				'description' => esc_html__(
+					'This controls the description which the user sees during checkout.',
+					'straumur-payments-for-woocommerce'
+				),
+				'default'     => esc_html__( 'Spread the payment with Straumur Kortalán. You complete the application on the next page.', 'straumur-payments-for-woocommerce' ),
+				'desc_tip'    => true,
+			),
+			'connection'          => array(
+				'title'       => esc_html__( 'Connection to Straumur', 'straumur-payments-for-woocommerce' ),
+				'type'        => 'title',
+				'description' => self::get_kortalan_connection_summary(),
+			),
+			'inherit_terminal'    => array(
+				'title'       => esc_html__( 'Terminal', 'straumur-payments-for-woocommerce' ),
+				'type'        => 'checkbox',
+				'label'       => esc_html__( 'Use the Payment Page Terminal Identifier from the Straumur Payments settings', 'straumur-payments-for-woocommerce' ),
+				'default'     => 'yes',
+				'description' => esc_html__(
+					'Uncheck only when Straumur Kortalán is on a different terminal than your card payments, then enter that terminal below.',
+					'straumur-payments-for-woocommerce'
+				),
+				'desc_tip'    => false,
+			),
+			'terminal_identifier' => array(
+				'title'             => esc_html__( 'Kortalán Terminal Identifier', 'straumur-payments-for-woocommerce' ),
+				'type'              => 'text',
+				'description'       => esc_html__(
+					'The terminal Straumur Kortalán uses. While the box above is ticked, this shows the terminal from the Straumur Payments settings and cannot be changed here.',
+					'straumur-payments-for-woocommerce'
+				),
+				'default'           => '',
+				'desc_tip'          => false,
+				// Read by the settings page script, which shows this value while the box above is ticked.
+				'custom_attributes' => array( 'data-card-terminal' => self::get_terminal_identifier() ),
+			),
+		);
+	}
+
+	/**
+	 * Saved settings of the Straumur Kortalán gateway.
+	 *
+	 * @since 2.3.0
+	 * @return array
+	 */
+	private static function get_kortalan_settings(): array {
+		$settings = get_option( self::KORTALAN_OPTION_KEY, array() );
+		return is_array( $settings ) ? $settings : array();
+	}
+
+	/**
+	 * Whether the merchant has switched the Straumur Kortalán option on. Off until they do.
+	 *
+	 * @since 2.3.0
+	 * @return bool
+	 */
+	public static function is_kortalan_enabled(): bool {
+		$settings = self::get_kortalan_settings();
+		return isset( $settings['enabled'] ) && 'yes' === $settings['enabled'];
+	}
+
+	/**
+	 * The terminal identifier entered for Straumur Kortalán, '' while the option uses the
+	 * card terminal: the "use the Straumur Payments terminal" box is ticked (the default),
+	 * or it is unticked with nothing entered.
+	 *
+	 * @since 2.3.0
+	 * @return string
+	 */
+	private static function get_kortalan_own_terminal_identifier(): string {
+		$settings = self::get_kortalan_settings();
+
+		if ( ! isset( $settings['inherit_terminal'] ) || 'no' !== $settings['inherit_terminal'] ) {
+			return '';
+		}
+
+		return isset( $settings['terminal_identifier'] ) && is_string( $settings['terminal_identifier'] )
+			? trim( $settings['terminal_identifier'] )
+			: '';
+	}
+
+	/**
+	 * Terminal the Straumur Kortalán option uses: its own when the merchant chose to enter one,
+	 * otherwise the Payment Page Terminal Identifier of the Straumur Payments gateway.
+	 *
+	 * @since 2.3.0
+	 * @return string
+	 */
+	public static function get_kortalan_terminal_identifier(): string {
+		$own = self::get_kortalan_own_terminal_identifier();
+
+		return '' !== $own ? $own : self::get_terminal_identifier();
+	}
+
+	/**
+	 * What the Straumur Kortalán settings page says about the settings it shares with
+	 * Straumur Payments. Says only whether each is filled in, never its value.
+	 *
+	 * @since 2.3.0
+	 * @return string HTML, escaped.
+	 */
+	private static function get_kortalan_connection_summary(): string {
+		$set     = esc_html__( 'set', 'straumur-payments-for-woocommerce' );
+		$missing = esc_html__( 'missing', 'straumur-payments-for-woocommerce' );
+
+		$has_own_terminal = '' !== self::get_kortalan_own_terminal_identifier();
+
+		if ( $has_own_terminal ) {
+			$terminal = esc_html__( 'the Kortalán Terminal Identifier below', 'straumur-payments-for-woocommerce' );
+		} elseif ( '' !== self::get_terminal_identifier() ) {
+			$terminal = esc_html__( 'the Payment Page Terminal Identifier from Straumur Payments', 'straumur-payments-for-woocommerce' );
+		} else {
+			$terminal = $missing;
+		}
+
+		$lines = array(
+			esc_html__( 'Terminal', 'straumur-payments-for-woocommerce' ) => $terminal,
+			esc_html__( 'API Key', 'straumur-payments-for-woocommerce' ) => '' !== self::get_api_key() ? $set : $missing,
+			esc_html__( 'HMAC Key', 'straumur-payments-for-woocommerce' ) => '' !== self::get_hmac_key() ? $set : $missing,
+			esc_html__( 'Mode', 'straumur-payments-for-woocommerce' ) => self::is_test_mode()
+				? esc_html__( 'test', 'straumur-payments-for-woocommerce' )
+				: esc_html__( 'live', 'straumur-payments-for-woocommerce' ),
+		);
+
+		$html = esc_html__(
+			'Straumur Kortalán uses the API key, HMAC key and test mode from the Straumur Payments settings. They apply here even when the Straumur Payments option itself is switched off.',
+			'straumur-payments-for-woocommerce'
+		);
+
+		foreach ( $lines as $label => $value ) {
+			$html .= '<br />' . $label . ': <strong>' . $value . '</strong>';
+		}
+
+		$html .= '<br /><a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . self::GATEWAY_ID ) ) . '">'
+			. esc_html__( 'Open the Straumur Payments settings', 'straumur-payments-for-woocommerce' )
+			. '</a>';
+
+		return $html;
+	}
+
+	/**
+	 * Title of the Straumur Kortalán option at checkout.
+	 *
+	 * @since 2.3.0
+	 * @return string
+	 */
+	public static function get_kortalan_title(): string {
+		$settings = self::get_kortalan_settings();
+		return isset( $settings['title'] ) && '' !== $settings['title']
+			? (string) $settings['title']
+			: 'Straumur Kortalán';
+	}
+
+	/**
+	 * Description of the Straumur Kortalán option at checkout.
+	 *
+	 * @since 2.3.0
+	 * @return string
+	 */
+	public static function get_kortalan_description(): string {
+		$settings = self::get_kortalan_settings();
+		return isset( $settings['description'] )
+			? (string) $settings['description']
+			: esc_html__( 'Spread the payment with Straumur Kortalán. You complete the application on the next page.', 'straumur-payments-for-woocommerce' );
 	}
 
 	/**

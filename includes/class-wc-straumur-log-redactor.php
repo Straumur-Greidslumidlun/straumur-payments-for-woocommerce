@@ -58,6 +58,9 @@ final class WC_Straumur_Log_Redactor {
 		'isManualCapture',
 		'recurringProcessingModel',
 		'terminalIdentifier',
+		'status',
+		'available',
+		'errorCode',
 	);
 
 	/**

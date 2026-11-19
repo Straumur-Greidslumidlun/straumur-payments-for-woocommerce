@@ -173,7 +173,10 @@ function init(): void {
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-order-handler.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-return-guard.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-payment-gateway.php';
+	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-kortalan.php';
+	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-kortalan-gateway.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-block-support.php';
+	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-kortalan-block-support.php';
 	require_once STRAUMUR_PAYMENTS_PLUGIN_DIR . 'includes/class-wc-straumur-webhook-handler.php';
 	// Initialize the webhook handler.
 	WC_Straumur_Webhook_Handler::init();
@@ -216,6 +219,14 @@ function init(): void {
 
 	// Add the gateway to WooCommerce.
 	add_filter( 'woocommerce_payment_gateways', __NAMESPACE__ . '\\add_straumur_payment_gateway' );
+
+	// Follow-up check on a Straumur Kortalán order whose shopper never came back (Action Scheduler).
+	add_action(
+		WC_Straumur_Kortalan::CHECK_ACTION,
+		array( __NAMESPACE__ . '\\WC_Straumur_Kortalan', 'check_order' ),
+		10,
+		3
+	);
 
 	// Declare HPOS (High Performance Order Storage) compatibility.
 	add_action(
@@ -310,6 +321,7 @@ function init(): void {
  */
 function add_straumur_payment_gateway( array $gateways ): array {
 	$gateways[] = '\\Straumur\\Payments\\WC_Straumur_Payment_Gateway';
+	$gateways[] = '\\Straumur\\Payments\\WC_Straumur_Kortalan_Gateway';
 	return $gateways;
 }
 

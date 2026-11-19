@@ -285,7 +285,7 @@ class WC_Straumur_Webhook_Handler {
 			return 'order_not_found';
 		}
 
-		if ( 'straumur' !== $order->get_payment_method() ) {
+		if ( ! WC_Straumur_Settings::is_straumur_gateway( (string) $order->get_payment_method() ) ) {
 			return 'other_payment_method';
 		}
 
